@@ -13,30 +13,30 @@ export const authConfigWithDatabase: NextAuthConfig = {
   ...authConfig,
   adapter: PrismaAdapter(prisma),
   session: {
-    strategy: "database",
+    strategy: "jwt", // Use JWT for consistency with edge middleware
     maxAge: 30 * 24 * 60 * 60, // 30 days
-    updateAge: 24 * 60 * 60, // 24 hours
   },
-  callbacks: {
-    ...authConfig.callbacks,
+  events: {
     /**
-     * Sign In Callback
-     * Control whether user is allowed to sign in
+     * Runs after user signs in successfully
+     * Update username from GitHub profile after the adapter has created/linked the account
      */
-    async signIn({ user, account, profile }) {
-      // Update username from GitHub profile on each login
+    async signIn({ user, account, profile, isNewUser }) {
       if (account?.provider === "github" && profile && typeof profile === "object" && "login" in profile) {
         const githubProfile = profile as { login: string; name?: string | null; avatar_url?: string };
-        await prisma.user.update({
-          where: { id: user.id ?? "" },
-          data: {
-            username: githubProfile.login,
-            name: githubProfile.name || githubProfile.login,
-            image: githubProfile.avatar_url,
-          },
-        });
+        try {
+          await prisma.user.update({
+            where: { id: user.id },
+            data: {
+              username: githubProfile.login,
+              name: githubProfile.name || githubProfile.login,
+              image: githubProfile.avatar_url,
+            },
+          });
+        } catch (error) {
+          console.error("Error updating user profile:", error);
+        }
       }
-      return true;
     },
   },
 };

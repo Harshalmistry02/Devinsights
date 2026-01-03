@@ -27,7 +27,9 @@ export default auth((req: NextRequest & { auth: any }) => {
 
   // Redirect to login if accessing protected route without authentication
   if (isProtectedRoute && !isLoggedIn) {
-    return NextResponse.redirect(new URL("/login", nextUrl));
+    const loginUrl = new URL("/login", nextUrl);
+    loginUrl.searchParams.set("callbackUrl", nextUrl.pathname);
+    return NextResponse.redirect(loginUrl);
   }
 
   // Redirect to dashboard if logged in and trying to access login page

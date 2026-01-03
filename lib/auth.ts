@@ -30,16 +30,62 @@ export const authConfig: NextAuthConfig = {
     /**
      * JWT Callback
      * Runs whenever a JWT is created or updated
+     * Handles token refresh for GitHub access tokens
      */
-    async jwt({ token, user, profile }) {
+    async jwt({ token, user, account, profile, trigger }) {
+      // Initial sign in - store user data and tokens
       if (user) {
         token.id = user.id ?? "";
         token.username = (user as { username?: string }).username;
       }
       
+      // Store account tokens on initial sign in
+      if (account) {
+        token.accessToken = account.access_token;
+        token.refreshToken = account.refresh_token;
+        token.expiresAt = account.expires_at;
+      }
+      
       // Store GitHub username from profile
       if (profile && typeof profile === "object" && "login" in profile) {
         token.username = profile.login as string;
+      }
+      
+      // Check if token needs refresh (expires in less than 1 hour)
+      if (token.expiresAt && typeof token.expiresAt === 'number') {
+        const shouldRefresh = Date.now() >= (token.expiresAt * 1000) - (60 * 60 * 1000);
+        
+        if (shouldRefresh && token.refreshToken) {
+          try {
+            // Refresh GitHub token
+            const response = await fetch('https://github.com/login/oauth/access_token', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+              },
+              body: JSON.stringify({
+                client_id: process.env.GITHUB_CLIENT_ID,
+                client_secret: process.env.GITHUB_CLIENT_SECRET,
+                grant_type: 'refresh_token',
+                refresh_token: token.refreshToken,
+              }),
+            });
+            
+            const tokens = await response.json();
+            
+            if (tokens.access_token) {
+              token.accessToken = tokens.access_token;
+              token.refreshToken = tokens.refresh_token ?? token.refreshToken;
+              token.expiresAt = tokens.expires_in 
+                ? Math.floor(Date.now() / 1000) + tokens.expires_in
+                : token.expiresAt;
+            }
+          } catch (error) {
+            console.error('Error refreshing access token:', error);
+            // Return old token if refresh fails
+          }
+        }
       }
       
       return token;
@@ -50,10 +96,11 @@ export const authConfig: NextAuthConfig = {
      * Runs whenever session is checked
      * Adds custom fields to the session object
      */
-    async session({ session, token, user }) {
-      if (session.user) {
-        session.user.id = user.id;
-        session.user.username = (user as { username?: string }).username || (token.username as string | undefined);
+    async session({ session, token }) {
+      if (session.user && token) {
+        // Use token data (not user) since we're using JWT strategy
+        session.user.id = token.id as string;
+        session.user.username = token.username as string | undefined;
       }
       return session;
     },

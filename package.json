@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.1",
+    "@prisma/adapter-neon": "^7.2.0",
     "clsx": "^2.1.1",
     "framer-motion": "^12.23.26",
     "gsap": "^3.14.2",

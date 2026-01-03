@@ -11,11 +11,12 @@ import { Suspense } from "react";
 function LoginForm() {
   const searchParams = useSearchParams();
   const error = searchParams.get("error");
+  const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
 
   const handleGithubLogin = async () => {
     try {
       await signIn("github", {
-        callbackUrl: "/dashboard",
+        callbackUrl,
         redirect: true,
       });
     } catch (error) {
