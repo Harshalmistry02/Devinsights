@@ -12,6 +12,7 @@ import {
   ExternalLink,
 } from "lucide-react";
 import Link from "next/link";
+import { SyncButton } from "@/components/SyncButton";
 
 /**
  * Dashboard Page
@@ -99,6 +100,17 @@ export default async function DashboardPage() {
                     <Settings className="w-4 h-4 group-hover:rotate-90 transition-transform duration-300" />
                     Settings
                   </Link>
+                </div>
+
+                {/* Divider */}
+                <div className="border-t border-slate-700/30 my-4" />
+
+                {/* Data Sync Section */}
+                <div className="space-y-3">
+                  <h4 className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                    Data Sync
+                  </h4>
+                  <SyncButton />
                 </div>
               </div>
             </div>
