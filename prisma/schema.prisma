@@ -18,10 +18,11 @@ model User {
   image         String?
   username      String?   @unique
 
-  accounts     Account[]
-  sessions     Session[]
-  repositories Repository[]
-  syncJobs     SyncJob[]
+  accounts          Account[]
+  sessions          Session[]
+  repositories      Repository[]
+  syncJobs          SyncJob[]
+  analyticsSnapshot AnalyticsSnapshot?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -156,4 +157,53 @@ model SyncJob {
   @@index([userId])
   @@index([status])
   @@map("sync_jobs")
+}
+
+// ============================================
+// Analytics / Pre-calculated Metrics
+// ============================================
+
+model AnalyticsSnapshot {
+  id     String @id @default(cuid())
+  userId String @unique
+
+  // Summary Statistics
+  totalRepos     Int @default(0)
+  totalCommits   Int @default(0)
+  totalAdditions Int @default(0)
+  totalDeletions Int @default(0)
+  totalStars     Int @default(0)
+  totalForks     Int @default(0)
+
+  // Streak Data
+  currentStreak  Int       @default(0)
+  longestStreak  Int       @default(0)
+  lastCommitDate DateTime?
+  isActiveToday  Boolean   @default(false)
+
+  // JSON Statistics (flexible structure)
+  languageStats  Json? // { "TypeScript": 45, "Python": 30 }
+  dailyCommits   Json? // { "2024-01-15": 5, "2024-01-16": 3 }
+  dayOfWeekStats Json? // { "Monday": 10, "Tuesday": 15 }
+  hourlyStats    Json? // { "9": 5, "14": 10, "22": 3 }
+  repoStats      Json? // [{ id, name, commits, stars }]
+  topLanguages   Json? // [{ language, count, percentage }]
+
+  // Computed Insights
+  averageCommitsPerDay Float   @default(0)
+  mostProductiveDay    String?
+  mostProductiveHour   Int?
+
+  // Metadata
+  calculatedAt   DateTime  @default(now())
+  dataRangeStart DateTime?
+  dataRangeEnd   DateTime?
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Indexes
+  @@index([userId])
+  @@index([calculatedAt])
+  @@map("analytics_snapshots")
 }

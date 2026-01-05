@@ -1,6 +1,7 @@
 import prisma from '@/lib/prisma';
 import { GitHubClient } from './client';
 import { SyncStatus } from '@prisma/client';
+import { refreshUserAnalytics } from '@/lib/analytics';
 
 export class GitHubSyncService {
   private client: GitHubClient;
@@ -100,6 +101,16 @@ export class GitHubSyncService {
         status: SyncStatus.COMPLETED,
         completedAt: new Date(),
       });
+
+      // Refresh analytics after successful sync
+      onProgress?.({ step: 'done', progress: 95, message: 'Calculating analytics...' });
+      try {
+        await refreshUserAnalytics(this.userId);
+        console.log('Analytics refreshed successfully for user:', this.userId);
+      } catch (analyticsError) {
+        // Log but don't fail the sync if analytics fails
+        console.error('Failed to refresh analytics:', analyticsError);
+      }
 
       onProgress?.({ step: 'done', progress: 100, message: 'Sync completed!' });
 
