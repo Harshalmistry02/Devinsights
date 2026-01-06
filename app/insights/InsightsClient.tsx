@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import {
   Sparkles,
   TrendingUp,
@@ -8,7 +8,6 @@ import {
   Lightbulb,
   RefreshCw,
   Loader2,
-  CheckCircle,
   XCircle,
   Code,
   Clock,
@@ -17,6 +16,7 @@ import {
   BarChart3,
   Calendar,
   AlertCircle,
+  CheckCircle,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -64,11 +64,6 @@ interface InsightsClientProps {
   userName: string;
 }
 
-/**
- * Insights Page Client Component
- * Handles all interactive elements and state management
- * Separated from server component to prevent hydration errors
- */
 export default function InsightsClient({
   hasSyncedData,
   analytics,
@@ -76,7 +71,7 @@ export default function InsightsClient({
   cachedInsight,
   userName,
 }: InsightsClientProps) {
-  // State for AI insights
+  // State management
   const [insights, setInsights] = useState<InsightsData | null>(
     cachedInsight?.insights || null
   );
@@ -90,12 +85,27 @@ export default function InsightsClient({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Generate insights handler
+  // Debug logging (remove in production)
+  useEffect(() => {
+    console.log("🔍 Insights Client Mounted", {
+      hasSyncedData,
+      hasAnalytics: !!analytics,
+      hasCachedInsight: !!cachedInsight,
+      topLanguagesCount: topLanguages.length,
+    });
+  }, [hasSyncedData, analytics, cachedInsight, topLanguages]);
+
+  // Generate insights handler with comprehensive error handling
   const generateInsights = useCallback(async () => {
-    setLoading(true);
+    console.log("🚀 Generate Insights Button Clicked");
+    
+    // Reset error state
     setError(null);
+    setLoading(true);
 
     try {
+      console.log("📡 Sending POST request to /api/insights/generate");
+      
       const response = await fetch("/api/insights/generate", {
         method: "POST",
         headers: {
@@ -103,45 +113,73 @@ export default function InsightsClient({
         },
       });
 
+      console.log("📨 Response received:", {
+        status: response.status,
+        statusText: response.statusText,
+        ok: response.ok,
+      });
+
       const data = await response.json();
+      console.log("📦 Response data:", data);
 
       if (!response.ok) {
-        throw new Error(data.error || "Failed to generate insights");
+        throw new Error(data.error || `HTTP ${response.status}: ${response.statusText}`);
       }
 
       if (!data.insights) {
-        throw new Error("No insights returned from API");
+        throw new Error("No insights data in response");
       }
 
+      // Validate insights structure
+      if (!data.insights.patterns || !data.insights.strengths || !data.insights.suggestions) {
+        throw new Error("Invalid insights structure");
+      }
+
+      console.log("✅ Insights generated successfully");
+      
       setInsights(data.insights);
       setInsightMeta({
         generatedAt: data.generatedAt || data.cachedAt || new Date().toISOString(),
         cached: data.cached || false,
       });
     } catch (err: any) {
-      console.error("Error generating insights:", err);
-      setError(err.message || "Failed to generate insights. Please try again.");
+      console.error("❌ Error generating insights:", err);
+      
+      // User-friendly error messages
+      let errorMessage = "Failed to generate insights. Please try again.";
+      
+      if (err.message.includes("RATE_LIMIT")) {
+        errorMessage = "Rate limit exceeded. Please wait a moment and try again.";
+      } else if (err.message.includes("TIMEOUT")) {
+        errorMessage = "Request took too long. Please try again.";
+      } else if (err.message.includes("Unauthorized") || err.message.includes("401")) {
+        errorMessage = "Session expired. Please refresh the page and try again.";
+      } else if (err.message.includes("404")) {
+        errorMessage = "No analytics data found. Please sync your GitHub data first.";
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+      
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
   }, []);
 
-  // Format hour helper
+  // Helper functions
   const formatHour = (hour: number | null): string => {
-    if (hour === null) return "N/A";
+    if (hour === null || hour === undefined) return "N/A";
     const period = hour >= 12 ? "PM" : "AM";
     const displayHour = hour % 12 || 12;
     return `${displayHour}:00 ${period}`;
   };
 
-  // Format number helper
   const formatNumber = (num: number): string => {
     if (num >= 1000000) return (num / 1000000).toFixed(1) + "M";
     if (num >= 1000) return (num / 1000).toFixed(1) + "K";
     return num.toString();
   };
 
-  // Format date helper
   const formatDate = (dateString: string | null): string => {
     if (!dateString) return "N/A";
     return new Date(dateString).toLocaleDateString("en-US", {
@@ -167,7 +205,7 @@ export default function InsightsClient({
             </h1>
           </div>
           <p className="text-slate-400 text-lg">
-            Personalized analysis of your coding patterns and productivity
+            Personalized analysis of {userName}&apos;s coding patterns and productivity
           </p>
         </div>
 
@@ -238,7 +276,7 @@ export default function InsightsClient({
                 </div>
 
                 {/* Meta info */}
-                {insightMeta.generatedAt && !loading && (
+                {insightMeta.generatedAt && !loading && !error && (
                   <div className="mt-4 pt-4 border-t border-slate-700/30 flex items-center gap-4 text-sm text-slate-500">
                     <span className="flex items-center gap-1.5">
                       <Clock className="w-4 h-4" />
@@ -256,15 +294,15 @@ export default function InsightsClient({
 
               {/* Error State */}
               {error && (
-                <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 flex items-start gap-3">
+                <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 flex items-start gap-3 animate-in fade-in slide-in-from-top-2 duration-300">
                   <XCircle className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
-                  <div>
+                  <div className="flex-1">
                     <p className="text-red-400 font-medium">Error</p>
                     <p className="text-red-300/80 text-sm">{error}</p>
                   </div>
                   <button
                     onClick={() => setError(null)}
-                    className="ml-auto text-red-400 hover:text-red-300"
+                    className="text-red-400 hover:text-red-300 text-xl leading-none"
                   >
                     ×
                   </button>
@@ -295,7 +333,17 @@ export default function InsightsClient({
 
               {/* Insights Display */}
               {insights && !loading && (
-                <div className="space-y-6">
+                <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                  {/* Success indicator */}
+                  {!insightMeta.cached && (
+                    <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-4 flex items-center gap-3">
+                      <CheckCircle className="w-5 h-5 text-green-400" />
+                      <p className="text-green-400 text-sm font-medium">
+                        Fresh insights generated successfully!
+                      </p>
+                    </div>
+                  )}
+
                   {/* Patterns */}
                   <InsightSection
                     icon={<TrendingUp className="w-5 h-5" />}
@@ -411,7 +459,7 @@ export default function InsightsClient({
                   <AlertCircle className="w-5 h-5 text-slate-500 shrink-0 mt-0.5" />
                   <div>
                     <p className="text-sm text-slate-400">
-                      Insights are generated using AI and cached for 24 hours to
+                      Insights are generated using AI (LLaMA 3.3 70B) and cached for 24 hours to
                       optimize performance and reduce API costs.
                     </p>
                   </div>

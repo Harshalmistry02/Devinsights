@@ -10,35 +10,57 @@ import {
 } from '@/lib/ai/service';
 import { AIServiceError } from '@/lib/ai/types';
 
+/**
+ * POST /api/insights/generate
+ * 
+ * Generates AI-powered insights from user's analytics data
+ * Uses intelligent caching to reduce API costs
+ */
 export async function POST(request: NextRequest) {
+  console.log("🔵 API Route: /api/insights/generate - POST request received");
+  
   try {
-    // 1. Authentication
+    // Step 1: Authentication
+    console.log("🔐 Step 1: Checking authentication...");
     const session = await auth();
 
     if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      console.warn("❌ Authentication failed: No session found");
+      return NextResponse.json(
+        { error: 'Unauthorized', message: 'Please sign in to generate insights' },
+        { status: 401 }
+      );
     }
 
     const userId = session.user.id;
+    console.log("✅ User authenticated:", userId);
 
-    // 2. Get latest analytics snapshot
+    // Step 2: Get latest analytics snapshot
+    console.log("📊 Step 2: Fetching analytics snapshot...");
     const snapshot = await prisma.analyticsSnapshot.findUnique({
-      where: {
-        userId,
-      },
+      where: { userId },
     });
 
     if (!snapshot) {
+      console.warn("❌ No analytics snapshot found for user:", userId);
       return NextResponse.json(
         {
-          error: 'No analytics data found. Please sync your GitHub data first.',
+          error: 'No analytics data found',
+          message: 'Please sync your GitHub data first to generate insights.',
         },
         { status: 404 }
       );
     }
 
-    // 3. Create data hash for caching
-    // Calculate avgCommitSize from additions+deletions / commits
+    console.log("✅ Analytics snapshot found:", {
+      totalCommits: snapshot.totalCommits,
+      calculatedAt: snapshot.calculatedAt,
+    });
+
+    // Step 3: Prepare data for AI
+    console.log("🔧 Step 3: Preparing data for AI...");
+    
+    // Calculate average commit size
     const avgCommitSize = snapshot.totalCommits > 0
       ? Math.round((snapshot.totalAdditions + snapshot.totalDeletions) / snapshot.totalCommits)
       : 0;
@@ -52,73 +74,120 @@ export async function POST(request: NextRequest) {
       avgCommitSize,
       mostActiveDay: snapshot.mostProductiveDay || 'N/A',
       period: 'last_30_days',
+      previousPeriodCommits: undefined, // Could add historical comparison
     };
 
-    const dataHash = createDataHash(analyticsData);
+    console.log("📦 Analytics data prepared:", {
+      totalCommits: analyticsData.totalCommits,
+      topLanguagesCount: Object.keys(analyticsData.topLanguages).length,
+    });
 
-    // 4. Check cache (most important optimization!)
+    // Step 4: Create data hash for caching
+    const dataHash = createDataHash(analyticsData);
+    console.log("🔑 Data hash created:", dataHash);
+
+    // Step 5: Check cache
+    console.log("💾 Step 5: Checking cache...");
     const cached = await prisma.insightCache.findUnique({
       where: { dataHash },
       select: {
         insights: true,
         createdAt: true,
         expiresAt: true,
+        model: true,
       },
     });
 
     // Return cached if valid
     if (cached && cached.expiresAt > new Date()) {
-      console.log('✅ Cache hit for insights');
+      console.log("✅ Cache hit! Returning cached insights");
+      console.log("📅 Cached at:", cached.createdAt);
+      console.log("⏰ Expires at:", cached.expiresAt);
+      
       return NextResponse.json({
         insights: cached.insights,
         cached: true,
-        cachedAt: cached.createdAt,
+        cachedAt: cached.createdAt.toISOString(),
+        model: cached.model,
       });
     }
 
-    // 5. Generate new insights
-    console.log('🤖 Generating new insights with AI...');
-
-    let insights;
-
-    // Use mock in development or if AI_CONFIG.useMock is true
-    try {
-      insights = await generateInsights(analyticsData);
-    } catch (aiError: any) {
-      console.error('AI generation failed, using mock:', aiError);
-      insights = getMockInsights();
+    if (cached) {
+      console.log("⚠️ Cache found but expired, generating fresh insights");
+    } else {
+      console.log("⚠️ No cache found, generating fresh insights");
     }
 
-    // 6. Store in cache
+    // Step 6: Generate new insights with AI
+    console.log("🤖 Step 6: Generating insights with AI...");
+    console.log("🔧 Using model: llama-3.3-70b-versatile");
+
+    let insights;
+    let model = 'llama-3.3-70b-versatile';
+
+    try {
+      console.log("📡 Calling GROQ API...");
+      insights = await generateInsights(analyticsData);
+      console.log("✅ AI insights generated successfully");
+      console.log("📊 Insights structure:", {
+        patternsCount: insights.patterns.length,
+        strengthsCount: insights.strengths.length,
+        suggestionsCount: insights.suggestions.length,
+      });
+    } catch (aiError: any) {
+      console.error("❌ AI generation failed:", aiError);
+      
+      // Use mock insights as fallback
+      console.log("🔄 Falling back to mock insights");
+      insights = getMockInsights();
+      model = 'mock-fallback';
+    }
+
+    // Step 7: Store in cache
+    console.log("💾 Step 7: Storing insights in cache...");
     const expiresAt = new Date();
     expiresAt.setHours(expiresAt.getHours() + 24); // 24-hour TTL
 
-    await prisma.insightCache.create({
-      data: {
-        userId,
-        snapshotId: snapshot.id,
-        dataHash,
-        insights,
-        model: 'llama-3.3-70b',
-        expiresAt,
-      },
-    });
+    try {
+      await prisma.insightCache.create({
+        data: {
+          userId,
+          snapshotId: snapshot.id,
+          dataHash,
+          insights,
+          model,
+          expiresAt,
+        },
+      });
+      console.log("✅ Insights cached successfully");
+      console.log("⏰ Cache expires at:", expiresAt.toISOString());
+    } catch (cacheError) {
+      console.error("⚠️ Failed to cache insights (non-critical):", cacheError);
+      // Continue even if caching fails
+    }
 
-    // 7. Return response
+    // Step 8: Return response
+    console.log("✅ Step 8: Returning fresh insights to client");
     return NextResponse.json({
       insights,
       cached: false,
-      generatedAt: new Date(),
+      generatedAt: new Date().toISOString(),
+      model,
     });
+
   } catch (error: any) {
-    console.error('AI Insights Error:', error);
+    console.error("❌ Unhandled error in insights generation:", error);
+    console.error("Stack trace:", error.stack);
 
     // Handle specific AI errors gracefully
     if (error instanceof AIServiceError) {
+      console.error("🤖 AI Service Error:", error.code);
+      
       if (error.code === 'RATE_LIMIT') {
         return NextResponse.json(
           {
-            error: 'AI service is temporarily busy. Please try again in a moment.',
+            error: 'Rate limit exceeded',
+            message: 'AI service is temporarily busy. Please try again in a moment.',
             code: 'RATE_LIMIT',
           },
           { status: 429 }
@@ -128,10 +197,22 @@ export async function POST(request: NextRequest) {
       if (error.code === 'TIMEOUT') {
         return NextResponse.json(
           {
-            error: 'Request took too long. Please try again.',
+            error: 'Request timeout',
+            message: 'Request took too long. Please try again.',
             code: 'TIMEOUT',
           },
           { status: 504 }
+        );
+      }
+
+      if (error.code === 'INVALID_RESPONSE') {
+        return NextResponse.json(
+          {
+            error: 'Invalid AI response',
+            message: 'AI returned invalid data. Please try again.',
+            code: 'INVALID_RESPONSE',
+          },
+          { status: 500 }
         );
       }
     }
@@ -139,7 +220,8 @@ export async function POST(request: NextRequest) {
     // Generic error response (don't leak implementation details)
     return NextResponse.json(
       {
-        error: 'Unable to generate insights. Please try again later.',
+        error: 'Internal server error',
+        message: 'Unable to generate insights. Please try again later.',
         code: 'INTERNAL_ERROR',
       },
       { status: 500 }
@@ -147,14 +229,26 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Optional: GET endpoint to retrieve existing insights
+/**
+ * GET /api/insights/generate
+ * 
+ * Retrieves existing cached insights without regenerating
+ */
 export async function GET(request: NextRequest) {
+  console.log("🔵 API Route: /api/insights/generate - GET request received");
+  
   try {
     const session = await auth();
 
     if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      console.warn("❌ Authentication failed");
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
     }
+
+    console.log("🔍 Fetching latest cached insight for user:", session.user.id);
 
     const latestInsight = await prisma.insightCache.findFirst({
       where: {
@@ -170,19 +264,23 @@ export async function GET(request: NextRequest) {
     });
 
     if (!latestInsight) {
+      console.log("⚠️ No cached insights found");
       return NextResponse.json(
-        { error: 'No insights found' },
+        { error: 'No insights found', message: 'Generate insights first' },
         { status: 404 }
       );
     }
 
+    console.log("✅ Cached insight found and returned");
     return NextResponse.json({
       insights: latestInsight.insights,
-      generatedAt: latestInsight.createdAt,
+      generatedAt: latestInsight.createdAt.toISOString(),
       model: latestInsight.model,
+      cached: true,
     });
-  } catch (error) {
-    console.error('Get insights error:', error);
+
+  } catch (error: any) {
+    console.error("❌ Error retrieving cached insights:", error);
     return NextResponse.json(
       { error: 'Failed to retrieve insights' },
       { status: 500 }

@@ -49,7 +49,8 @@ export default async function InsightsPage() {
   });
 
   // Check if user has synced data
-  const hasSyncedData = analytics !== null && analytics.totalCommits > 0;
+  // User has synced data if analytics exists AND has at least 1 commit OR at least 1 repo
+  const hasSyncedData = analytics !== null && (analytics.totalCommits > 0 || analytics.totalRepos > 0);
 
   // Parse top languages from JSON
   const topLanguages =
