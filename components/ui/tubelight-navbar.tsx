@@ -21,7 +21,10 @@ interface NavBarProps {
 }
 
 export function NavBar({ items, className }: NavBarProps) {
-  const { data: session, status } = useSession()
+  const { data: session, status } = useSession({
+    refetchInterval: 0,
+    refetchOnWindowFocus: false,
+  })
   const [activeTab, setActiveTab] = useState(items[0]?.name || "")
   const [isLoggingOut, setIsLoggingOut] = useState(false)
 

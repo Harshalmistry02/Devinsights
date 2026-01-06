@@ -11,7 +11,7 @@ import type { NextRequest } from "next/server";
 const publicRoutes = ["/login", "/api/auth"];
 
 // Routes that require authentication
-const protectedRoutes = ["/dashboard", "/profile", "/settings"];
+const protectedRoutes = ["/dashboard", "/profile", "/settings", "/insights"];
 
 export default auth((req: NextRequest & { auth: any }) => {
   const { nextUrl } = req;

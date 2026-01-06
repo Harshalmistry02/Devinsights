@@ -23,6 +23,7 @@ model User {
   repositories      Repository[]
   syncJobs          SyncJob[]
   analyticsSnapshot AnalyticsSnapshot?
+  insightCaches     InsightCache[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -200,10 +201,43 @@ model AnalyticsSnapshot {
   dataRangeEnd   DateTime?
 
   // Relations
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user              User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  generatedInsights InsightCache[]
 
   // Indexes
   @@index([userId])
   @@index([calculatedAt])
   @@map("analytics_snapshots")
+}
+
+// ============================================
+// AI Insights Caching
+// ============================================
+
+model InsightCache {
+  id         String @id @default(cuid())
+  userId     String
+  snapshotId String
+
+  // Relations
+  user     User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  snapshot AnalyticsSnapshot @relation(fields: [snapshotId], references: [id], onDelete: Cascade)
+
+  // Cache Logic
+  dataHash String @unique // Hash of the specific snapshot data used to generate this
+
+  // AI Response (structured JSON)
+  // Structure: { patterns: string[], strengths: string[], suggestions: string[] }
+  insights Json
+
+  // Metadata
+  model      String? // e.g., "claude-3-5-sonnet"
+  tokensUsed Int? // For cost tracking
+
+  createdAt DateTime @default(now())
+  expiresAt DateTime // TTL (Time To Live)
+
+  @@index([userId])
+  @@index([expiresAt]) // Useful for cleanup cron jobs
+  @@map("insight_caches")
 }

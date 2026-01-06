@@ -11,7 +11,10 @@ import { User, Loader2 } from "lucide-react";
  * Shows loading state while session is being fetched
  */
 export function UserMenu() {
-  const { data: session, status } = useSession();
+  const { data: session, status } = useSession({
+    refetchInterval: 0,
+    refetchOnWindowFocus: false,
+  });
 
   if (status === "loading") {
     return (
