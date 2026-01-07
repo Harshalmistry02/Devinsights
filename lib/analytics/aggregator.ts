@@ -8,6 +8,7 @@
 import prisma from '@/lib/prisma';
 import { calculateStreaks } from './streak-calculator';
 import { aggregateLanguageStats, getTopLanguages, getLanguageColor } from './language-analyzer';
+import type { Prisma } from '@prisma/client';
 import {
   AnalyticsResult,
   DailyCommitStats,
@@ -194,13 +195,13 @@ export class AnalyticsAggregator {
         lastCommitDate: result.lastCommitDate,
         isActiveToday: result.isActiveToday,
         
-        // JSON Stats
-        languageStats: result.languageStats,
-        dailyCommits: result.dailyCommits,
-        dayOfWeekStats: result.dayOfWeekStats,
-        hourlyStats: result.hourlyStats,
-        repoStats: result.repoStats,
-        topLanguages: result.topLanguages,
+        // JSON Stats - cast for Prisma compatibility
+        languageStats: result.languageStats as Prisma.InputJsonValue,
+        dailyCommits: result.dailyCommits as Prisma.InputJsonValue,
+        dayOfWeekStats: result.dayOfWeekStats as Prisma.InputJsonValue,
+        hourlyStats: result.hourlyStats as Prisma.InputJsonValue,
+        repoStats: result.repoStats as unknown as Prisma.InputJsonValue,
+        topLanguages: result.topLanguages as unknown as Prisma.InputJsonValue,
         
         // Computed Insights
         averageCommitsPerDay: result.averageCommitsPerDay,
@@ -229,13 +230,13 @@ export class AnalyticsAggregator {
         lastCommitDate: result.lastCommitDate,
         isActiveToday: result.isActiveToday,
         
-        // JSON Stats
-        languageStats: result.languageStats,
-        dailyCommits: result.dailyCommits,
-        dayOfWeekStats: result.dayOfWeekStats,
-        hourlyStats: result.hourlyStats,
-        repoStats: result.repoStats,
-        topLanguages: result.topLanguages,
+        // JSON Stats - cast for Prisma compatibility
+        languageStats: result.languageStats as Prisma.InputJsonValue,
+        dailyCommits: result.dailyCommits as Prisma.InputJsonValue,
+        dayOfWeekStats: result.dayOfWeekStats as Prisma.InputJsonValue,
+        hourlyStats: result.hourlyStats as Prisma.InputJsonValue,
+        repoStats: result.repoStats as unknown as Prisma.InputJsonValue,
+        topLanguages: result.topLanguages as unknown as Prisma.InputJsonValue,
         
         // Computed Insights
         averageCommitsPerDay: result.averageCommitsPerDay,

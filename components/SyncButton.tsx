@@ -1,11 +1,21 @@
 'use client';
 
 import { useState } from 'react';
-import { Loader2, RefreshCw, CheckCircle, XCircle, Github } from 'lucide-react';
+import { Loader2, RefreshCw, CheckCircle, XCircle, Github, Clock, GitCommit, FolderGit2 } from 'lucide-react';
+
+interface SyncResult {
+  totalRepos: number;
+  totalCommits: number;
+  processedCommits: number;
+  duplicateCommits: number;
+  syncDurationMin: number;
+  syncErrors: number;
+}
 
 /**
  * SyncButton Component
  * Triggers GitHub data synchronization with visual progress feedback
+ * Uses the advanced /api/sync/complete endpoint for full commit history
  * Matches the project's glassmorphism design system
  */
 export function SyncButton() {
@@ -13,20 +23,40 @@ export function SyncButton() {
   const [progress, setProgress] = useState(0);
   const [message, setMessage] = useState('');
   const [status, setStatus] = useState<'idle' | 'syncing' | 'success' | 'error'>('idle');
+  const [syncResult, setSyncResult] = useState<SyncResult | null>(null);
 
   const handleSync = async () => {
     setSyncing(true);
     setStatus('syncing');
     setProgress(0);
-    setMessage('Starting sync...');
+    setMessage('Connecting to GitHub...');
+    setSyncResult(null);
 
     try {
       // Simulate progress stages while waiting for response
-      const progressInterval = setInterval(() => {
-        setProgress((prev) => Math.min(prev + 10, 90));
-      }, 500);
+      const progressMessages = [
+        'Fetching repositories...',
+        'Analyzing commit history...',
+        'Processing commits...',
+        'Enriching data...',
+        'Calculating analytics...',
+      ];
+      let messageIndex = 0;
 
-      const response = await fetch('/api/sync', {
+      const progressInterval = setInterval(() => {
+        setProgress((prev) => {
+          const newProgress = Math.min(prev + 5, 90);
+          // Update message at certain thresholds
+          if (newProgress >= (messageIndex + 1) * 18 && messageIndex < progressMessages.length) {
+            setMessage(progressMessages[messageIndex]);
+            messageIndex++;
+          }
+          return newProgress;
+        });
+      }, 800);
+
+      // Use the new complete sync endpoint for full commit history
+      const response = await fetch('/api/sync/complete', {
         method: 'POST',
       });
 
@@ -41,13 +71,28 @@ export function SyncButton() {
 
       setProgress(100);
       setStatus('success');
-      setMessage(`Synced ${data.data.repos} repositories successfully`);
+      
+      // Store detailed results
+      setSyncResult({
+        totalRepos: data.data.totalRepos,
+        totalCommits: data.data.totalCommits,
+        processedCommits: data.data.processedCommits,
+        duplicateCommits: data.data.duplicateCommits,
+        syncDurationMin: data.data.syncDurationMin,
+        syncErrors: data.data.syncErrors,
+      });
 
-      // Refresh page after 2 seconds to show new data
-      setTimeout(() => window.location.reload(), 2000);
-    } catch (error: any) {
+      // Create success message
+      const commitText = data.data.processedCommits === 1 ? 'commit' : 'commits';
+      const repoText = data.data.totalRepos === 1 ? 'repository' : 'repositories';
+      setMessage(`Synced ${data.data.processedCommits} ${commitText} from ${data.data.totalRepos} ${repoText}`);
+
+      // Refresh page after 3 seconds to show new data
+      setTimeout(() => window.location.reload(), 3000);
+    } catch (error: unknown) {
       setStatus('error');
-      setMessage(error.message || 'Sync failed. Please try again.');
+      const errorMessage = error instanceof Error ? error.message : 'Sync failed. Please try again.';
+      setMessage(errorMessage);
       console.error('Sync error:', error);
     } finally {
       setSyncing(false);
@@ -132,6 +177,24 @@ export function SyncButton() {
               {message}
             </p>
           </div>
+
+          {/* Detailed Results on Success */}
+          {status === 'success' && syncResult && (
+            <div className="grid grid-cols-3 gap-2 pt-2 border-t border-slate-700/30">
+              <div className="flex items-center gap-1.5 text-xs text-slate-400">
+                <FolderGit2 className="w-3.5 h-3.5 text-cyan-400" />
+                <span>{syncResult.totalRepos} repos</span>
+              </div>
+              <div className="flex items-center gap-1.5 text-xs text-slate-400">
+                <GitCommit className="w-3.5 h-3.5 text-green-400" />
+                <span>{syncResult.processedCommits} new</span>
+              </div>
+              <div className="flex items-center gap-1.5 text-xs text-slate-400">
+                <Clock className="w-3.5 h-3.5 text-purple-400" />
+                <span>{syncResult.syncDurationMin}m</span>
+              </div>
+            </div>
+          )}
 
           {/* Progress percentage */}
           {syncing && (

@@ -84,6 +84,10 @@ export default function InsightsClient({
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+  // Analytics state for refresh capability
+  const [currentAnalytics, setCurrentAnalytics] = useState<AnalyticsData | null>(analytics);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Debug logging (remove in production)
   useEffect(() => {
@@ -91,9 +95,54 @@ export default function InsightsClient({
       hasSyncedData,
       hasAnalytics: !!analytics,
       hasCachedInsight: !!cachedInsight,
-      topLanguagesCount: topLanguages.length,
+      topLanguagesCount: topLanguages?.length || 0,
     });
   }, [hasSyncedData, analytics, cachedInsight, topLanguages]);
+
+  // Refresh analytics data without full page reload
+  const refreshAnalytics = useCallback(async () => {
+    console.log("🔄 Refreshing analytics data...");
+    setIsRefreshing(true);
+    setError(null);
+
+    try {
+      const response = await fetch("/api/analytics?refresh=true", {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to refresh analytics: ${response.status}`);
+      }
+
+      const data = await response.json();
+      
+      if (data.success && data.data) {
+        console.log("✅ Analytics refreshed:", data.data);
+        setCurrentAnalytics({
+          totalRepos: data.data.totalRepos,
+          totalCommits: data.data.totalCommits,
+          currentStreak: data.data.currentStreak,
+          longestStreak: data.data.longestStreak,
+          totalStars: data.data.totalStars,
+          totalForks: data.data.totalForks,
+          totalAdditions: data.data.totalAdditions,
+          totalDeletions: data.data.totalDeletions,
+          isActiveToday: data.data.isActiveToday,
+          lastCommitDate: data.data.lastCommitDate?.toISOString?.() || data.data.lastCommitDate || null,
+          mostProductiveDay: data.data.mostProductiveDay,
+          mostProductiveHour: data.data.mostProductiveHour,
+          averageCommitsPerDay: data.data.averageCommitsPerDay,
+          calculatedAt: data.data.calculatedAt?.toISOString?.() || data.data.calculatedAt || null,
+        });
+      }
+    } catch (err: any) {
+      console.error("❌ Error refreshing analytics:", err);
+      setError("Failed to refresh analytics: " + (err.message || "Unknown error"));
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, []);
 
   // Generate insights handler with comprehensive error handling
   const generateInsights = useCallback(async () => {
@@ -395,39 +444,49 @@ export default function InsightsClient({
             <div className="space-y-6">
               {/* Analytics Summary */}
               <div className="bg-slate-900/50 border border-slate-700/30 rounded-xl p-6 backdrop-blur-sm">
-                <h3 className="text-lg font-semibold text-slate-200 mb-4 flex items-center gap-2">
-                  <BarChart3 className="w-5 h-5 text-cyan-400" />
-                  Your Stats
-                </h3>
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-slate-200 flex items-center gap-2">
+                    <BarChart3 className="w-5 h-5 text-cyan-400" />
+                    Your Stats
+                  </h3>
+                  <button
+                    onClick={refreshAnalytics}
+                    disabled={isRefreshing}
+                    className="p-1.5 rounded-lg text-slate-400 hover:text-cyan-400 hover:bg-slate-800/50 transition-all disabled:opacity-50"
+                    title="Refresh Stats"
+                  >
+                    <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+                  </button>
+                </div>
                 <div className="space-y-4">
                   <QuickStat
                     icon={<Code className="w-4 h-4" />}
                     label="Total Commits"
-                    value={formatNumber(analytics?.totalCommits || 0)}
+                    value={formatNumber(currentAnalytics?.totalCommits || 0)}
                     color="cyan"
                   />
                   <QuickStat
                     icon={<Flame className="w-4 h-4" />}
                     label="Current Streak"
-                    value={`${analytics?.currentStreak || 0} days`}
+                    value={`${currentAnalytics?.currentStreak || 0} days`}
                     color="orange"
                   />
                   <QuickStat
                     icon={<Zap className="w-4 h-4" />}
                     label="Longest Streak"
-                    value={`${analytics?.longestStreak || 0} days`}
+                    value={`${currentAnalytics?.longestStreak || 0} days`}
                     color="yellow"
                   />
                   <QuickStat
                     icon={<Calendar className="w-4 h-4" />}
                     label="Best Day"
-                    value={analytics?.mostProductiveDay || "N/A"}
+                    value={currentAnalytics?.mostProductiveDay || "N/A"}
                     color="purple"
                   />
                   <QuickStat
                     icon={<Clock className="w-4 h-4" />}
                     label="Peak Hour"
-                    value={formatHour(analytics?.mostProductiveHour ?? null)}
+                    value={formatHour(currentAnalytics?.mostProductiveHour ?? null)}
                     color="blue"
                   />
                 </div>

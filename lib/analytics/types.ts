@@ -28,6 +28,7 @@ export interface DailyCommitStats {
 }
 
 export interface DayOfWeekStats {
+  [key: string]: number; // Index signature for Prisma Json compatibility
   Monday: number;
   Tuesday: number;
   Wednesday: number;
