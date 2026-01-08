@@ -1,52 +1,109 @@
-import { Code, Activity, Flame, Star } from "lucide-react";
+'use client';
+
+import { Code, Activity, Flame, Star, RefreshCw } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 interface StatsGridProps {
   analytics: any;
 }
 
-export function StatsGrid({ analytics }: StatsGridProps) {
+export function StatsGrid({ analytics: initialAnalytics }: StatsGridProps) {
+  const [analytics, setAnalytics] = useState(initialAnalytics);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
   const hasSyncedData = analytics !== null && (analytics.totalCommits > 0 || analytics.totalRepos > 0);
 
+  const refreshStats = async () => {
+    setIsRefreshing(true);
+    try {
+      const response = await fetch('/api/analytics?refresh=true');
+      if (!response.ok) {
+        throw new Error('Failed to refresh stats');
+      }
+      const data = await response.json();
+      setAnalytics(data.data);
+      toast.success('Statistics refreshed successfully');
+    } catch (error) {
+      console.error('Failed to refresh stats:', error);
+      toast.error('Failed to refresh statistics');
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-      <StatCard
-        icon={<Code className="w-6 h-6" />}
-        title="Repositories"
-        value={analytics?.totalRepos?.toString() || "0"}
-        subtitle={hasSyncedData ? "synced repos" : "sync to see"}
-        color="blue"
-      />
-      <StatCard
-        icon={<Activity className="w-6 h-6" />}
-        title="Total Commits"
-        value={formatNumber(analytics?.totalCommits || 0)}
-        subtitle={hasSyncedData ? "all time" : "sync to see"}
-        color="cyan"
-      />
-      <StatCard
-        icon={<Flame className="w-6 h-6" />}
-        title="Current Streak"
-        value={analytics?.currentStreak?.toString() || "0"}
-        subtitle={
-          analytics?.currentStreak
-            ? `${analytics.currentStreak} day${
-                analytics.currentStreak !== 1 ? "s" : ""
-              }`
-            : "days"
-        }
-        color="orange"
-        highlight={analytics?.isActiveToday}
-      />
-      <StatCard
-        icon={<Star className="w-6 h-6" />}
-        title="Stars Earned"
-        value={formatNumber(analytics?.totalStars || 0)}
-        subtitle="across repos"
-        color="yellow"
-      />
+    <div>
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-lg font-semibold text-slate-200">Statistics</h3>
+        <button
+          onClick={refreshStats}
+          disabled={isRefreshing}
+          className={cn(
+            "p-2 rounded-lg transition-colors",
+            "hover:bg-slate-800/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400",
+            isRefreshing && "cursor-wait"
+          )}
+          title="Refresh statistics"
+          aria-label="Refresh statistics"
+        >
+          <RefreshCw className={cn("w-4 h-4 text-slate-400", isRefreshing && "animate-spin")} />
+        </button>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+        {isRefreshing ? (
+          <>
+            <StatCardSkeleton />
+            <StatCardSkeleton />
+            <StatCardSkeleton />
+            <StatCardSkeleton />
+          </>
+        ) : (
+          <>
+            <StatCard
+              icon={<Code className="w-6 h-6" />}
+              title="Repositories"
+              value={analytics?.totalRepos?.toString() || "0"}
+              subtitle={hasSyncedData ? "synced repos" : "sync to see"}
+              color="blue"
+            />
+            <StatCard
+              icon={<Activity className="w-6 h-6" />}
+              title="Total Commits"
+              value={formatNumber(analytics?.totalCommits || 0)}
+              subtitle={hasSyncedData ? "all time" : "sync to see"}
+              color="cyan"
+            />
+            <StatCard
+              icon={<Flame className="w-6 h-6" />}
+              title="Current Streak"
+              value={analytics?.currentStreak?.toString() || "0"}
+              subtitle={
+                analytics?.currentStreak
+                  ? `${analytics.currentStreak} day${
+                      analytics.currentStreak !== 1 ? "s" : ""
+                    }`
+                  : "days"
+              }
+              color="orange"
+              highlight={analytics?.isActiveToday}
+            />
+            <StatCard
+              icon={<Star className="w-6 h-6" />}
+              title="Stars Earned"
+              value={formatNumber(analytics?.totalStars || 0)}
+              subtitle="across repos"
+              color="yellow"
+            />
+          </>
+        )}
+      </div>
     </div>
   );
 }
+
 
 function StatCard({
   icon,
@@ -99,7 +156,21 @@ function StatCard({
   );
 }
 
+function StatCardSkeleton() {
+  return (
+    <div className="bg-slate-800/30 border border-slate-700/30 rounded-xl p-3 sm:p-5 backdrop-blur-sm min-h-[88px] animate-pulse">
+      <div className="flex items-start justify-between mb-2 sm:mb-3">
+        <div className="w-6 h-6 bg-slate-700/50 rounded" />
+      </div>
+      <div className="h-4 w-24 bg-slate-700/50 rounded mb-2" />
+      <div className="h-8 w-16 bg-slate-700/50 rounded mb-1" />
+      <div className="h-3 w-20 bg-slate-700/50 rounded" />
+    </div>
+  );
+}
+
 function formatNumber(num: number): string {
+
   if (num >= 1000000) {
     return (num / 1000000).toFixed(1) + "M";
   }

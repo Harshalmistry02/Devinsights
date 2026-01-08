@@ -2,16 +2,52 @@
 
 import { z } from 'zod';
 
+// Commit size categories
+export interface CommitSizeDistribution {
+  small: number;   // < 50 lines changed
+  medium: number;  // 50-200 lines changed
+  large: number;   // > 200 lines changed
+}
+
+// Previous period stats for comparison
+export interface ComparisonStats {
+  commits: number;
+  streak: number;
+  languages: Record<string, number>;
+}
+
 // Input: What we send to the AI
 export interface AnalyticsSummary {
+  // Core metrics
   totalCommits: number;
   currentStreak: number;
   longestStreak: number;
   topLanguages: Record<string, number>; // { "TypeScript": 150 }
   avgCommitSize: number;
   mostActiveDay: string;
-  previousPeriodCommits?: number; // For comparison
   period: string; // "last_30_days"
+  
+  // Enhanced metrics for better insights
+  previousPeriodCommits?: number; // For comparison
+  previousPeriodStats?: ComparisonStats; // Full comparison data
+  commitSizeDistribution?: CommitSizeDistribution;
+  
+  // Calculated scores (0-100)
+  consistencyScore?: number; // Based on daily commit regularity
+  languageDiversity?: number; // Shannon entropy normalized
+  
+  // Work patterns
+  weekdayVsWeekendRatio?: number; // >1 means more weekday activity
+  hourlyPattern?: 'morning' | 'afternoon' | 'evening' | 'night' | 'mixed';
+  isActiveToday?: boolean;
+  
+  // Streak health
+  streakHealth?: 'excellent' | 'good' | 'warning' | 'danger' | 'inactive';
+  daysToMilestone?: { milestone: number; daysRemaining: number } | null;
+  
+  // Repository insights
+  activeRepos?: number;
+  totalRepos?: number;
 }
 
 // Output: What AI returns (validated with Zod)

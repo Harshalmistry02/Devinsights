@@ -7,8 +7,14 @@ import {
   generateInsights,
   createDataHash,
   getMockInsights,
+  estimateTokenUsage,
 } from '@/lib/ai/service';
 import { AIServiceError } from '@/lib/ai/types';
+import { buildAnalyticsSummary } from '@/lib/analytics/insights-data-builder';
+import { AI_CONFIG } from '@/lib/ai/client';
+
+// Cache duration based on tier (free tier gets longer cache to save tokens)
+const CACHE_HOURS = 24; // 24 hours for free tier
 
 export async function POST(request: NextRequest) {
   try {
@@ -37,32 +43,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 3. Create data hash for caching
-    // Calculate avgCommitSize from additions+deletions / commits
-    const avgCommitSize = snapshot.totalCommits > 0
-      ? Math.round((snapshot.totalAdditions + snapshot.totalDeletions) / snapshot.totalCommits)
-      : 0;
+    // 3. Build comprehensive analytics data
+    const analyticsData = buildAnalyticsSummary(snapshot);
 
-    const analyticsData = {
-      totalCommits: snapshot.totalCommits,
-      currentStreak: snapshot.currentStreak,
-      longestStreak: snapshot.longestStreak,
-      topLanguages: (snapshot.topLanguages as Array<{ language: string; count: number }> || [])
-        .reduce((acc, lang) => ({ ...acc, [lang.language]: lang.count }), {} as Record<string, number>),
-      avgCommitSize,
-      mostActiveDay: snapshot.mostProductiveDay || 'N/A',
-      period: 'last_30_days',
-    };
-
+    // 4. Create data hash for caching
     const dataHash = createDataHash(analyticsData);
 
-    // 4. Check cache (most important optimization!)
+    // 5. Check cache (most important optimization!)
     const cached = await prisma.insightCache.findUnique({
       where: { dataHash },
       select: {
         insights: true,
         createdAt: true,
         expiresAt: true,
+        tokensUsed: true,
       },
     });
 
@@ -73,25 +67,69 @@ export async function POST(request: NextRequest) {
         insights: cached.insights,
         cached: true,
         cachedAt: cached.createdAt,
+        meta: {
+          dataQuality: {
+            consistencyScore: analyticsData.consistencyScore,
+            languageDiversity: analyticsData.languageDiversity,
+            streakHealth: analyticsData.streakHealth,
+          },
+          daysToMilestone: analyticsData.daysToMilestone,
+        },
       });
     }
 
-    // 5. Generate new insights
-    console.log('🤖 Generating new insights with AI...');
+    // 6. Check quota (simple daily limit tracking via usage log)
+    // Note: The quota manager requires DB migration, so we use a simpler approach here
+    // that can be enhanced after migration
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    const todaysInsightCount = await prisma.insightCache.count({
+      where: {
+        userId,
+        createdAt: {
+          gte: today,
+        },
+      },
+    });
 
-    let insights;
-
-    // Use mock in development or if AI_CONFIG.useMock is true
-    try {
-      insights = await generateInsights(analyticsData);
-    } catch (aiError: any) {
-      console.error('AI generation failed, using mock:', aiError);
-      insights = getMockInsights();
+    if (todaysInsightCount >= AI_CONFIG.maxRequestsPerDay) {
+      console.log('⚠️ Daily quota exceeded for user:', userId);
+      return NextResponse.json(
+        {
+          error: 'Daily AI quota exceeded. Your insights will refresh tomorrow, or use cached insights.',
+          code: 'QUOTA_EXCEEDED',
+          retryAfter: new Date(today.getTime() + 24 * 60 * 60 * 1000).toISOString(),
+        },
+        { status: 429 }
+      );
     }
 
-    // 6. Store in cache
+    // 7. Generate new insights
+    console.log('🤖 Generating new insights with AI...');
+    console.log('📊 Analytics data:', {
+      totalCommits: analyticsData.totalCommits,
+      currentStreak: analyticsData.currentStreak,
+      consistencyScore: analyticsData.consistencyScore,
+      languageDiversity: analyticsData.languageDiversity,
+      streakHealth: analyticsData.streakHealth,
+    });
+
+    let insights;
+    let tokensUsed: number = AI_CONFIG.estimatedTokensPerRequest; // Default estimate
+
+    try {
+      insights = await generateInsights(analyticsData);
+      // Estimate actual tokens used
+      tokensUsed = estimateTokenUsage(analyticsData, insights);
+    } catch (aiError: any) {
+      console.error('AI generation failed, using mock:', aiError);
+      insights = getMockInsights(analyticsData);
+    }
+
+    // 8. Store in cache
     const expiresAt = new Date();
-    expiresAt.setHours(expiresAt.getHours() + 24); // 24-hour TTL
+    expiresAt.setHours(expiresAt.getHours() + CACHE_HOURS);
 
     await prisma.insightCache.create({
       data: {
@@ -99,16 +137,27 @@ export async function POST(request: NextRequest) {
         snapshotId: snapshot.id,
         dataHash,
         insights,
-        model: 'llama-3.3-70b',
+        model: AI_CONFIG.model,
+        tokensUsed,
         expiresAt,
       },
     });
 
-    // 7. Return response
+    // 9. Return response with enhanced metadata
     return NextResponse.json({
       insights,
       cached: false,
       generatedAt: new Date(),
+      meta: {
+        dataQuality: {
+          consistencyScore: analyticsData.consistencyScore,
+          languageDiversity: analyticsData.languageDiversity,
+          streakHealth: analyticsData.streakHealth,
+        },
+        daysToMilestone: analyticsData.daysToMilestone,
+        tokensUsed,
+        quotaRemaining: AI_CONFIG.maxRequestsPerDay - todaysInsightCount - 1,
+      },
     });
   } catch (error: any) {
     console.error('AI Insights Error:', error);
@@ -147,7 +196,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Optional: GET endpoint to retrieve existing insights
+// GET endpoint to retrieve existing insights
 export async function GET(request: NextRequest) {
   try {
     const session = await auth();
@@ -156,6 +205,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    // Get the latest valid insight
     const latestInsight = await prisma.insightCache.findFirst({
       where: {
         userId: session.user.id,
@@ -166,20 +216,41 @@ export async function GET(request: NextRequest) {
         insights: true,
         createdAt: true,
         model: true,
+        tokensUsed: true,
       },
     });
 
     if (!latestInsight) {
       return NextResponse.json(
-        { error: 'No insights found' },
+        { error: 'No insights found. Generate new insights first.' },
         { status: 404 }
       );
+    }
+
+    // Also get analytics snapshot for metadata
+    const snapshot = await prisma.analyticsSnapshot.findUnique({
+      where: { userId: session.user.id },
+    });
+
+    let meta = {};
+    if (snapshot) {
+      const analyticsData = buildAnalyticsSummary(snapshot);
+      meta = {
+        dataQuality: {
+          consistencyScore: analyticsData.consistencyScore,
+          languageDiversity: analyticsData.languageDiversity,
+          streakHealth: analyticsData.streakHealth,
+        },
+        daysToMilestone: analyticsData.daysToMilestone,
+      };
     }
 
     return NextResponse.json({
       insights: latestInsight.insights,
       generatedAt: latestInsight.createdAt,
       model: latestInsight.model,
+      cached: true,
+      meta,
     });
   } catch (error) {
     console.error('Get insights error:', error);

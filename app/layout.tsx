@@ -3,6 +3,9 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import ClientLayout from "./components/ClientLayout";
 import { SessionProviderWrapper } from "@/components/SessionProvider";
+import { ToastProvider } from "@/components/ToastProvider";
+import { KeyboardShortcuts, KeyboardShortcutsHelp } from "@/components/dashboard/KeyboardShortcuts";
+
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,8 +34,12 @@ export default function RootLayout({
       >
         <SessionProviderWrapper>
           <ClientLayout>{children}</ClientLayout>
+          <ToastProvider />
+          <KeyboardShortcuts />
+          <KeyboardShortcutsHelp />
         </SessionProviderWrapper>
       </body>
+
     </html>
   );
 }

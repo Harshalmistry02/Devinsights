@@ -19,9 +19,9 @@ import {
 import { UserProfileCard } from "./components/UserProfileCard";
 import { StatsGrid } from "./components/StatsGrid";
 import { InsightsRow } from "./components/InsightsRow";
-import { LanguageSection } from "./components/LanguageSection";
-import { ChartsSection } from "./components/ChartsSection";
 import { ActivityOverview } from "./components/ActivityOverview";
+import { QuickActionsPanel } from "@/components/dashboard/QuickActionsPanel";
+
 
 /**
  * Dashboard Page
@@ -198,60 +198,42 @@ export default async function DashboardPage() {
             {/* Step 3: Insights Row */}
             {hasSyncedData && <InsightsRow analytics={analytics} />}
 
-            {/* Step 3: Language Breakdowns */}
-            {hasSyncedData && <LanguageSection analytics={analytics} />}
-
             {/* Activity Overview */}
             <ActivityOverview analytics={analytics} hasSyncedData={hasSyncedData} />
 
-            {/* Step 3 & 4: Charts Section */}
-            {hasSyncedData && <ChartsSection analytics={analytics} />}
-
-            {/* Quick Actions */}
-            <div className="bg-slate-900/50 border border-slate-700/30 rounded-xl p-4 sm:p-6 backdrop-blur-sm">
-              <h3 className="text-lg sm:text-xl font-semibold text-slate-200 mb-3 sm:mb-4">
-                Quick Actions
-              </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-                <ActionCard
-                  title="View Profile"
-                  href="/profile"
-                  icon={<UserIcon className="w-5 h-5 text-cyan-400" />}
-                />
-                <ActionCard
-                  title="Settings"
-                  href="/settings"
-                  icon={<SettingsIcon className="w-5 h-5 text-blue-400" />}
-                />
-                <ActionCard
-                  title="Insights"
-                  href="/insights"
-                  icon={<TrendingUp className="w-5 h-5 text-purple-400" />}
-                />
-                <ActionCard
-                  title="Repositories"
-                  href="/repositories"
-                  icon={<Code className="w-5 h-5 text-pink-400" />}
-                />
-              </div>
-            </div>
+            {/* Quick Actions Panel */}
+            <QuickActionsPanel 
+              actions={[
+                {
+                  title: "View Profile",
+                  href: "/profile",
+                  icon: <UserIcon className="w-5 h-5 text-cyan-400" />,
+                  tooltip: "View and edit your profile settings"
+                },
+                {
+                  title: "Settings",
+                  href: "/settings",
+                  icon: <SettingsIcon className="w-5 h-5 text-blue-400" />,
+                  tooltip: "Manage application settings"
+                },
+                {
+                  title: "Insights",
+                  href: "/insights",
+                  icon: <TrendingUp className="w-5 h-5 text-purple-400" />,
+                  tooltip: "View AI-generated insights",
+                  disabled: !hasSyncedData
+                },
+                {
+                  title: "Repositories",
+                  href: "/repositories",
+                  icon: <Code className="w-5 h-5 text-pink-400" />,
+                  tooltip: "Browse your synced repositories"
+                }
+              ]}
+            />
           </main>
         </div>
       </div>
     </div>
-  );
-}
-
-function ActionCard({ title, href, icon }: { title: string; href: string; icon: React.ReactNode }) {
-  return (
-    <Link
-      href={href}
-      className="flex items-center gap-3 p-4 bg-slate-800/30 border border-slate-700/30 rounded-xl hover:bg-slate-800/50 hover:border-slate-600/50 transition-all duration-300 group"
-    >
-      {icon}
-      <span className="text-sm font-medium text-slate-300 group-hover:text-slate-100 transition-colors">
-        {title}
-      </span>
-    </Link>
   );
 }

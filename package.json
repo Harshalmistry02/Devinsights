@@ -14,6 +14,7 @@
     "@octokit/plugin-throttling": "^11.0.3",
     "@octokit/rest": "^22.0.1",
     "@prisma/adapter-neon": "^7.2.0",
+    "@tanstack/react-virtual": "^3.13.17",
     "bullmq": "^5.66.4",
     "clsx": "^2.1.1",
     "framer-motion": "^12.23.26",
@@ -28,8 +29,11 @@
     "react-dom": "19.2.3",
     "react-icons": "^5.5.0",
     "recharts": "^3.6.0",
+    "sonner": "^2.0.7",
+    "swr": "^2.3.8",
     "tailwind-merge": "^3.4.0",
-    "zod": "^4.3.5"
+    "zod": "^4.3.5",
+    "zustand": "^5.0.9"
   },
   "devDependencies": {
     "@prisma/client": "^7.2.0",
