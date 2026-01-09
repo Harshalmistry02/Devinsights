@@ -127,15 +127,22 @@ export async function POST(request: NextRequest) {
       insights = getMockInsights(analyticsData);
     }
 
-    // 8. Store in cache
+    // 8. Store in cache (upsert to handle regeneration)
     const expiresAt = new Date();
     expiresAt.setHours(expiresAt.getHours() + CACHE_HOURS);
 
-    await prisma.insightCache.create({
-      data: {
+    await prisma.insightCache.upsert({
+      where: { dataHash },
+      create: {
         userId,
         snapshotId: snapshot.id,
         dataHash,
+        insights,
+        model: AI_CONFIG.model,
+        tokensUsed,
+        expiresAt,
+      },
+      update: {
         insights,
         model: AI_CONFIG.model,
         tokensUsed,

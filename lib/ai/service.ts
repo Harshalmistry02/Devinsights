@@ -17,10 +17,19 @@ import crypto from 'crypto';
 async function generateWithModel(
   model: string,
   data: AnalyticsSummary,
-  useCompactPrompt: boolean = false
+  useCompactPrompt: boolean = false,
+  customUserPrompt?: string
 ): Promise<InsightResponse> {
   if (!groq) {
     throw new AIServiceError('GROQ client not initialized', 'API_ERROR');
+  }
+
+  // Determine which user prompt to use
+  let userPromptContent: string;
+  if (customUserPrompt) {
+    userPromptContent = customUserPrompt;
+  } else {
+    userPromptContent = useCompactPrompt ? buildUserPromptCompact(data) : buildUserPrompt(data);
   }
 
   const completion = await groq.chat.completions.create({
@@ -32,7 +41,7 @@ async function generateWithModel(
       },
       {
         role: 'user',
-        content: useCompactPrompt ? buildUserPromptCompact(data) : buildUserPrompt(data),
+        content: userPromptContent,
       },
     ],
     temperature: AI_CONFIG.temperature,
@@ -67,9 +76,15 @@ async function generateWithModel(
  * 1. Try primary model first (best quality)
  * 2. If rate limited, fallback to smaller model
  * 3. If all else fails, return mock insights
+ * 
+ * @param data - Analytics summary data
+ * @param customPrompt - Optional custom user prompt (for enhanced insights)
+ * @param retries - Number of retry attempts
+ * @param useFallbackModel - Whether to use fallback model
  */
 export async function generateInsights(
   data: AnalyticsSummary,
+  customPrompt?: string,
   retries = 2,
   useFallbackModel = false
 ): Promise<InsightResponse> {
@@ -85,13 +100,13 @@ export async function generateInsights(
 
   try {
     console.log(`🤖 Generating insights with ${currentModel}...`);
-    return await generateWithModel(currentModel, data, useFallbackModel);
+    return await generateWithModel(currentModel, data, useFallbackModel, customPrompt);
   } catch (error: any) {
     // Handle rate limiting - try fallback model
     if (error.status === 429) {
       if (!useFallbackModel) {
         console.log('⚠️ Rate limited on primary model, trying fallback...');
-        return generateInsights(data, retries, true);
+        return generateInsights(data, customPrompt, retries, true);
       }
       throw new AIServiceError('Rate limit exceeded on all models', 'RATE_LIMIT');
     }
@@ -107,7 +122,7 @@ export async function generateInsights(
       await new Promise((resolve) =>
         setTimeout(resolve, 1000 * (3 - retries))
       ); // Exponential backoff
-      return generateInsights(data, retries - 1, useFallbackModel);
+      return generateInsights(data, customPrompt, retries - 1, useFallbackModel);
     }
 
     // Re-throw as AIServiceError
