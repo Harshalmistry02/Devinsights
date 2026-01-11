@@ -121,3 +121,28 @@ export type {
   LanguageChartData,
 } from './types';
 
+// Code Impact Analysis
+export {
+  analyzeCodeImpact,
+  getImpactRating,
+  getChurnSeverity,
+} from './code-impact-analyzer';
+
+export type {
+  CodeImpactMetrics,
+  CommitCategory,
+  CommitForImpactAnalysis,
+} from './code-impact-analyzer';
+
+// Developer Persona Detection
+export {
+  detectPersona,
+  getEarnedPersonas,
+  PERSONAS,
+} from './persona-detector';
+
+export type {
+  DeveloperPersona,
+  PersonaResult,
+  PersonaContext,
+} from './persona-detector';

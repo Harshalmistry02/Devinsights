@@ -32,11 +32,12 @@ interface RepoStatsChartProps {
   data: RepoStat[];
   className?: string;
   limit?: number;
+  showViewAll?: boolean;
 }
 
 const COLORS = ['#06b6d4', '#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981'];
 
-export function RepoStatsChart({ data, className = '', limit = 6 }: RepoStatsChartProps) {
+export function RepoStatsChart({ data, className = '', limit = 6, showViewAll = true }: RepoStatsChartProps) {
   // Get top repos by commits
   const topRepos = data
     .sort((a, b) => b.commits - a.commits)
@@ -47,12 +48,33 @@ export function RepoStatsChart({ data, className = '', limit = 6 }: RepoStatsCha
   const totalStars = data.reduce((sum, r) => sum + r.stars, 0);
   const totalForks = data.reduce((sum, r) => sum + r.forks, 0);
 
+  const hiddenRepos = data.length - topRepos.length;
+
   return (
     <div className={`bg-slate-900/50 border border-slate-700/30 rounded-xl backdrop-blur-sm ${className}`}>
       {/* Header */}
       <div className="p-4 sm:p-6 border-b border-slate-700/30">
-        <h3 className="text-lg font-semibold text-slate-200">Top Repositories</h3>
-        <p className="text-sm text-slate-500">By commit activity</p>
+        <div className="flex items-start justify-between">
+          <div>
+            <h3 className="text-lg font-semibold text-slate-200">
+              Top Repositories
+              {hiddenRepos > 0 && (
+                <span className="text-sm font-normal text-slate-500 ml-2">
+                  (showing {topRepos.length} of {data.length})
+                </span>
+              )}
+            </h3>
+            <p className="text-sm text-slate-500">By commit activity</p>
+          </div>
+          {showViewAll && data.length > limit && (
+            <a
+              href="/repositories"
+              className="text-sm text-cyan-400 hover:text-cyan-300 hover:underline transition-colors"
+            >
+              View all →
+            </a>
+          )}
+        </div>
         
         {/* Summary Stats */}
         <div className="flex items-center gap-6 mt-3">

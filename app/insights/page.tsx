@@ -19,6 +19,11 @@ import { AIInsightsSection } from "./AIInsightsSection";
 import { InsightsChartsSection } from "./InsightsChartsSection";
 import { DataQualityIndicator } from "@/components/DataQualityIndicator";
 import { InsightsFiltersWrapper } from "./InsightsFiltersWrapper";
+import { CodeImpactCard } from "./components/CodeImpactCard";
+import { RepoDeepDive } from "./components/RepoDeepDive";
+import { PersonaBadgeCompact } from "./components/PersonaBadge";
+import { detectPersona, type PersonaContext } from "@/lib/analytics/persona-detector";
+import type { CodeImpactMetrics } from "@/lib/analytics/code-impact-analyzer";
 
 // Type definitions for JSON fields
 type DailyCommits = Record<string, number>;
@@ -71,6 +76,23 @@ export default async function InsightsPage() {
   // Get available languages for filters
   const availableLanguages = topLanguages?.map(l => l.language) ?? [];
 
+  // Parse code impact metrics
+  const codeImpactMetrics = (analytics as any)?.codeImpactMetrics as CodeImpactMetrics | null;
+
+  // Detect developer persona
+  const personaContext: PersonaContext = {
+    hourlyStats: hourlyStats,
+    dayOfWeekStats: dayOfWeekStats as any,
+    topLanguages: topLanguages,
+    currentStreak: analytics?.currentStreak,
+    totalCommits: analytics?.totalCommits,
+    totalRepos: analytics?.totalRepos,
+    avgCommitSize: analytics && analytics.totalCommits > 0 
+      ? Math.round((analytics.totalAdditions + analytics.totalDeletions) / analytics.totalCommits)
+      : undefined,
+  };
+  const persona = analytics ? detectPersona(personaContext) : null;
+
   return (
     <div className="min-h-screen bg-linear-to-br from-slate-950 via-slate-900 to-slate-950 pt-20 sm:pt-24">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -121,8 +143,8 @@ export default async function InsightsPage() {
 
         {hasData ? (
           <div className="space-y-8">
-            {/* AI Stats Banner */}
-            <AIStatsBanner analytics={analytics} userId={user.id} />
+            {/* AI Stats Banner with Developer Persona */}
+            <AIStatsBanner analytics={analytics} userId={user.id} persona={persona} />
 
             {/* Data Quality Indicator - shows if there are outliers */}
             {outlierCount > 0 && (
@@ -146,6 +168,25 @@ export default async function InsightsPage() {
                 lastCommitDate: analytics.lastCommitDate,
               }}
             />
+
+            {/* Repository Deep Dive - Full Width */}
+            {repoStats && repoStats.length > 0 && (
+              <RepoDeepDive repoStats={repoStats} />
+            )}
+
+            {/* Code Quality & Impact Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Code Impact Card */}
+              <CodeImpactCard metrics={codeImpactMetrics} />
+              
+              {/* Reserved space for future Code Quality expansion */}
+              <div className="bg-slate-900/50 border border-slate-700/30 rounded-xl p-6 backdrop-blur-sm flex items-center justify-center">
+                <div className="text-center text-slate-500">
+                  <BarChart3 className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                  <p className="text-sm">More quality metrics coming soon</p>
+                </div>
+              </div>
+            </div>
 
             {/* Charts Section */}
             <InsightsChartsSection
@@ -194,7 +235,11 @@ export default async function InsightsPage() {
 // AI Stats Banner Component
 // ===========================================
 
-async function AIStatsBanner({ analytics, userId }: { analytics: any; userId: string }) {
+async function AIStatsBanner({ analytics, userId, persona }: { 
+  analytics: any; 
+  userId: string;
+  persona: ReturnType<typeof detectPersona> | null;
+}) {
   // Get count of AI insights generated
   const insightCount = await prisma.insightCache.count({
     where: { userId }
@@ -252,24 +297,60 @@ async function AIStatsBanner({ analytics, userId }: { analytics: any; userId: st
   ];
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-      {stats.map((stat, index) => (
-        <div
-          key={index}
-          className={`bg-linear-to-br ${stat.gradient} border ${stat.borderColor} rounded-xl p-4 backdrop-blur-sm hover:scale-105 transition-all duration-300 group`}
-        >
-          <div className="flex items-center gap-2 mb-2">
-            {stat.icon}
-            <span className="text-xs text-slate-400">{stat.label}</span>
+    <div className="space-y-4">
+      {/* Developer Persona Badge */}
+      {persona && (
+        <div className="flex items-center justify-between bg-linear-to-r from-slate-800/50 to-slate-900/50 border border-slate-700/30 rounded-xl p-4 backdrop-blur-sm">
+          <div className="flex items-center gap-3">
+            <div className="text-2xl">{persona.primary.emoji}</div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className={`font-semibold ${persona.primary.color}`}>
+                  {persona.primary.name}
+                </span>
+                <span className={`text-xs px-2 py-0.5 rounded-full capitalize ${
+                  persona.primary.rarity === 'legendary' ? 'bg-amber-500/20 text-amber-400' :
+                  persona.primary.rarity === 'rare' ? 'bg-purple-500/20 text-purple-400' :
+                  persona.primary.rarity === 'uncommon' ? 'bg-cyan-500/20 text-cyan-400' :
+                  'bg-slate-700 text-slate-400'
+                }`}>
+                  {persona.primary.rarity}
+                </span>
+              </div>
+              <p className="text-xs text-slate-500 mt-0.5">
+                {persona.primary.description}
+              </p>
+            </div>
           </div>
-          <div className="text-2xl font-bold text-slate-200 group-hover:scale-110 transition-transform">
-            {stat.value}
+          <div className="text-right">
+            <div className="text-lg font-bold text-slate-200 tabular-nums">
+              {persona.confidence}%
+            </div>
+            <div className="text-xs text-slate-500">match</div>
           </div>
-          {stat.sublabel && (
-            <div className="text-xs text-slate-500 mt-1">{stat.sublabel}</div>
-          )}
         </div>
-      ))}
+      )}
+      
+      {/* Stats Grid */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {stats.map((stat, index) => (
+          <div
+            key={index}
+            className={`bg-linear-to-br ${stat.gradient} border ${stat.borderColor} rounded-xl p-4 backdrop-blur-sm hover:scale-105 transition-all duration-300 group`}
+          >
+            <div className="flex items-center gap-2 mb-2">
+              {stat.icon}
+              <span className="text-xs text-slate-400">{stat.label}</span>
+            </div>
+            <div className="text-2xl font-bold text-slate-200 group-hover:scale-110 transition-transform">
+              {stat.value}
+            </div>
+            {stat.sublabel && (
+              <div className="text-xs text-slate-500 mt-1">{stat.sublabel}</div>
+            )}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

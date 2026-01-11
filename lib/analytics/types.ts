@@ -97,6 +97,7 @@ export interface CommitForAnalysis {
 // ===========================================
 
 import type { CommitQualityMetrics } from './commit-quality-analyzer';
+import type { CodeImpactMetrics } from './code-impact-analyzer';
 
 export interface AnalyticsResult {
   // Summary Statistics
@@ -128,6 +129,9 @@ export interface AnalyticsResult {
   
   // Commit Quality Analysis
   commitQualityMetrics?: CommitQualityMetrics;
+  
+  // Code Impact Analysis (churn, productive code ratio)
+  codeImpactMetrics?: CodeImpactMetrics;
   
   // Metadata
   calculatedAt: Date;

@@ -97,6 +97,7 @@ export interface LanguageBreakdown {
 export interface FetchOptions {
   includeForks?: boolean;
   includeArchived?: boolean;
+  includeOrgRepos?: boolean; // Include organization repos user has access to
   maxCommitsPerRepo?: number; // Optional limit for testing, null = no limit
   onProgress?: (progress: AdvancedSyncProgress) => void;
 }
@@ -174,20 +175,34 @@ export class AdvancedGitHubSyncService {
   /**
    * Fetch ALL repositories with comprehensive metadata
    * Handles pagination automatically
+   * 
+   * NOTE: Requires 'repo' OAuth scope for private repository access
    */
   async fetchAllRepositories(options?: FetchOptions): Promise<EnhancedRepository[]> {
     const repos: EnhancedRepository[] = [];
     const includeArchived = options?.includeArchived ?? false;
     const includeForks = options?.includeForks ?? false;
+    const includeOrgRepos = options?.includeOrgRepos ?? true;
+
+    // Build affiliation string based on options
+    // 'owner' = repos you own
+    // 'collaborator' = repos you're a collaborator on
+    // 'organization_member' = org repos you have access to
+    const affiliations = ['owner'];
+    if (includeOrgRepos) {
+      affiliations.push('collaborator', 'organization_member');
+    }
+    const affiliation = affiliations.join(',');
 
     try {
-      console.log('🔄 Starting repository fetch...');
+      console.log(`🔄 Starting repository fetch with affiliation: ${affiliation}...`);
       
       // Use paginate iterator for automatic pagination
       for await (const response of this.octokit.paginate.iterator(
         'GET /user/repos',
         {
-          affiliation: 'owner',
+          affiliation: affiliation,
+          visibility: 'all', // Include both public and private
           sort: 'updated',
           per_page: 100,
         }
@@ -226,7 +241,7 @@ export class AdvancedGitHubSyncService {
         });
       }
 
-      console.log(`✅ Fetched ${repos.length} repositories`);
+      console.log(`✅ Fetched ${repos.length} repositories (${repos.filter(r => r.isPrivate).length} private)`);
       return repos;
     } catch (error) {
       this.metrics.errorsEncountered++;

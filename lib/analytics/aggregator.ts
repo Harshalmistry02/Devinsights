@@ -9,6 +9,7 @@ import prisma from '@/lib/prisma';
 import { calculateStreaks } from './streak-calculator';
 import { aggregateLanguageStats, getTopLanguages, getLanguageColor } from './language-analyzer';
 import { analyzeCommitQuality, type CommitQualityMetrics } from './commit-quality-analyzer';
+import { analyzeCodeImpact, type CodeImpactMetrics } from './code-impact-analyzer';
 import type { Prisma } from '@prisma/client';
 import {
   AnalyticsResult,
@@ -161,6 +162,20 @@ export class AnalyticsAggregator {
     );
     
     // ============================================
+    // Analyze Code Impact (Churn, Productivity)
+    // ============================================
+    const codeImpactMetrics = analyzeCodeImpact(
+      commits.map(c => ({
+        sha: c.sha,
+        additions: c.additions,
+        deletions: c.deletions,
+        filesChanged: c.filesChanged,
+        authorDate: c.authorDate,
+        repositoryId: c.repositoryId,
+      }))
+    );
+    
+    // ============================================
     // Determine Date Range
     // ============================================
     const dataRangeStart = commits.length > 0 ? commits[0].authorDate : null;
@@ -196,6 +211,9 @@ export class AnalyticsAggregator {
       
       // Commit Quality
       commitQualityMetrics,
+      
+      // Code Impact
+      codeImpactMetrics,
       
       // Metadata
       calculatedAt: new Date(),

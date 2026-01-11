@@ -50,6 +50,11 @@ export interface SyncOptions {
   includeArchived?: boolean;
 
   /**
+   * Include organization repositories the user has access to
+   */
+  includeOrgRepos?: boolean;
+
+  /**
    * Maximum commits to fetch per repository (for testing/throttling)
    * Set to null for unlimited
    */
@@ -115,6 +120,7 @@ export class AdvancedSyncOrchestrator {
       fullSync = false,
       includeForks = false,
       includeArchived = false,
+      includeOrgRepos = true, // Include org repos by default
       maxCommitsPerRepo,
       fetchCommitStats = true,
       onProgress,
@@ -150,6 +156,7 @@ export class AdvancedSyncOrchestrator {
       const repositories = await this.syncService.fetchAllRepositories({
         includeForks,
         includeArchived,
+        includeOrgRepos,
       });
 
       await this.updateSyncJob({ totalRepos: repositories.length });

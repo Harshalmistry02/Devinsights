@@ -35,18 +35,47 @@ export class GitHubClient {
 
   /**
    * Fetch all repositories for authenticated user
+   * 
+   * @param options.includePrivate - Include private repositories (requires 'repo' OAuth scope)
+   * @param options.includeForks - Include forked repositories
+   * @param options.includeArchived - Include archived repositories
+   * @param options.includeOrgRepos - Include organization repos user has access to
    */
-  async fetchRepositories(options = { includePrivate: true, includeForks: false }) {
+  async fetchRepositories(options: {
+    includePrivate?: boolean;
+    includeForks?: boolean;
+    includeArchived?: boolean;
+    includeOrgRepos?: boolean;
+  } = {}) {
+    const {
+      includePrivate = true,
+      includeForks = false,
+      includeArchived = false,
+      includeOrgRepos = true,
+    } = options;
+
     await this.checkRateLimit();
 
     const repos = [];
     let page = 1;
     const perPage = 100;
 
+    // Build affiliation string based on options
+    // 'owner' = repos you own
+    // 'collaborator' = repos you're a collaborator on
+    // 'organization_member' = org repos you have access to
+    const affiliations = ['owner'];
+    if (includeOrgRepos) {
+      affiliations.push('collaborator', 'organization_member');
+    }
+    const affiliation = affiliations.join(',');
+
+    console.log(`📦 Fetching repositories with affiliation: ${affiliation}`);
+
     while (true) {
       const { data } = await this.octokit.repos.listForAuthenticatedUser({
-        visibility: options.includePrivate ? 'all' : 'public',
-        affiliation: 'owner',
+        visibility: includePrivate ? 'all' : 'public',
+        affiliation: affiliation as 'owner' | 'collaborator' | 'organization_member',
         sort: 'updated',
         per_page: perPage,
         page,
@@ -56,16 +85,20 @@ export class GitHubClient {
 
       // Filter based on options
       const filtered = data.filter(repo => {
-        if (repo.archived) return false; // Skip archived
-        if (!options.includeForks && repo.fork) return false;
+        if (!includeArchived && repo.archived) return false;
+        if (!includeForks && repo.fork) return false;
         return true;
       });
 
       repos.push(...filtered);
       
+      console.log(`   📄 Page ${page}: Found ${data.length} repos (${repos.length} total after filtering)`);
+      
       if (data.length < perPage) break; // Last page
       page++;
     }
+
+    console.log(`✅ Total repositories fetched: ${repos.length}`);
 
     return repos.map(repo => ({
       githubId: repo.id,
