@@ -48,6 +48,25 @@ export interface AnalyticsSummary {
   // Repository insights
   activeRepos?: number;
   totalRepos?: number;
+  
+  // Commit message content for AI "vibe/style" analysis
+  recentMessages?: string[];
+  
+  // Commit quality analysis
+  commitQualityMetrics?: {
+    qualityGrade: 'A' | 'B' | 'C' | 'D' | 'F';
+    conventionalCommitScore: number;
+    hasTicketReferences: number;
+    hasBodyText: number;
+    insights: string[];
+  };
+  
+  // Data quality indicators
+  dataQuality?: {
+    outlierCount: number;       // Number of flagged outlier commits
+    unknownExtensionPercent: number; // % of files with unknown extensions
+    hasSufficientData: boolean; // Has enough data for meaningful insights
+  };
 }
 
 // Output: What AI returns (validated with Zod)
@@ -63,7 +82,7 @@ export type InsightResponse = z.infer<typeof InsightSchema>;
 export class AIServiceError extends Error {
   constructor(
     message: string,
-    public code: 'RATE_LIMIT' | 'TIMEOUT' | 'INVALID_RESPONSE' | 'API_ERROR'
+    public code: 'RATE_LIMIT' | 'TIMEOUT' | 'INVALID_RESPONSE' | 'API_ERROR' | 'QUOTA_EXCEEDED'
   ) {
     super(message);
     this.name = 'AIServiceError';

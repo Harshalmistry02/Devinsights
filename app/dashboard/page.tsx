@@ -21,6 +21,8 @@ import { StatsGrid } from "./components/StatsGrid";
 import { InsightsRow } from "./components/InsightsRow";
 import { ActivityOverview } from "./components/ActivityOverview";
 import { QuickActionsPanel } from "@/components/dashboard/QuickActionsPanel";
+import { WeeklySummary } from "./components/WeeklySummary";
+import { CommitQualityCard } from "./components/CommitQualityCard";
 
 
 /**
@@ -192,11 +194,39 @@ export default async function DashboardPage() {
               <NoDataEmptyState />
             )}
 
-            {/* Step 2: Stats Grid */}
+            {/* Weekly Summary Widget - At-a-glance view */}
+            {hasSyncedData && (
+              <WeeklySummary 
+                analytics={{
+                  dailyCommits: analytics?.dailyCommits as Record<string, number> | undefined,
+                  hourlyStats: analytics?.hourlyStats as Record<string, number> | undefined,
+                  currentStreak: analytics?.currentStreak,
+                  isActiveToday: analytics?.isActiveToday,
+                  repoStats: (analytics?.repoStats as { name: string; commits: number }[]) || [],
+                }}
+              />
+            )}
+
+            {/* Stats Grid with Comparative Analytics */}
             <StatsGrid analytics={analytics} />
 
-            {/* Step 3: Insights Row */}
+            {/* Insights Row */}
             {hasSyncedData && <InsightsRow analytics={analytics} />}
+
+            {/* Commit Quality Analysis Card */}
+            {hasSyncedData && (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+                <CommitQualityCard 
+                  metrics={
+                    (analytics as Record<string, unknown> | null)?.commitQualityMetrics as 
+                    Parameters<typeof CommitQualityCard>[0]['metrics'] | null
+                  }
+                  className="lg:col-span-1"
+                />
+                {/* Space for future widget or balance the layout */}
+                <div className="hidden lg:block" />
+              </div>
+            )}
 
             {/* Activity Overview */}
             <ActivityOverview analytics={analytics} hasSyncedData={hasSyncedData} />

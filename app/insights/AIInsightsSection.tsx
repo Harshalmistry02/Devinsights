@@ -16,6 +16,9 @@ import {
   Clock,
   CheckCircle2,
 } from 'lucide-react';
+import { AIAnalysisProgress } from '@/components/AIAnalysisProgress';
+import { QuotaDisplay } from '@/components/QuotaDisplay';
+import { useQuota } from '@/lib/hooks/useQuota';
 
 // Types for the insights API response
 interface InsightResponse {
@@ -52,6 +55,10 @@ export function AIInsightsSection({ analytics }: AIInsightsSectionProps) {
   const [meta, setMeta] = useState<InsightMeta | null>(null);
   const [isCached, setIsCached] = useState(false);
   const [generatedAt, setGeneratedAt] = useState<Date | null>(null);
+  const [analysisStep, setAnalysisStep] = useState(0);
+  
+  // Fetch quota status
+  const { quota, refresh: refreshQuota } = useQuota();
 
   // Fetch existing insights on mount
   useEffect(() => {
@@ -78,6 +85,12 @@ export function AIInsightsSection({ analytics }: AIInsightsSectionProps) {
   const generateInsights = useCallback(async () => {
     setLoading(true);
     setError(null);
+    setAnalysisStep(0);
+    
+    // Simulate step progression for better UX
+    const stepInterval = setInterval(() => {
+      setAnalysisStep(prev => Math.min(prev + 1, 3));
+    }, 1500);
     
     try {
       const response = await fetch('/api/insights/generate', { method: 'POST' });
@@ -97,13 +110,18 @@ export function AIInsightsSection({ analytics }: AIInsightsSectionProps) {
         setIsCached(data.cached);
         setGeneratedAt(data.generatedAt ? new Date(data.generatedAt) : new Date());
       }
+      
+      // Refresh quota after generation
+      refreshQuota();
     } catch (err) {
       console.error('Failed to generate insights:', err);
       setError(err instanceof Error ? err.message : 'Failed to generate insights');
     } finally {
-      setLoading(false);
+      clearInterval(stepInterval);
+      setAnalysisStep(4); // Complete
+      setTimeout(() => setLoading(false), 500);
     }
-  }, []);
+  }, [refreshQuota]);
 
   return (
     <div className="space-y-6">
@@ -158,6 +176,11 @@ export function AIInsightsSection({ analytics }: AIInsightsSectionProps) {
         </div>
       </div>
 
+      {/* AI Analysis Progress - shown during generation */}
+      {loading && (
+        <AIAnalysisProgress isAnalyzing={loading} currentStep={analysisStep} />
+      )}
+
       {/* Error State */}
       {error && (
         <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 flex items-start gap-3">
@@ -167,6 +190,15 @@ export function AIInsightsSection({ analytics }: AIInsightsSectionProps) {
             <p className="text-red-400/70 text-sm">{error}</p>
           </div>
         </div>
+      )}
+
+      {/* Quota Display */}
+      {quota && (
+        <QuotaDisplay 
+          tokensUsed={quota.tokensUsed} 
+          requestsCount={quota.requestsToday}
+          resetAt={new Date(quota.resetAt)}
+        />
       )}
 
       {/* Data Quality Indicators */}

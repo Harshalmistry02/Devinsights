@@ -67,12 +67,18 @@ export function buildUserPrompt(data: AnalyticsSummary): string {
     patterns.push('active today');
   }
 
+  // Build commit messages section for vibe/style analysis
+  let messagesSection = '';
+  if (data.recentMessages && data.recentMessages.length > 0) {
+    messagesSection = `\nRecent commits: "${data.recentMessages.slice(0, 5).join('", "')}"`;
+  }
+
   return `Dev stats (${data.period}):
 Commits: ${data.totalCommits}${trend ? ` (${trend} vs prev)` : ''} | Streak: ${data.currentStreak}d (best: ${data.longestStreak}d)
 Langs: ${langs || 'N/A'}
 Avg size: ${data.avgCommitSize} lines | Peak day: ${data.mostActiveDay || 'N/A'}
-${scores.length > 0 ? scores.join(' | ') + '\n' : ''}${patterns.length > 0 ? 'Pattern: ' + patterns.join(', ') + '\n' : ''}${data.daysToMilestone ? `Next milestone: ${data.daysToMilestone.milestone}d streak in ${data.daysToMilestone.daysRemaining}d\n` : ''}
-Analyze patterns, identify strengths, suggest improvements.`;
+${scores.length > 0 ? scores.join(' | ') + '\n' : ''}${patterns.length > 0 ? 'Pattern: ' + patterns.join(', ') + '\n' : ''}${data.daysToMilestone ? `Next milestone: ${data.daysToMilestone.milestone}d streak in ${data.daysToMilestone.daysRemaining}d\n` : ''}${messagesSection}
+Analyze patterns, identify strengths, suggest improvements. Consider commit message quality if provided.`;
 }
 
 /**

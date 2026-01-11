@@ -17,6 +17,8 @@ import {
 } from "lucide-react";
 import { AIInsightsSection } from "./AIInsightsSection";
 import { InsightsChartsSection } from "./InsightsChartsSection";
+import { DataQualityIndicator } from "@/components/DataQualityIndicator";
+import { InsightsFiltersWrapper } from "./InsightsFiltersWrapper";
 
 // Type definitions for JSON fields
 type DailyCommits = Record<string, number>;
@@ -54,6 +56,20 @@ export default async function InsightsPage() {
   const isDataStale = lastSyncDate 
     ? (Date.now() - new Date(lastSyncDate).getTime()) > (24 * 60 * 60 * 1000) // More than 24 hours old
     : false;
+
+  // Get outlier counts for DataQualityIndicator
+  const outlierCount = await prisma.commit.count({
+    where: {
+      repository: { userId: user.id },
+      metadata: {
+        path: ['isOutlier'],
+        equals: true,
+      },
+    },
+  }).catch(() => 0); // Handle case where metadata field doesn't exist yet
+
+  // Get available languages for filters
+  const availableLanguages = topLanguages?.map(l => l.language) ?? [];
 
   return (
     <div className="min-h-screen bg-linear-to-br from-slate-950 via-slate-900 to-slate-950 pt-20 sm:pt-24">
@@ -107,6 +123,18 @@ export default async function InsightsPage() {
           <div className="space-y-8">
             {/* AI Stats Banner */}
             <AIStatsBanner analytics={analytics} userId={user.id} />
+
+            {/* Data Quality Indicator - shows if there are outliers */}
+            {outlierCount > 0 && (
+              <DataQualityIndicator
+                outlierCount={outlierCount}
+                unknownExtensionPercent={0}
+                totalCommits={analytics.totalCommits}
+              />
+            )}
+
+            {/* Insights Filters */}
+            <InsightsFiltersWrapper availableLanguages={availableLanguages} />
 
             {/* AI-Powered Insights Section */}
             <AIInsightsSection 

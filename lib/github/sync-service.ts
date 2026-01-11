@@ -2,6 +2,7 @@ import prisma from '@/lib/prisma';
 import { GitHubClient } from './client';
 import { SyncStatus } from '@prisma/client';
 import { refreshUserAnalytics } from '@/lib/analytics';
+import { analyzeCommitFiles } from '@/lib/utils/language-detector';
 
 export class GitHubSyncService {
   private client: GitHubClient;
@@ -71,6 +72,22 @@ export class GitHubSyncService {
             }
 
             try {
+              // Analyze commit files for language detection and outlier flagging
+              const fileAnalysis = analyzeCommitFiles(
+                commit.files || [],
+                commit.additions ?? 0,
+                commit.deletions ?? 0
+              );
+
+              // Build metadata object
+              const metadata = {
+                fileExtensions: fileAnalysis.fileExtensions,
+                languages: fileAnalysis.languages,
+                isOutlier: fileAnalysis.isOutlier,
+                outlierReason: fileAnalysis.outlierReason,
+                unknownExtensions: fileAnalysis.unknownExtensions,
+              };
+
               await prisma.commit.create({
                 data: {
                   repositoryId: storedRepo.id,
@@ -82,6 +99,7 @@ export class GitHubSyncService {
                   additions: commit.additions ?? 0,
                   deletions: commit.deletions ?? 0,
                   filesChanged: commit.filesChanged ?? 0,
+                  metadata, // Store file analysis metadata
                 },
               });
             } catch (error: any) {

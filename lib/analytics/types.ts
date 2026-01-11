@@ -96,6 +96,8 @@ export interface CommitForAnalysis {
 // Main Analytics Result
 // ===========================================
 
+import type { CommitQualityMetrics } from './commit-quality-analyzer';
+
 export interface AnalyticsResult {
   // Summary Statistics
   totalRepos: number;
@@ -123,6 +125,9 @@ export interface AnalyticsResult {
   averageCommitsPerDay: number;
   mostProductiveDay: string;
   mostProductiveHour: number;
+  
+  // Commit Quality Analysis
+  commitQualityMetrics?: CommitQualityMetrics;
   
   // Metadata
   calculatedAt: Date;

@@ -130,6 +130,10 @@ model Commit {
   filesChanged Int      @default(0)
   createdAt    DateTime @default(now())
 
+  // Metadata for enhanced analytics
+  // Stores: { fileExtensions: { "ts": 12, "json": 2 }, isOutlier: false, outlierReason?: string }
+  metadata Json?
+
   // Relations
   repository Repository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
 
@@ -184,12 +188,13 @@ model AnalyticsSnapshot {
   isActiveToday  Boolean   @default(false)
 
   // JSON Statistics (flexible structure)
-  languageStats  Json? // { "TypeScript": 45, "Python": 30 }
-  dailyCommits   Json? // { "2024-01-15": 5, "2024-01-16": 3 }
-  dayOfWeekStats Json? // { "Monday": 10, "Tuesday": 15 }
-  hourlyStats    Json? // { "9": 5, "14": 10, "22": 3 }
-  repoStats      Json? // [{ id, name, commits, stars }]
-  topLanguages   Json? // [{ language, count, percentage }]
+  languageStats        Json? // { "TypeScript": 45, "Python": 30 }
+  dailyCommits         Json? // { "2024-01-15": 5, "2024-01-16": 3 }
+  dayOfWeekStats       Json? // { "Monday": 10, "Tuesday": 15 }
+  hourlyStats          Json? // { "9": 5, "14": 10, "22": 3 }
+  repoStats            Json? // [{ id, name, commits, stars }]
+  topLanguages         Json? // [{ language, count, percentage }]
+  commitQualityMetrics Json? // { qualityGrade, conventionalCommitScore, insights, ... }
 
   // Computed Insights
   averageCommitsPerDay Float   @default(0)

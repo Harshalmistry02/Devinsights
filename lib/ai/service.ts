@@ -137,6 +137,51 @@ export async function generateInsights(
   }
 }
 
+// Import quota manager for the quota-aware function
+import { quotaManager } from './quota-manager';
+
+/**
+ * Generates AI insights with quota enforcement
+ * 
+ * Enhanced version that:
+ * 1. Checks quota before making API calls
+ * 2. Records token usage after successful calls
+ * 3. Throws QuotaExceededError if limits are reached
+ * 
+ * @param userId - The user ID for quota tracking
+ * @param data - Analytics summary data
+ * @param customPrompt - Optional custom user prompt
+ */
+export async function generateInsightsWithQuota(
+  userId: string,
+  data: AnalyticsSummary,
+  customPrompt?: string
+): Promise<{ insights: InsightResponse; tokensUsed: number }> {
+  // Step 1: Check quota before making API call
+  const quotaStatus = await quotaManager.checkQuota(userId);
+  
+  if (!quotaStatus.isWithinQuota) {
+    const resetTime = quotaStatus.resetAt.toLocaleTimeString();
+    throw new AIServiceError(
+      `Daily AI quota exceeded. Resets at ${resetTime}. Used: ${quotaStatus.tokensUsed} tokens today.`,
+      'QUOTA_EXCEEDED'
+    );
+  }
+  
+  console.log(`📊 Quota check passed: ${quotaStatus.remainingTokens} tokens remaining`);
+  
+  // Step 2: Generate insights
+  const insights = await generateInsights(data, customPrompt);
+  
+  // Step 3: Estimate and record token usage
+  const tokensUsed = estimateTokenUsage(data, insights);
+  await quotaManager.recordUsage(userId, tokensUsed);
+  
+  console.log(`✅ Recorded ${tokensUsed} tokens for user ${userId}`);
+  
+  return { insights, tokensUsed };
+}
+
 /**
  * Creates a hash of analytics data for cache key
  * Same data = same hash = cache hit

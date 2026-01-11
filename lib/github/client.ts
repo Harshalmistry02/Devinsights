@@ -117,6 +117,14 @@ export class GitHubClient {
                 ref: commit.sha,
               });
 
+              // Extract file information for language detection and outlier analysis
+              const files = detail.files?.map(file => ({
+                filename: file.filename,
+                additions: file.additions || 0,
+                deletions: file.deletions || 0,
+                status: file.status,
+              })) || [];
+
               return {
                 sha: commit.sha,
                 message: commit.commit.message,
@@ -126,6 +134,7 @@ export class GitHubClient {
                 additions: detail.stats?.additions || 0,
                 deletions: detail.stats?.deletions || 0,
                 filesChanged: detail.files?.length || 0,
+                files, // Include file info for language detection
               };
             } catch (error) {
               console.error(`Failed to fetch commit ${commit.sha}:`, error);

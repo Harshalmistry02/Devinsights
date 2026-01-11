@@ -34,6 +34,76 @@ export {
   LANGUAGE_COLORS,
 } from './language-analyzer';
 
+// Insights data building
+export {
+  buildAnalyticsSummary,
+  calculateConsistencyScore,
+  calculateWeekdayWeekendRatio,
+  determineHourlyPattern,
+  calculateCommitSizeDistribution,
+} from './insights-data-builder';
+
+// Insights data fetching  
+export {
+  fetchRecentCommitMessages,
+  calculateDataQuality,
+  aggregateFileLanguageStats,
+} from './insights-data-fetcher';
+
+// Comparative period analytics
+export {
+  calculateComparativePeriod,
+  calculateWeekOverWeek,
+  calculateQuarterOverQuarter,
+  formatChangePercent,
+  formatChange,
+  getTrendIndicator,
+  getPeriodLabel,
+} from './comparison-calculator';
+
+export type {
+  PeriodMetrics,
+  ComparativePeriodData,
+} from './comparison-calculator';
+
+// Commit quality analysis
+export {
+  analyzeCommitQuality,
+  analyzeRecentCommitQuality,
+  compareQualityPeriods,
+  getGradeColor,
+  getGradeBgColor,
+  getGradeDescription,
+} from './commit-quality-analyzer';
+
+export type {
+  CommitQualityMetrics,
+  CommitPrefix,
+  CommitGrade,
+  QualityTrend,
+  CommitForQualityAnalysis,
+} from './commit-quality-analyzer';
+
+// Weekly summary analytics
+export {
+  getWeekNumber,
+  getWeekData,
+  compareWeeks,
+  getMostActiveHour,
+  getStreakMilestoneInfo,
+  buildWeeklySummary,
+  getWeekLabel,
+  formatWeekChange,
+} from './weekly-summary';
+
+export type {
+  WeekData,
+  WeekComparison,
+  WeeklySummaryData,
+  WeeklyHighlights,
+  StreakInfo,
+} from './weekly-summary';
+
 // Types
 export type {
   AnalyticsResult,
@@ -50,3 +120,4 @@ export type {
   ActivityData,
   LanguageChartData,
 } from './types';
+

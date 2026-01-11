@@ -8,6 +8,7 @@
 import prisma from '@/lib/prisma';
 import { calculateStreaks } from './streak-calculator';
 import { aggregateLanguageStats, getTopLanguages, getLanguageColor } from './language-analyzer';
+import { analyzeCommitQuality, type CommitQualityMetrics } from './commit-quality-analyzer';
 import type { Prisma } from '@prisma/client';
 import {
   AnalyticsResult,
@@ -58,7 +59,7 @@ export class AnalyticsAggregator {
       }
     });
     
-    // Fetch all commits for user's repositories
+    // Fetch all commits for user's repositories (including metadata for outlier filtering)
     const commits = await prisma.commit.findMany({
       where: {
         repository: { userId: this.userId }
@@ -66,11 +67,13 @@ export class AnalyticsAggregator {
       select: {
         id: true,
         sha: true,
+        message: true, // Include message for quality analysis
         authorDate: true,
         additions: true,
         deletions: true,
         filesChanged: true,
         repositoryId: true,
+        metadata: true, // Include metadata for outlier detection
         repository: {
           select: {
             id: true,
@@ -85,6 +88,13 @@ export class AnalyticsAggregator {
       orderBy: { authorDate: 'asc' }
     });
     
+    // Filter out outlier commits for size-based calculations
+    const nonOutlierCommits = commits.filter(c => {
+      if (!c.metadata || typeof c.metadata !== 'object') return true;
+      const meta = c.metadata as { isOutlier?: boolean };
+      return !meta.isOutlier;
+    });
+    
     // ============================================
     // Calculate Summary Statistics
     // ============================================
@@ -94,6 +104,16 @@ export class AnalyticsAggregator {
     const totalDeletions = commits.reduce((sum, c) => sum + c.deletions, 0);
     const totalStars = repositories.reduce((sum, r) => sum + r.stars, 0);
     const totalForks = repositories.reduce((sum, r) => sum + r.forks, 0);
+    
+    // Calculate average commit size (excluding outliers for accuracy)
+    const nonOutlierAdditions = nonOutlierCommits.reduce((sum, c) => sum + c.additions, 0);
+    const nonOutlierDeletions = nonOutlierCommits.reduce((sum, c) => sum + c.deletions, 0);
+    const avgCommitSize = nonOutlierCommits.length > 0
+      ? Math.round((nonOutlierAdditions + nonOutlierDeletions) / nonOutlierCommits.length)
+      : 0;
+    
+    // Count outliers for data quality reporting
+    const outlierCount = commits.length - nonOutlierCommits.length;
     
     // ============================================
     // Calculate Streaks
@@ -131,6 +151,16 @@ export class AnalyticsAggregator {
     const repoStats = this.buildRepoStats(repositories, commits);
     
     // ============================================
+    // Analyze Commit Quality
+    // ============================================
+    const commitQualityMetrics = analyzeCommitQuality(
+      commits.map(c => ({
+        message: c.message,
+        authorDate: c.authorDate,
+      }))
+    );
+    
+    // ============================================
     // Determine Date Range
     // ============================================
     const dataRangeStart = commits.length > 0 ? commits[0].authorDate : null;
@@ -163,6 +193,9 @@ export class AnalyticsAggregator {
       averageCommitsPerDay,
       mostProductiveDay,
       mostProductiveHour,
+      
+      // Commit Quality
+      commitQualityMetrics,
       
       // Metadata
       calculatedAt: new Date(),
@@ -208,6 +241,9 @@ export class AnalyticsAggregator {
         mostProductiveDay: result.mostProductiveDay,
         mostProductiveHour: result.mostProductiveHour,
         
+        // Commit Quality Analysis
+        commitQualityMetrics: result.commitQualityMetrics as unknown as Prisma.InputJsonValue,
+        
         // Metadata
         calculatedAt: result.calculatedAt,
         dataRangeStart: result.dataRangeStart,
@@ -242,6 +278,9 @@ export class AnalyticsAggregator {
         averageCommitsPerDay: result.averageCommitsPerDay,
         mostProductiveDay: result.mostProductiveDay,
         mostProductiveHour: result.mostProductiveHour,
+        
+        // Commit Quality Analysis
+        commitQualityMetrics: result.commitQualityMetrics as unknown as Prisma.InputJsonValue,
         
         // Metadata
         calculatedAt: result.calculatedAt,
@@ -298,6 +337,7 @@ export class AnalyticsAggregator {
       averageCommitsPerDay: snapshot.averageCommitsPerDay || 0,
       mostProductiveDay: snapshot.mostProductiveDay || 'N/A',
       mostProductiveHour: snapshot.mostProductiveHour ?? 0,
+      commitQualityMetrics: (snapshot.commitQualityMetrics as CommitQualityMetrics) || undefined,
       calculatedAt: snapshot.calculatedAt,
       dataRangeStart: snapshot.dataRangeStart,
       dataRangeEnd: snapshot.dataRangeEnd,

@@ -130,10 +130,20 @@ export function calculateCommitSizeDistribution(
 
 /**
  * Build comprehensive AnalyticsSummary from AnalyticsSnapshot
+ * @param snapshot - The analytics snapshot from the database
+ * @param previousPeriodCommits - Optional commit count from previous period for comparison
+ * @param recentMessages - Optional array of recent non-merge commit messages for AI analysis
+ * @param dataQuality - Optional data quality metrics for UI indicators
  */
 export function buildAnalyticsSummary(
   snapshot: AnalyticsSnapshot,
-  previousPeriodCommits?: number
+  previousPeriodCommits?: number,
+  recentMessages?: string[],
+  dataQuality?: {
+    outlierCount: number;
+    unknownExtensionPercent: number;
+    hasSufficientData: boolean;
+  }
 ): AnalyticsSummary {
   // Parse JSON fields safely
   const topLanguages = (snapshot.topLanguages as TopLanguageItem[] | null) || [];
@@ -202,7 +212,51 @@ export function buildAnalyticsSummary(
     streakHealth,
     daysToMilestone,
 
-    // Repository insights
+  // Repository insights
     totalRepos: snapshot.totalRepos,
+    
+    // Commit message content for AI "vibe/style" analysis
+    recentMessages,
+    
+    // Commit quality metrics (if available)
+    // Note: Uses type assertion since field may not be in Prisma types until regenerated
+    commitQualityMetrics: parseCommitQualityMetrics((snapshot as Record<string, unknown>).commitQualityMetrics),
+    
+    // Data quality indicators
+    dataQuality,
   };
 }
+
+/**
+ * Parse commit quality metrics from JSON snapshot
+ */
+function parseCommitQualityMetrics(
+  raw: unknown
+): {
+  qualityGrade: 'A' | 'B' | 'C' | 'D' | 'F';
+  conventionalCommitScore: number;
+  hasTicketReferences: number;
+  hasBodyText: number;
+  insights: string[];
+} | undefined {
+  if (!raw || typeof raw !== 'object') return undefined;
+  
+  const data = raw as Record<string, unknown>;
+  
+  if (
+    typeof data.qualityGrade === 'string' &&
+    ['A', 'B', 'C', 'D', 'F'].includes(data.qualityGrade) &&
+    typeof data.conventionalCommitScore === 'number'
+  ) {
+    return {
+      qualityGrade: data.qualityGrade as 'A' | 'B' | 'C' | 'D' | 'F',
+      conventionalCommitScore: data.conventionalCommitScore,
+      hasTicketReferences: (data.hasTicketReferences as number) || 0,
+      hasBodyText: (data.hasBodyText as number) || 0,
+      insights: Array.isArray(data.insights) ? data.insights : [],
+    };
+  }
+  
+  return undefined;
+}
+
