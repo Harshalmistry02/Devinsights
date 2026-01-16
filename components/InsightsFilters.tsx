@@ -1,16 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { Calendar, Filter, ChevronDown, ChevronUp, X } from 'lucide-react';
+import { Filter, ChevronDown, ChevronUp, X } from 'lucide-react';
 
 export interface InsightFilters {
-  dateRange: 'week' | 'month' | '90days' | 'custom';
-  startDate?: Date;
-  endDate?: Date;
   repoType: 'all' | 'personal' | 'work' | 'archived';
   languages: string[];
   includeForked: boolean;
-  compareWithPrevious: boolean;
 }
 
 export function InsightsFilters({
@@ -21,11 +17,9 @@ export function InsightsFilters({
   availableLanguages: string[];
 }) {
   const [filters, setFilters] = useState<InsightFilters>({
-    dateRange: 'month',
     repoType: 'all',
     languages: [],
     includeForked: false,
-    compareWithPrevious: false,
   });
 
   const [showAdvanced, setShowAdvanced] = useState(false);
@@ -49,41 +43,6 @@ export function InsightsFilters({
 
   return (
     <div className="space-y-4 bg-slate-900/50 border border-slate-700/30 rounded-xl p-4 backdrop-blur-sm">
-      {/* Quick Date Range Selection */}
-      <div>
-        <label className="block text-xs font-medium text-slate-400 mb-2">Time Period</label>
-        <div className="flex flex-wrap gap-2">
-          {(['week', 'month', '90days'] as const).map((range) => (
-            <button
-              key={range}
-              onClick={() => handleFilterChange({ dateRange: range })}
-              className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
-                filters.dateRange === range
-                  ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30'
-                  : 'bg-slate-800/50 text-slate-400 hover:text-slate-300 border border-slate-700/20 hover:border-slate-600/30'
-              }`}
-            >
-              {range === 'week' && 'Last Week'}
-              {range === 'month' && 'Last Month'}
-              {range === '90days' && 'Last 3 Months'}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Comparison Toggle */}
-      <label className="flex items-center gap-2 cursor-pointer group">
-        <input
-          type="checkbox"
-          checked={filters.compareWithPrevious}
-          onChange={(e) => handleFilterChange({ compareWithPrevious: e.target.checked })}
-          className="w-4 h-4 rounded border-slate-600 bg-slate-800 text-cyan-500 focus:ring-cyan-500 focus:ring-offset-slate-900 cursor-pointer"
-        />
-        <span className="text-sm text-slate-300 group-hover:text-slate-200 transition-colors">
-          Compare with previous period
-        </span>
-      </label>
-
       {/* Advanced Filters Toggle */}
       <button
         onClick={() => setShowAdvanced(!showAdvanced)}

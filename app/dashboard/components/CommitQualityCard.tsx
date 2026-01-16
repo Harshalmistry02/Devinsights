@@ -1,6 +1,6 @@
 'use client';
 
-import { FileText, Check, AlertTriangle, TrendingUp, TrendingDown, Minus, Info } from "lucide-react";
+import { FileText, BadgeCheck, AlertCircle, Ban, TrendingUp, TrendingDown, Minus, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   CommitQualityMetrics,
@@ -135,15 +135,21 @@ export function CommitQualityCard({ metrics, className }: CommitQualityCardProps
         <div className="border-t border-slate-700/30 pt-4">
           <h4 className="text-sm font-medium text-slate-300 mb-3">Insights</h4>
           <div className="space-y-2">
-            {metrics.insights.map((insight, i) => (
-              <div 
-                key={i} 
-                className="flex items-start gap-2 text-sm text-slate-300 leading-relaxed"
-              >
-                <span className="shrink-0 mt-0.5">{insight.charAt(0)}</span>
-                <span>{insight.slice(2)}</span>
-              </div>
-            ))}
+            {metrics.insights.map((insight, i) => {
+              // Extract emoji properly (emojis are multi-byte)
+              const chars = [...insight];
+              const emoji = chars[0];
+              const text = chars.slice(1).join('').trim();
+              return (
+                <div 
+                  key={i} 
+                  className="flex items-start gap-2 text-sm text-slate-300 leading-relaxed"
+                >
+                  <span className="shrink-0 text-base">{emoji}</span>
+                  <span>{text}</span>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}
@@ -205,9 +211,9 @@ function MetricBar({ label, value, tooltip, color = 'cyan' }: MetricBarProps) {
   };
 
   const getStatusIcon = () => {
-    if (value >= 70) return <Check className="w-3.5 h-3.5 text-emerald-400" />;
-    if (value >= 40) return <AlertTriangle className="w-3.5 h-3.5 text-yellow-400" />;
-    return <AlertTriangle className="w-3.5 h-3.5 text-rose-400" />;
+    if (value >= 70) return <span className="text-base">✅</span>;
+    if (value >= 40) return <span className="text-base">⚠️</span>;
+    return <span className="text-base">❌</span>;
   };
 
   return (

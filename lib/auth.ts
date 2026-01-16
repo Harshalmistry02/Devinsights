@@ -11,13 +11,6 @@ export const authConfig: NextAuthConfig = {
     GitHub({
       clientId: process.env.GITHUB_CLIENT_ID!,
       clientSecret: process.env.GITHUB_CLIENT_SECRET!,
-      // OAuth scopes: 'repo' grants access to public AND private repositories
-      // Without this, only public repos are accessible (explaining limited repo count)
-      authorization: {
-        params: {
-          scope: 'read:user user:email repo',
-        },
-      },
       profile(profile) {
         return {
           id: profile.id.toString(),

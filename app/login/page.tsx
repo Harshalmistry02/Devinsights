@@ -86,7 +86,7 @@ function LoginForm() {
             }}
             className="flex justify-center mb-4"
           >
-            <div className="p-3 bg-gradient-to-br from-cyan-500/20 to-blue-500/20 rounded-full border border-cyan-500/30">
+            <div className="p-3 bg-linear-to-br from-cyan-500/20 to-blue-500/20 rounded-full border border-cyan-500/30">
               <Shield className="w-6 h-6 text-cyan-400" strokeWidth={2} />
             </div>
           </motion.div>
@@ -100,7 +100,7 @@ function LoginForm() {
               duration: 0.8,
               ease: "easeInOut",
             }}
-            className="text-2xl sm:text-3xl font-bold text-center bg-gradient-to-br from-slate-300 to-slate-500 bg-clip-text text-transparent mb-2"
+            className="text-2xl sm:text-3xl font-bold text-center bg-linear-to-br from-slate-300 to-slate-500 bg-clip-text text-transparent mb-2"
           >
             Sign in to DevInsight
           </motion.h1>
@@ -126,7 +126,7 @@ function LoginForm() {
               animate={{ opacity: 1, y: 0 }}
               className="mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg flex items-center gap-2"
             >
-              <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0" />
+              <AlertCircle className="w-4 h-4 text-red-400 shrink-0" />
               <span className="text-sm text-red-400">{errorMessage}</span>
             </motion.div>
           )}
@@ -144,7 +144,7 @@ function LoginForm() {
             className="w-full relative group"
           >
           {/* Button Glow Effect */}
-            <div className="absolute -inset-0.5 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-xl blur opacity-30 group-hover:opacity-50 transition duration-300"></div>
+            <div className="absolute -inset-0.5 bg-linear-to-r from-cyan-500 to-blue-500 rounded-xl blur opacity-30 group-hover:opacity-50 transition duration-300"></div>
             
             {/* Button Content */}
             <div className="relative flex items-center justify-center gap-2 px-5 py-3 bg-slate-950 border border-cyan-500/30 rounded-xl transition-all duration-300 group-hover:bg-slate-900 group-hover:border-cyan-500/50">

@@ -191,7 +191,7 @@ export function SyncButtonComplete() {
         aria-describedby="sync-status"
         className={`
           w-full flex items-center justify-center gap-3 px-5 py-3.5 rounded-xl
-          font-medium text-sm transition-all duration-300
+          font-medium text-sm transition-all duration-300 cursor-pointer
           focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2 focus:ring-offset-slate-900
           ${
             status.status === 'syncing'
@@ -220,7 +220,7 @@ export function SyncButtonComplete() {
         <button
           onClick={() => handleSync(true)}
           aria-label="Force full re-sync of all GitHub data"
-          className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg
+          className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg cursor-pointer
             text-xs text-slate-500 hover:text-slate-400 
             bg-slate-800/30 border border-slate-700/20 
             hover:bg-slate-800/50 hover:border-slate-600/30 

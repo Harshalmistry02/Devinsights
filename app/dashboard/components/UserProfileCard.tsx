@@ -102,7 +102,7 @@ export function UserProfileCard({ session, githubStatus, lastSync, analytics }: 
           <nav className="space-y-2" aria-label="Quick actions">
             <Link
               href="/profile"
-              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-cyan-500/10 border border-cyan-500/30 rounded-lg hover:bg-cyan-500/20 hover:border-cyan-500/50 transition-all duration-300 text-cyan-400 hover:text-cyan-300 text-sm font-medium group focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2 focus:ring-offset-slate-900"
+              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-cyan-500/10 border border-cyan-500/30 rounded-lg hover:bg-cyan-500/20 hover:border-cyan-500/50 transition-all duration-300 text-cyan-400 hover:text-cyan-300 text-sm font-medium group focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2 focus:ring-offset-slate-900 cursor-pointer"
               aria-label="View your full profile"
             >
               <User className="w-4 h-4 group-hover:scale-110 transition-transform" aria-hidden="true" />
@@ -110,7 +110,7 @@ export function UserProfileCard({ session, githubStatus, lastSync, analytics }: 
             </Link>
             <Link
               href="/settings"
-              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-slate-800/50 border border-slate-700/30 rounded-lg hover:bg-slate-800/80 hover:border-slate-600/50 transition-all duration-300 text-slate-300 hover:text-slate-200 text-sm font-medium group focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2 focus:ring-offset-slate-900"
+              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-slate-800/50 border border-slate-700/30 rounded-lg hover:bg-slate-800/80 hover:border-slate-600/50 transition-all duration-300 text-slate-300 hover:text-slate-200 text-sm font-medium group focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2 focus:ring-offset-slate-900 cursor-pointer"
               aria-label="Manage account settings"
             >
               <Settings className="w-4 h-4 group-hover:rotate-90 transition-transform duration-300" aria-hidden="true" />

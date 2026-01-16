@@ -1,5 +1,4 @@
 import { TrendingUp } from "lucide-react";
-import Link from "next/link";
 import { ActivityEmptyState } from "@/components/ui/empty-states";
 
 interface ActivityOverviewProps {
@@ -16,15 +15,6 @@ export function ActivityOverview({ analytics, hasSyncedData }: ActivityOverviewP
             <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-cyan-400" />
             Activity Overview
           </h3>
-          {hasSyncedData && (
-            <Link
-              href="/insights"
-              className="text-sm text-cyan-400 hover:text-cyan-300 transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2 focus:ring-offset-slate-900 rounded px-1"
-              aria-label="View detailed activity insights"
-            >
-              View Details →
-            </Link>
-          )}
         </div>
       </div>
       <div className="p-4 sm:p-6">

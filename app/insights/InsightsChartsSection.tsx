@@ -74,7 +74,7 @@ export function InsightsChartsSection({
   repoStats,
   topLanguages,
 }: InsightsChartsSectionProps) {
-  const [timePeriod, setTimePeriod] = useState<TimePeriod>('30d');
+  const [timePeriod] = useState<TimePeriod>('all');
 
   // Filter daily commits based on time period
   const filteredDailyCommits = filterByPeriod(dailyCommits, timePeriod);
@@ -106,8 +106,7 @@ export function InsightsChartsSection({
           </p>
         </div>
         
-        {/* Time Period Selector */}
-        <TimePeriodSelector value={timePeriod} onChange={setTimePeriod} />
+        {/* Time period selector removed per user request */}
       </div>
 
       {/* Commit Timeline - Full Width */}
@@ -186,38 +185,7 @@ export function InsightsChartsSection({
 // Helper Components
 // ===========================================
 
-function TimePeriodSelector({
-  value,
-  onChange,
-}: {
-  value: TimePeriod;
-  onChange: (value: TimePeriod) => void;
-}) {
-  const options: { value: TimePeriod; label: string }[] = [
-    { value: '7d', label: '7 Days' },
-    { value: '30d', label: '30 Days' },
-    { value: '90d', label: '90 Days' },
-    { value: 'all', label: 'All Time' },
-  ];
 
-  return (
-    <div className="flex items-center gap-2 bg-slate-800/50 border border-slate-700/30 rounded-lg p-1">
-      {options.map((option) => (
-        <button
-          key={option.value}
-          onClick={() => onChange(option.value)}
-          className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
-            value === option.value
-              ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30'
-              : 'text-slate-400 hover:text-slate-200 hover:bg-slate-700/50'
-          }`}
-        >
-          {option.label}
-        </button>
-      ))}
-    </div>
-  );
-}
 
 function ChartCard({
   title,

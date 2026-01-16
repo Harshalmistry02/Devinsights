@@ -195,6 +195,7 @@ model AnalyticsSnapshot {
   repoStats            Json? // [{ id, name, commits, stars }]
   topLanguages         Json? // [{ language, count, percentage }]
   commitQualityMetrics Json? // { qualityGrade, conventionalCommitScore, insights, ... }
+  codeImpactMetrics    Json? // { impactScore, churnRate, productiveRate, churnGauge, insights, ... }
 
   // Computed Insights
   averageCommitsPerDay Float   @default(0)

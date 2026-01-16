@@ -262,6 +262,9 @@ export class AnalyticsAggregator {
         // Commit Quality Analysis
         commitQualityMetrics: result.commitQualityMetrics as unknown as Prisma.InputJsonValue,
         
+        // Code Impact Analysis
+        codeImpactMetrics: result.codeImpactMetrics as unknown as Prisma.InputJsonValue,
+        
         // Metadata
         calculatedAt: result.calculatedAt,
         dataRangeStart: result.dataRangeStart,
@@ -299,6 +302,9 @@ export class AnalyticsAggregator {
         
         // Commit Quality Analysis
         commitQualityMetrics: result.commitQualityMetrics as unknown as Prisma.InputJsonValue,
+        
+        // Code Impact Analysis
+        codeImpactMetrics: result.codeImpactMetrics as unknown as Prisma.InputJsonValue,
         
         // Metadata
         calculatedAt: result.calculatedAt,
@@ -356,6 +362,7 @@ export class AnalyticsAggregator {
       mostProductiveDay: snapshot.mostProductiveDay || 'N/A',
       mostProductiveHour: snapshot.mostProductiveHour ?? 0,
       commitQualityMetrics: (snapshot.commitQualityMetrics as CommitQualityMetrics) || undefined,
+      codeImpactMetrics: (snapshot.codeImpactMetrics as CodeImpactMetrics) || undefined,
       calculatedAt: snapshot.calculatedAt,
       dataRangeStart: snapshot.dataRangeStart,
       dataRangeEnd: snapshot.dataRangeEnd,

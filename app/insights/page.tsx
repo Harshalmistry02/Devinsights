@@ -15,15 +15,17 @@ import {
   Trophy,
   Brain,
 } from "lucide-react";
-import { AIInsightsSection } from "./AIInsightsSection";
+import { AIInsightsHero } from "./AIInsightsHero";
 import { InsightsChartsSection } from "./InsightsChartsSection";
 import { DataQualityIndicator } from "@/components/DataQualityIndicator";
-import { InsightsFiltersWrapper } from "./InsightsFiltersWrapper";
+
 import { CodeImpactCard } from "./components/CodeImpactCard";
 import { RepoDeepDive } from "./components/RepoDeepDive";
 import { PersonaBadgeCompact } from "./components/PersonaBadge";
+
 import { detectPersona, type PersonaContext } from "@/lib/analytics/persona-detector";
 import type { CodeImpactMetrics } from "@/lib/analytics/code-impact-analyzer";
+import type { CommitQualityMetrics } from "@/lib/analytics/commit-quality-analyzer";
 
 // Type definitions for JSON fields
 type DailyCommits = Record<string, number>;
@@ -73,11 +75,11 @@ export default async function InsightsPage() {
     },
   }).catch(() => 0); // Handle case where metadata field doesn't exist yet
 
-  // Get available languages for filters
-  const availableLanguages = topLanguages?.map(l => l.language) ?? [];
+
 
   // Parse code impact metrics
   const codeImpactMetrics = (analytics as any)?.codeImpactMetrics as CodeImpactMetrics | null;
+  const commitQualityMetrics = (analytics as any)?.commitQualityMetrics as CommitQualityMetrics | null;
 
   // Detect developer persona
   const personaContext: PersonaContext = {
@@ -143,6 +145,19 @@ export default async function InsightsPage() {
 
         {hasData ? (
           <div className="space-y-8">
+            {/* ============================================
+                AI-Powered Insights Hero (TOP - Most Important)
+                ============================================ */}
+            <AIInsightsHero 
+              analytics={{
+                totalCommits: analytics.totalCommits,
+                currentStreak: analytics.currentStreak,
+                longestStreak: analytics.longestStreak,
+                isActiveToday: analytics.isActiveToday,
+                lastCommitDate: analytics.lastCommitDate,
+              }}
+            />
+
             {/* AI Stats Banner with Developer Persona */}
             <AIStatsBanner analytics={analytics} userId={user.id} persona={persona} />
 
@@ -155,20 +170,6 @@ export default async function InsightsPage() {
               />
             )}
 
-            {/* Insights Filters */}
-            <InsightsFiltersWrapper availableLanguages={availableLanguages} />
-
-            {/* AI-Powered Insights Section */}
-            <AIInsightsSection 
-              analytics={{
-                totalCommits: analytics.totalCommits,
-                currentStreak: analytics.currentStreak,
-                longestStreak: analytics.longestStreak,
-                isActiveToday: analytics.isActiveToday,
-                lastCommitDate: analytics.lastCommitDate,
-              }}
-            />
-
             {/* Repository Deep Dive - Full Width */}
             {repoStats && repoStats.length > 0 && (
               <RepoDeepDive repoStats={repoStats} />
@@ -179,12 +180,63 @@ export default async function InsightsPage() {
               {/* Code Impact Card */}
               <CodeImpactCard metrics={codeImpactMetrics} />
               
-              {/* Reserved space for future Code Quality expansion */}
-              <div className="bg-slate-900/50 border border-slate-700/30 rounded-xl p-6 backdrop-blur-sm flex items-center justify-center">
-                <div className="text-center text-slate-500">
-                  <BarChart3 className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                  <p className="text-sm">More quality metrics coming soon</p>
+              {/* Code Quality Summary Card */}
+              <div className="bg-slate-900/50 border border-slate-700/30 rounded-xl p-6 backdrop-blur-sm">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-2 bg-slate-800/50 rounded-lg">
+                    <BarChart3 className="w-5 h-5 text-purple-400" />
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-slate-200">Code Quality Summary</h3>
+                    <p className="text-xs text-slate-500">Commit message analysis</p>
+                  </div>
                 </div>
+                
+                {commitQualityMetrics ? (
+                  <div className="space-y-4">
+                    {/* Quality Grade */}
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-slate-400">Quality Grade</span>
+                      <span className={`text-2xl font-bold ${
+                        commitQualityMetrics.qualityGrade === 'A' ? 'text-emerald-400' :
+                        commitQualityMetrics.qualityGrade === 'B' ? 'text-cyan-400' :
+                        commitQualityMetrics.qualityGrade === 'C' ? 'text-yellow-400' :
+                        commitQualityMetrics.qualityGrade === 'D' ? 'text-orange-400' :
+                        'text-rose-400'
+                      }`}>
+                        {commitQualityMetrics.qualityGrade}
+                      </span>
+                    </div>
+                    
+                    {/* Metrics */}
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="p-3 bg-slate-800/50 rounded-lg">
+                        <p className="text-xs text-slate-500">Conventional</p>
+                        <p className="text-lg font-semibold text-slate-200">
+                          {commitQualityMetrics.conventionalCommitScore}%
+                        </p>
+                      </div>
+                      <div className="p-3 bg-slate-800/50 rounded-lg">
+                        <p className="text-xs text-slate-500">Ticket Refs</p>
+                        <p className="text-lg font-semibold text-slate-200">
+                          {commitQualityMetrics.hasTicketReferences}%
+                        </p>
+                      </div>
+                    </div>
+                    
+                    {/* Top insight */}
+                    {commitQualityMetrics.insights.length > 0 && (
+                      <p className="text-xs text-slate-400">
+                        {commitQualityMetrics.insights[0]}
+                      </p>
+                    )}
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-6 text-center">
+                    <BarChart3 className="w-8 h-8 text-slate-600 mb-2" />
+                    <p className="text-sm text-slate-500">No quality data available</p>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -201,31 +253,7 @@ export default async function InsightsPage() {
           <EmptyState />
         )}
 
-        {/* Debug Info (development only) */}
-        {process.env.NODE_ENV === 'development' && (
-          <div className="mt-8 bg-slate-900/50 border border-yellow-500/30 rounded-xl p-6 backdrop-blur-sm">
-            <h3 className="text-lg font-semibold text-yellow-400 mb-3 flex items-center gap-2">
-              <span>🔍</span> Debug Info
-            </h3>
-            <pre className="text-xs text-slate-400 overflow-auto bg-slate-950/50 p-4 rounded-lg border border-slate-700/30">
-              {JSON.stringify(
-                {
-                  userId: user.id,
-                  hasAnalytics: analytics !== null,
-                  totalCommits: analytics?.totalCommits ?? 0,
-                  hasData,
-                  hasDailyCommits: !!dailyCommits,
-                  hasDayOfWeekStats: !!dayOfWeekStats,
-                  hasHourlyStats: !!hourlyStats,
-                  hasRepoStats: !!repoStats,
-                  hasTopLanguages: !!topLanguages,
-                },
-                null,
-                2
-              )}
-            </pre>
-          </div>
-        )}
+
       </div>
     </div>
   );

@@ -6,7 +6,10 @@ import Link from "next/link";
 import { ArrowRight, BarChart3 } from "lucide-react";
 
 export default function Home() {
-  const { data: session, status } = useSession();
+  const { data: session, status } = useSession({
+    refetchInterval: 0,
+    refetchOnWindowFocus: false,
+  });
   const isAuthenticated = status === "authenticated";
   const isLoading = status === "loading";
 

@@ -4,12 +4,7 @@ import {
   AlertCircle,
   Loader2,
   AlertTriangle,
-  TrendingUp,
-  User as UserIcon,
-  Settings as SettingsIcon,
-  Code,
 } from "lucide-react";
-import Link from "next/link";
 import prisma from "@/lib/prisma";
 import {
   NoDataEmptyState,
@@ -20,7 +15,6 @@ import { UserProfileCard } from "./components/UserProfileCard";
 import { StatsGrid } from "./components/StatsGrid";
 import { InsightsRow } from "./components/InsightsRow";
 import { ActivityOverview } from "./components/ActivityOverview";
-import { QuickActionsPanel } from "@/components/dashboard/QuickActionsPanel";
 import { WeeklySummary } from "./components/WeeklySummary";
 import { CommitQualityCard } from "./components/CommitQualityCard";
 
@@ -215,52 +209,17 @@ export default async function DashboardPage() {
 
             {/* Commit Quality Analysis Card */}
             {hasSyncedData && (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-                <CommitQualityCard 
-                  metrics={
-                    (analytics as Record<string, unknown> | null)?.commitQualityMetrics as 
-                    Parameters<typeof CommitQualityCard>[0]['metrics'] | null
-                  }
-                  className="lg:col-span-1"
-                />
-                {/* Space for future widget or balance the layout */}
-                <div className="hidden lg:block" />
-              </div>
+              <CommitQualityCard 
+                metrics={
+                  (analytics as Record<string, unknown> | null)?.commitQualityMetrics as 
+                  Parameters<typeof CommitQualityCard>[0]['metrics'] | null
+                }
+              />
             )}
 
             {/* Activity Overview */}
             <ActivityOverview analytics={analytics} hasSyncedData={hasSyncedData} />
 
-            {/* Quick Actions Panel */}
-            <QuickActionsPanel 
-              actions={[
-                {
-                  title: "View Profile",
-                  href: "/profile",
-                  icon: <UserIcon className="w-5 h-5 text-cyan-400" />,
-                  tooltip: "View and edit your profile settings"
-                },
-                {
-                  title: "Settings",
-                  href: "/settings",
-                  icon: <SettingsIcon className="w-5 h-5 text-blue-400" />,
-                  tooltip: "Manage application settings"
-                },
-                {
-                  title: "Insights",
-                  href: "/insights",
-                  icon: <TrendingUp className="w-5 h-5 text-purple-400" />,
-                  tooltip: "View AI-generated insights",
-                  disabled: !hasSyncedData
-                },
-                {
-                  title: "Repositories",
-                  href: "/repositories",
-                  icon: <Code className="w-5 h-5 text-pink-400" />,
-                  tooltip: "Browse your synced repositories"
-                }
-              ]}
-            />
           </main>
         </div>
       </div>
