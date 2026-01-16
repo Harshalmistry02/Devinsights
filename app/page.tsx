@@ -54,41 +54,6 @@ export default function Home() {
         >
           AI-powered insights into your GitHub activity, productivity, and coding patterns.
         </motion.p>
-
-        {/* CTA Buttons */}
-        {isAuthenticated && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{
-              delay: 0.7,
-              duration: 0.8,
-              ease: "easeInOut",
-            }}
-            className="mt-10 flex flex-col sm:flex-row items-center gap-4"
-          >
-            <Link
-              href="/dashboard"
-              className="group relative px-8 py-3 bg-linear-to-r from-cyan-500 to-blue-500 rounded-lg font-semibold text-white shadow-lg shadow-cyan-500/30 hover:shadow-cyan-500/50 transition-all duration-300 hover:scale-105 flex items-center gap-2"
-            >
-              <BarChart3 className="w-5 h-5" />
-              Go to Dashboard
-              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-            </Link>
-          </motion.div>
-        )}
-
-        {/* User Welcome Message */}
-        {isAuthenticated && session?.user && (
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.9, duration: 0.5 }}
-            className="mt-6 text-slate-400 text-sm"
-          >
-            Welcome back, <span className="text-cyan-400 font-semibold">{session.user.name?.split(' ')[0] || session.user.username}</span>! 👋
-          </motion.p>
-        )}
       </div>
     </div>
   );
