@@ -16,8 +16,13 @@ import crypto from 'crypto';
  */
 export async function generateInsights(
   data: AnalyticsSummary,
-  retries = 3
+  customPromptOrRetries?: string | number
 ): Promise<InsightResponse> {
+  // Determine if second parameter is a custom prompt or retries count
+  const isCustomPrompt = typeof customPromptOrRetries === 'string';
+  const retries = isCustomPrompt ? 3 : (customPromptOrRetries ?? 3);
+  const customPrompt = isCustomPrompt ? customPromptOrRetries : undefined;
+
   // Use mock if no Groq client is available
   if (!groq) {
     console.log('⚠️ No GROQ_API_KEY found, using mock insights');
@@ -34,7 +39,7 @@ export async function generateInsights(
         },
         {
           role: 'user',
-          content: buildUserPrompt(data),
+          content: customPrompt || buildUserPrompt(data),
         },
       ],
       temperature: AI_CONFIG.temperature,
@@ -75,7 +80,7 @@ export async function generateInsights(
       await new Promise((resolve) =>
         setTimeout(resolve, 1000 * (4 - retries))
       ); // Exponential backoff
-      return generateInsights(data, retries - 1);
+      return generateInsights(data, customPrompt || retries - 1);
     }
 
     // Re-throw as AIServiceError

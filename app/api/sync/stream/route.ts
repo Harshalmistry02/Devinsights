@@ -26,6 +26,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'GitHub not connected' }, { status: 401 });
   }
 
+  const accessToken = account.access_token;
+
   // Create SSE stream
   const stream = new ReadableStream({
     async start(controller) {
@@ -39,7 +41,7 @@ export async function POST(req: NextRequest) {
 
       try {
         const syncService = new GitHubSyncService(
-          account.access_token,
+          accessToken,
           userId
         );
 
@@ -75,10 +77,10 @@ export async function POST(req: NextRequest) {
           percentage: 100,
           message: 'Sync complete!',
           stats: {
-            reposProcessed: result.reposCount || 0,
-            totalRepos: result.reposCount || 0,
-            commitsProcessed: result.commitsCount || 0,
-            totalCommits: result.commitsCount || 0,
+            reposProcessed: result.repos || 0,
+            totalRepos: result.repos || 0,
+            commitsProcessed: 0, // Not available in current implementation
+            totalCommits: 0, // Not available in current implementation
             apiRequests: 0,
             rateLimitResets: 0,
             errors: 0,

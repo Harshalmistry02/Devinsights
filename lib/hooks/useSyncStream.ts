@@ -1,24 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback, useRef } from 'react';
-
-export interface SyncProgressEvent {
-  phase: 'init' | 'repos' | 'commits' | 'stats' | 'analytics' | 'complete' | 'error';
-  percentage: number;
-  message: string;
-  stats: {
-    reposProcessed: number;
-    totalRepos: number;
-    commitsProcessed: number;
-    totalCommits: number;
-    apiRequests: number;
-    rateLimitResets: number;
-    errors: number;
-  };
-  estimatedTimeRemaining?: number;
-  currentRepo?: string;
-  eta?: string;
-}
+import type { SyncProgressEvent } from '@/lib/sync/sync-stream';
 
 export function useSyncStream() {
   const [progress, setProgress] = useState<SyncProgressEvent | null>(null);

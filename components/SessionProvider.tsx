@@ -16,10 +16,7 @@ export function SessionProviderWrapper({
   children,
 }: SessionProviderWrapperProps) {
   return (
-    <SessionProvider 
-      refetchInterval={0}
-      refetchOnWindowFocus={false}
-    >
+    <SessionProvider>
       {children}
     </SessionProvider>
   );

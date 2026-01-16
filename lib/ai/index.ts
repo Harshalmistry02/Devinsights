@@ -7,9 +7,7 @@
 // AI service functions
 export {
   generateInsights,
-  generateInsightsWithQuota,
   createDataHash,
-  estimateTokenUsage,
   getMockInsights,
 } from './service';
 
@@ -25,7 +23,6 @@ export {
 export {
   groq,
   AI_CONFIG,
-  type AIModelType,
 } from './client';
 
 // Prompt builders

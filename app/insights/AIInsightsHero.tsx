@@ -85,7 +85,6 @@ export function AIInsightsHero({ analytics }: AIInsightsHeroProps) {
     setLoading(true);
     setError(null);
     setAnalysisStep(0);
-    setExpanded(true);
     
     const stepInterval = setInterval(() => {
       setAnalysisStep(prev => Math.min(prev + 1, 3));

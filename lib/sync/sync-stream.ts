@@ -5,7 +5,7 @@
  */
 
 export interface SyncProgressEvent {
-  phase: "init" | "repos" | "commits" | "stats" | "analytics" | "complete";
+  phase: "init" | "repos" | "commits" | "stats" | "analytics" | "complete" | "error";
   percentage: number;
   message: string;
   stats: {
