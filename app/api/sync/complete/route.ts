@@ -97,8 +97,44 @@ export async function POST(req: NextRequest) {
     // ============================================
     console.log('🔍 Step 2: Checking GitHub API rate limits...');
 
-    const rateLimitBefore = await syncService.getRateLimit();
+    let rateLimitBefore;
+    try {
+      rateLimitBefore = await syncService.getRateLimit();
+    } catch (rateLimitError: any) {
+      // Handle authentication errors
+      if (rateLimitError.message?.includes('authentication')) {
+        return NextResponse.json(
+          {
+            error: 'GitHub authentication required',
+            message: 'Your GitHub token has expired. Please log out and log back in to reconnect your GitHub account.',
+            requiresReauth: true,
+          },
+          { status: 401 }
+        );
+      }
+      
+      // For other errors, default to a generic message
+      return NextResponse.json(
+        {
+          error: 'Failed to check rate limit',
+          message: 'Unable to verify GitHub API status. Please try again later.',
+        },
+        { status: 503 }
+      );
+    }
+    
     console.log(`   Rate limit: ${rateLimitBefore.remaining}/${rateLimitBefore.limit} requests`);
+
+    // Check if we have a valid rate limit response
+    if (rateLimitBefore.remaining === -1) {
+      return NextResponse.json(
+        {
+          error: 'GitHub API unavailable',
+          message: 'Unable to connect to GitHub API. Please try again later.',
+        },
+        { status: 503 }
+      );
+    }
 
     if (rateLimitBefore.remaining < 50) {
       return NextResponse.json(

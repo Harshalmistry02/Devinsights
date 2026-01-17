@@ -542,9 +542,16 @@ export class AdvancedGitHubSyncService {
         reset: response.data.rate.reset,
         limit: response.data.rate.limit,
       };
-    } catch (error) {
+    } catch (error: any) {
+      // Check if it's an authentication error
+      if (error.status === 401 || error.message?.includes('Bad credentials')) {
+        console.error('❌ GitHub authentication failed - token may be expired or invalid');
+        throw new Error('GitHub authentication failed. Please reconnect your GitHub account.');
+      }
+      
       console.error('Error fetching rate limit:', error);
-      return { remaining: 0, reset: 0, limit: 0 };
+      // Return minimal values instead of zeros to indicate an error state
+      return { remaining: -1, reset: 0, limit: 0 };
     }
   }
 

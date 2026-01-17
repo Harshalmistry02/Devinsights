@@ -143,12 +143,36 @@ export function SyncButtonComplete() {
       console.error('❌ Sync error:', err);
 
       let errorMessage = 'Sync failed. Please try again.';
+      let errorData: any = null;
       const errorStr = err instanceof Error ? err.message : String(err);
+
+      // Try to extract structured error data from response
+      try {
+        if (err instanceof Error && err.message) {
+          errorData = JSON.parse(err.message);
+        }
+      } catch {
+        // Not JSON, continue with string parsing
+      }
+
+      // Check for authentication requirement flag
+      if (errorData?.requiresReauth) {
+        errorMessage = errorData.message || 'GitHub authentication required. Please log out and log back in.';
+        setStatus({
+          status: 'error',
+          message: `🔐 ${errorMessage}`,
+          progress: 0,
+        });
+        
+        // Optionally redirect to sign out after delay
+        console.log('💡 Tip: Log out and log back in to refresh your GitHub connection');
+        return;
+      }
 
       if (errorStr.includes('Rate limit') || errorStr.includes('429')) {
         errorMessage = 'GitHub rate limit exceeded. Please wait a few minutes and try again.';
-      } else if (errorStr.includes('401') || errorStr.includes('Unauthorized')) {
-        errorMessage = 'GitHub authentication failed. Please reconnect your account.';
+      } else if (errorStr.includes('authentication') || errorStr.includes('401') || errorStr.includes('Unauthorized')) {
+        errorMessage = 'GitHub authentication failed. Please reconnect your account by logging out and back in.';
       } else if (errorStr.includes('not linked')) {
         errorMessage = 'GitHub account not linked. Please connect your GitHub account first.';
       } else if (err instanceof Error) {

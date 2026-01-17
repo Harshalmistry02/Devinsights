@@ -89,15 +89,23 @@ export async function POST(request: NextRequest) {
       insights = getMockInsights();
     }
 
-    // 6. Store in cache
+    // 6. Store in cache with upsert to avoid duplicate dataHash errors
     const expiresAt = new Date();
     expiresAt.setHours(expiresAt.getHours() + 24); // 24-hour TTL
 
-    await prisma.insightCache.create({
-      data: {
+    await prisma.insightCache.upsert({
+      where: {
+        dataHash,
+      },
+      create: {
         userId,
         snapshotId: snapshot.id,
         dataHash,
+        insights,
+        model: 'llama-3.3-70b',
+        expiresAt,
+      },
+      update: {
         insights,
         model: 'llama-3.3-70b',
         expiresAt,
