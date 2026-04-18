@@ -37,7 +37,7 @@ export function CodeImpactCard({ metrics, className }: CodeImpactCardProps) {
   if (!metrics) {
     return (
       <div className={cn(
-        " border border-[rgba(240,240,250,0.15)]  p-6 backdrop-blur-sm",
+        " bg-transparent p-0",
         className
       )}>
         <div className="flex items-center gap-3 mb-4">
@@ -62,11 +62,11 @@ export function CodeImpactCard({ metrics, className }: CodeImpactCardProps) {
 
   return (
     <div className={cn(
-      " border border-[rgba(240,240,250,0.15)]  overflow-hidden backdrop-blur-sm",
+      " bg-transparent overflow-visible",
       className
     )}>
       {/* Header */}
-      <div className="px-6 py-4 border-b border-[rgba(240,240,250,0.15)]">
+      <div className="py-4 border-b border-[rgba(240,240,250,0.05)]">
         <div className="flex items-center gap-3">
           <div className="p-2">
             <Gauge className="w-5 h-5 text-[#f0f0fa]" />
@@ -79,7 +79,7 @@ export function CodeImpactCard({ metrics, className }: CodeImpactCardProps) {
       </div>
       
       {/* Main Content */}
-      <div className="p-6">
+      <div className="py-6">
         {/* Impact Score & Gauge Row */}
         <div className="grid grid-cols-2 gap-6 mb-6">
           {/* Impact Score */}
@@ -313,7 +313,7 @@ export function CodeImpactCardCompact({ metrics, className }: CodeImpactCardProp
   if (!metrics) {
     return (
       <div className={cn(
-        " border border-[rgba(240,240,250,0.15)]  p-4",
+        " bg-transparent py-4",
         className
       )}>
         <div className="flex items-center gap-2 mb-2">
@@ -329,7 +329,7 @@ export function CodeImpactCardCompact({ metrics, className }: CodeImpactCardProp
 
   return (
     <div className={cn(
-      " border border-[rgba(240,240,250,0.15)]  p-4",
+      " bg-transparent py-4",
       className
     )}>
       <div className="flex items-center justify-between mb-2">

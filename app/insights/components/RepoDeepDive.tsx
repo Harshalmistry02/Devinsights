@@ -119,7 +119,7 @@ export function RepoDeepDive({
   if (!repoStats || repoStats.length === 0) {
     return (
       <div className={cn(
-        " border border-[rgba(240,240,250,0.15)]  p-8 text-center",
+        " bg-transparent py-8 text-center",
         className
       )}>
         <GitBranch className="w-12 h-12 opacity-80 mx-auto mb-4" />
@@ -146,11 +146,11 @@ export function RepoDeepDive({
 
   return (
     <div className={cn(
-      " border border-[rgba(240,240,250,0.15)]  overflow-hidden backdrop-blur-sm",
+      " bg-transparent overflow-visible",
       className
     )}>
       {/* Header */}
-      <div className="px-6 py-4 border-b border-[rgba(240,240,250,0.15)]">
+      <div className="py-4 border-b border-[rgba(240,240,250,0.05)]">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="p-2">
@@ -193,7 +193,7 @@ export function RepoDeepDive({
       </div>
       
       {/* Content */}
-      <div className="p-6">
+      <div className="py-6">
         {viewMode === 'treemap' ? (
           <TreemapView 
             repos={displayedRepos} 

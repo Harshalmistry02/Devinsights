@@ -35,23 +35,22 @@ export function UserProfileCard({ session, githubStatus, lastSync, analytics }: 
     >
       <div
         style={{
-          background: "rgba(240,240,250,0.02)",
-          border: "1px solid rgba(240,240,250,0.06)",
-          borderRadius: "var(--radius-sharp)",
-          overflow: "hidden",
+          background: "transparent",
+          border: "none",
+          borderRadius: 0,
         }}
       >
         {/* Profile header — thin spectral line instead of colored gradient */}
         <div
           style={{
-            height: "3px",
-            background: "linear-gradient(to right, rgba(240,240,250,0.3), rgba(240,240,250,0.05))",
+            height: "1px",
+            background: "rgba(240,240,250,0.35)",
           }}
           aria-hidden="true"
         />
 
         {/* Avatar row */}
-        <div style={{ padding: "24px 24px 0" }}>
+        <div style={{ padding: "24px 0 0" }}>
           {user.image ? (
             <Image
               src={user.image}
@@ -83,7 +82,7 @@ export function UserProfileCard({ session, githubStatus, lastSync, analytics }: 
         </div>
 
         {/* User info */}
-        <div style={{ padding: "16px 24px 24px" }}>
+        <div style={{ padding: "16px 0 24px" }}>
           <h2
             className="text-caption-bold"
             style={{ fontSize: "0.875rem", marginBottom: "4px" }}

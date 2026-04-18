@@ -96,14 +96,18 @@ export default async function InsightsPage() {
   const persona = analytics ? detectPersona(personaContext) : null;
 
   return (
-    <div className="app-canvas">
-      <div
-        style={{
-          maxWidth: "1400px",
-          margin: "0 auto",
-          padding: "40px clamp(16px, 4vw, 48px)",
-        }}
-      >
+    <div className="section-cinematic bg-black">
+      <div 
+        className="section-photo" 
+        style={{ 
+          backgroundImage: "url('/space-hero.png')", 
+          backgroundSize: "cover", 
+          backgroundPosition: "center",
+          position: "fixed"
+        }} 
+      />
+      <div className="section-overlay" style={{ position: "fixed" }} />
+      <div className="section-content relative z-20 w-full" style={{ padding: "120px clamp(24px, 6vw, 80px) 40px" }}>
         {/* Header */}
         <div style={{ marginBottom: "40px" }}>
           <Link
@@ -203,10 +207,9 @@ export default async function InsightsPage() {
               {/* Code Quality Summary Card */}
               <div
                 style={{
-                  background: "rgba(240,240,250,0.02)",
-                  border: "1px solid rgba(240,240,250,0.06)",
-                  borderRadius: "var(--radius-sharp)",
-                  padding: "20px",
+                  background: "transparent",
+                  border: "none",
+                  padding: "0",
                 }}
               >
                 <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "16px" }}>
@@ -225,12 +228,12 @@ export default async function InsightsPage() {
                         {commitQualityMetrics.qualityGrade}
                       </span>
                     </div>
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1px", background: "rgba(240,240,250,0.05)", borderRadius: "2px", overflow: "hidden" }}>
-                      <div style={{ background: "#000", padding: "12px 14px" }}>
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px", background: "transparent", borderRadius: "2px", overflow: "visible" }}>
+                      <div style={{ background: "transparent", padding: "12px 0" }}>
                         <p className="text-micro" style={{ opacity: 0.3, marginBottom: "4px" }}>Conventional</p>
                         <p className="stat-value" style={{ fontSize: "1rem" }}>{commitQualityMetrics.conventionalCommitScore}%</p>
                       </div>
-                      <div style={{ background: "#000", padding: "12px 14px" }}>
+                      <div style={{ background: "transparent", padding: "12px 0" }}>
                         <p className="text-micro" style={{ opacity: 0.3, marginBottom: "4px" }}>Ticket Refs</p>
                         <p className="stat-value" style={{ fontSize: "1rem" }}>{commitQualityMetrics.hasTicketReferences}%</p>
                       </div>
@@ -344,9 +347,9 @@ async function AIStatsBanner({ analytics, userId, persona }: {
             alignItems: "center",
             justifyContent: "space-between",
             padding: "16px 20px",
-            background: "rgba(240,240,250,0.02)",
-            border: "1px solid rgba(240,240,250,0.06)",
-            borderRadius: "var(--radius-sharp)",
+            background: "transparent",
+            border: "none",
+            borderRadius: "0",
             flexWrap: "wrap",
             gap: "12px",
           }}
@@ -389,11 +392,9 @@ async function AIStatsBanner({ analytics, userId, persona }: {
         style={{
           display: "grid",
           gridTemplateColumns: "repeat(2, 1fr)",
-          gap: "1px",
-          background: "rgba(240,240,250,0.06)",
-          border: "1px solid rgba(240,240,250,0.06)",
-          borderRadius: "var(--radius-sharp)",
-          overflow: "hidden",
+          gap: "24px",
+          background: "transparent",
+          border: "none",
         }}
         className="insights-stats-grid"
       >
@@ -402,9 +403,8 @@ async function AIStatsBanner({ analytics, userId, persona }: {
           <div
             key={index}
             style={{
-              background: "rgba(0,0,0,0.6)",
-              padding: "20px",
-              transition: "background 0.2s ease",
+              background: "transparent",
+              padding: "0",
             }}
             
             
@@ -432,9 +432,8 @@ function EmptyState() {
   return (
     <div
       style={{
-        background: "rgba(240,240,250,0.02)",
-        border: "1px solid rgba(240,240,250,0.06)",
-        borderRadius: "var(--radius-sharp)",
+        background: "transparent",
+        border: "none",
         padding: "64px 24px",
         textAlign: "center",
       }}

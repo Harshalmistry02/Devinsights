@@ -63,22 +63,26 @@ export default async function DashboardPage() {
   };
 
   return (
-    <div className="app-canvas">
-      {/* Skip to main content link for keyboard users */}
-      <a
-        href="#main-content"
-        className="skip-link"
-      >
-        Skip to main content
-      </a>
-
-      <div
-        style={{
-          maxWidth: "1400px",
-          margin: "0 auto",
-          padding: "40px clamp(16px, 4vw, 48px)",
-        }}
-      >
+    <div className="section-cinematic bg-black">
+      <div 
+        className="section-photo" 
+        style={{ 
+          backgroundImage: "url('/space-hero.png')", 
+          backgroundSize: "cover", 
+          backgroundPosition: "center",
+          position: "fixed"
+        }} 
+      />
+      <div className="section-overlay" style={{ position: "fixed" }} />
+      
+      <div className="section-content relative z-20 w-full" style={{ padding: "120px clamp(24px, 6vw, 80px) 40px" }}>
+        {/* Skip to main content link for keyboard users */}
+        <a
+          href="#main-content"
+          className="skip-link"
+        >
+          Skip to main content
+        </a>
         <div
           style={{
             display: "grid",
@@ -271,7 +275,6 @@ export default async function DashboardPage() {
             <ActivityOverview analytics={analytics} hasSyncedData={hasSyncedData} />
 
           </main>
-        </div>
       </div>
     </div>
   );

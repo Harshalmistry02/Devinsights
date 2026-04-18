@@ -72,10 +72,8 @@ export function WeeklySummary({ analytics, className }: WeeklySummaryProps) {
   return (
     <div
       style={{
-        background: "rgba(240,240,250,0.02)",
-        border: "1px solid rgba(240,240,250,0.06)",
-        borderRadius: "var(--radius-sharp)",
-        overflow: "hidden",
+        background: "transparent",
+        border: "none",
       }}
     >
       {/* Header */}
@@ -107,8 +105,8 @@ export function WeeklySummary({ analytics, className }: WeeklySummaryProps) {
         style={{
           display: "grid",
           gridTemplateColumns: "1fr",
-          gap: "1px",
-          background: "rgba(240,240,250,0.05)",
+          gap: "24px",
+          background: "transparent",
         }}
         className="weekly-grid"
       >
@@ -121,7 +119,7 @@ export function WeeklySummary({ analytics, className }: WeeklySummaryProps) {
         `}</style>
 
         {/* Progress Section */}
-        <div style={{ background: "#000", padding: "20px" }}>
+        <div style={{ background: "transparent", padding: "0" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "14px", opacity: 0.4 }}>
             <Target size={12} />
             <p className="text-micro">Progress</p>
@@ -165,7 +163,7 @@ export function WeeklySummary({ analytics, className }: WeeklySummaryProps) {
         </div>
 
         {/* Highlights Section */}
-        <div style={{ background: "#000", padding: "20px" }}>
+        <div style={{ background: "transparent", padding: "0" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "14px", opacity: 0.4 }}>
             <Sparkles size={12} />
             <p className="text-micro">Highlights</p>
@@ -204,7 +202,7 @@ export function WeeklySummary({ analytics, className }: WeeklySummaryProps) {
         </div>
 
         {/* Mini Chart Section */}
-        <div style={{ background: "#000", padding: "20px" }}>
+        <div style={{ background: "transparent", padding: "0" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "14px", opacity: 0.4 }}>
             <TrendingUp size={12} />
             <p className="text-micro">This Week</p>
@@ -417,10 +415,9 @@ export function WeeklySummaryCompact({ analytics, className }: WeeklySummaryProp
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
-        padding: "14px 18px",
-        background: "rgba(240,240,250,0.02)",
-        border: "1px solid rgba(240,240,250,0.06)",
-        borderRadius: "var(--radius-sharp)",
+        padding: "14px 0",
+        background: "transparent",
+        border: "none",
       }}
     >
       <div style={{ display: "flex", alignItems: "center", gap: "24px" }}>

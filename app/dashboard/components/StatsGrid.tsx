@@ -86,11 +86,10 @@ export function StatsGrid({ analytics: initialAnalytics, previousAnalytics }: St
         style={{
           display: "grid",
           gridTemplateColumns: "repeat(2, 1fr)",
-          gap: "1px",
-          background: "rgba(240,240,250,0.06)",
-          border: "1px solid rgba(240,240,250,0.06)",
-          borderRadius: "var(--radius-sharp)",
-          overflow: "hidden",
+          gap: "24px",
+          background: "transparent",
+          border: "none",
+          overflow: "visible",
         }}
         className="stats-responsive"
       >
@@ -179,10 +178,9 @@ function StatCard({
       role="region"
       aria-label={`${title} statistics`}
       style={{
-        background: "rgba(0,0,0,0.6)",
-        padding: "20px 20px 18px",
+        background: "transparent",
+        padding: "0",
         position: "relative",
-        transition: "background 0.2s ease",
       }}
       
       
@@ -281,7 +279,7 @@ function StatCard({
 
 function StatCardSkeleton() {
   return (
-    <div style={{ background: "rgba(0,0,0,0.6)", padding: "20px 20px 18px" }}>
+    <div style={{ background: "transparent", padding: "0" }}>
       <div className="skeleton" style={{ width: "16px", height: "16px", marginBottom: "12px" }} />
       <div className="skeleton" style={{ width: "60px", height: "10px", marginBottom: "6px" }} />
       <div className="skeleton" style={{ width: "80px", height: "28px", marginBottom: "4px" }} />

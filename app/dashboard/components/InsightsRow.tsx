@@ -19,11 +19,9 @@ export function InsightsRow({ analytics }: InsightsRowProps) {
         style={{
           display: "grid",
           gridTemplateColumns: "repeat(3, 1fr)",
-          gap: "1px",
-          background: "rgba(240,240,250,0.06)",
-          border: "1px solid rgba(240,240,250,0.06)",
-          borderRadius: "var(--radius-sharp)",
-          overflow: "hidden",
+          gap: "24px",
+          background: "transparent",
+          border: "none",
         }}
         className="insights-responsive"
       >
@@ -73,12 +71,11 @@ function InsightCell({
       role="article"
       aria-label={`Insight: ${label}`}
       style={{
-        background: "rgba(0,0,0,0.6)",
-        padding: "20px",
+        background: "transparent",
+        padding: "0",
         display: "flex",
         flexDirection: "column",
         gap: "6px",
-        transition: "background 0.2s ease",
       }}
       
       

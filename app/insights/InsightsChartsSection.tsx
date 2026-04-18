@@ -84,7 +84,7 @@ export function InsightsChartsSection({
 
   if (!hasChartData) {
     return (
-      <div className="border border-[rgba(240,240,250,0.15)] p-8 text-center">
+    <div className="bg-transparent py-8 text-center">
         <BarChart3 className="w-12 h-12 opacity-80 mx-auto mb-4" />
         <h3 className="text-lg font-medium opacity-80 mb-2">No chart data available</h3>
         <p className="opacity-80 text-sm">Sync your GitHub data to see visualizations</p>
@@ -199,9 +199,9 @@ function ChartCard({
   children: React.ReactNode;
 }) {
   return (
-    <div className="border border-[rgba(240,240,250,0.15)] overflow-hidden backdrop-blur-sm">
+    <div className="bg-transparent overflow-visible">
       {/* Header */}
-      <div className="px-6 py-4 border-b border-[rgba(240,240,250,0.15)]">
+      <div className="py-4 border-b border-[rgba(240,240,250,0.05)]">
         <div className="flex items-center gap-3">
           <div className="p-2">{icon}</div>
           <div>
@@ -212,7 +212,7 @@ function ChartCard({
       </div>
       
       {/* Chart Content */}
-      <div className="p-6">
+      <div className="py-6">
         {children}
       </div>
     </div>

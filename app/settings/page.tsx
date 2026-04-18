@@ -11,14 +11,18 @@ export default async function SettingsPage() {
   const { user } = session;
 
   return (
-    <div className="app-canvas">
-      <div
-        style={{
-          maxWidth: "800px",
-          margin: "0 auto",
-          padding: "40px clamp(16px, 4vw, 48px)",
-        }}
-      >
+    <div className="section-cinematic bg-black">
+      <div 
+        className="section-photo" 
+        style={{ 
+          backgroundImage: "url('/space-hero.png')", 
+          backgroundSize: "cover", 
+          backgroundPosition: "center",
+          position: "fixed"
+        }} 
+      />
+      <div className="section-overlay" style={{ position: "fixed" }} />
+      <div className="section-content relative z-20 w-full" style={{ padding: "120px clamp(24px, 6vw, 80px) 40px", maxWidth: "800px", margin: "0 auto" }}>
         {/* Header */}
         <div style={{ marginBottom: "40px" }}>
           <Link
@@ -48,7 +52,7 @@ export default async function SettingsPage() {
           </div>
         </div>
 
-        <div style={{ display: "flex", flexDirection: "column", gap: "1px", background: "rgba(240,240,250,0.06)", borderRadius: "var(--radius-sharp)", overflow: "hidden" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: "24px", background: "transparent", borderRadius: "0", overflow: "visible" }}>
           {/* Account Settings */}
           <SettingsSection
             icon={<Shield size={14} />}
@@ -78,11 +82,11 @@ export default async function SettingsPage() {
             title="Security"
             description="Manage your security and authentication settings"
           >
-            <div style={{ display: "flex", flexDirection: "column", gap: "1px", background: "rgba(240,240,250,0.05)", borderRadius: "var(--radius-sharp)", overflow: "hidden" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: "24px", background: "transparent", borderRadius: "0", overflow: "visible" }}>
               <div
                 style={{
-                  background: "rgba(0,0,0,0.5)",
-                  padding: "16px 20px",
+                  background: "transparent",
+                  padding: "0",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "space-between",
@@ -111,8 +115,8 @@ export default async function SettingsPage() {
 
               <div
                 style={{
-                  background: "rgba(0,0,0,0.5)",
-                  padding: "16px 20px",
+                  background: "transparent",
+                  padding: "0",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "space-between",
@@ -151,10 +155,10 @@ export default async function SettingsPage() {
         <div
           style={{
             marginTop: "32px",
-            padding: "20px",
-            background: "rgba(252,165,165,0.03)",
-            border: "1px solid rgba(252,165,165,0.1)",
-            borderRadius: "var(--radius-sharp)",
+            padding: "20px 0",
+            background: "transparent",
+            border: "none",
+            borderRadius: "0",
           }}
         >
           <p
@@ -200,11 +204,11 @@ function SettingsSection({
   children: React.ReactNode;
 }) {
   return (
-    <div style={{ background: "rgba(0,0,0,0.6)" }}>
+    <div style={{ background: "transparent" }}>
       {/* Section header */}
       <div
         style={{
-          padding: "16px 20px",
+          padding: "16px 0",
           borderBottom: "1px solid rgba(240,240,250,0.05)",
           display: "flex",
           alignItems: "center",
@@ -218,7 +222,7 @@ function SettingsSection({
         </div>
       </div>
       {/* Section content */}
-      <div style={{ padding: "20px" }}>{children}</div>
+      <div style={{ padding: "20px 0" }}>{children}</div>
     </div>
   );
 }
@@ -236,10 +240,11 @@ function SettingItem({
   return (
     <div
       style={{
-        padding: "14px 16px",
-        background: "rgba(240,240,250,0.02)",
-        border: "1px solid rgba(240,240,250,0.05)",
-        borderRadius: "var(--radius-sharp)",
+        padding: "14px 0",
+        background: "transparent",
+        border: "none",
+        borderBottom: "1px solid rgba(240,240,250,0.05)",
+        borderRadius: "0",
         marginBottom: "8px",
       }}
       className="last-mb-0"

@@ -10,16 +10,14 @@ export function ActivityOverview({ analytics, hasSyncedData }: ActivityOverviewP
   return (
     <div
       style={{
-        background: "rgba(240,240,250,0.02)",
-        border: "1px solid rgba(240,240,250,0.06)",
-        borderRadius: "var(--radius-sharp)",
-        overflow: "hidden",
+        background: "transparent",
+        border: "none",
       }}
     >
       {/* Header */}
       <div
         style={{
-          padding: "16px 20px",
+          padding: "16px 0",
           borderBottom: "1px solid rgba(240,240,250,0.05)",
           display: "flex",
           alignItems: "center",
@@ -30,16 +28,14 @@ export function ActivityOverview({ analytics, hasSyncedData }: ActivityOverviewP
         <p className="text-caption-bold" style={{ fontSize: "0.75rem" }}>Activity Overview</p>
       </div>
 
-      <div style={{ padding: "20px" }}>
+      <div style={{ padding: "20px 0" }}>
         {hasSyncedData ? (
           <div
             style={{
               display: "grid",
               gridTemplateColumns: "repeat(2, 1fr)",
-              gap: "1px",
-              background: "rgba(240,240,250,0.05)",
-              borderRadius: "var(--radius-sharp)",
-              overflow: "hidden",
+              gap: "24px",
+              background: "transparent",
             }}
             className="activity-responsive"
           >
@@ -85,9 +81,8 @@ function MiniStat({
   return (
     <div
       style={{
-        background: "rgba(0,0,0,0.4)",
-        padding: "16px 18px",
-        transition: "background 0.2s ease",
+        background: "transparent",
+        padding: "0",
       }}
       
       

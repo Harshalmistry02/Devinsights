@@ -119,9 +119,9 @@ export function AIInsightsHero({ analytics }: AIInsightsHeroProps) {
   }, []);
 
   return (
-    <div className="border border-[rgba(240,240,250,0.15)] overflow-hidden backdrop-blur-sm">
+    <div className="bg-transparent overflow-visible">
       {/* Header Section */}
-      <div className="p-6 border-b border-[rgba(240,240,250,0.15)]">
+      <div className="py-4 border-b border-[rgba(240,240,250,0.05)]">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           {/* Title & Meta */}
           <div className="flex items-center gap-4">
@@ -143,11 +143,8 @@ export function AIInsightsHero({ analytics }: AIInsightsHeroProps) {
             onClick={generateInsights}
             disabled={loading}
             className={cn(
-              "group relative flex items-center gap-2.5 px-6 py-3  font-medium text-sm",
-              "transition-all duration-300",
-              loading 
-                ? " border border-[rgba(240,240,250,0.15)] opacity-80 cursor-not-allowed"
-                : "bg-linear-to-r from-purple-500 to-pink-500 text-white  -500/20 hover:-500/30 hover:scale-[1.02]"
+              "group relative flex items-center gap-2.5 btn-ghost ml-auto",
+              loading ? "opacity-80 cursor-not-allowed" : ""
             )}
           >
             {loading ? (
@@ -208,7 +205,7 @@ export function AIInsightsHero({ analytics }: AIInsightsHeroProps) {
 
       {/* Insights Display */}
       {insights && !loading && (
-        <div className="p-6 space-y-6">
+        <div className="py-6 space-y-6">
           {/* Milestone Banner */}
           {meta?.daysToMilestone && (
             <div className="flex items-center gap-4 p-4 bg-linear-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/20">
@@ -249,8 +246,8 @@ export function AIInsightsHero({ analytics }: AIInsightsHeroProps) {
 
       {/* Empty State */}
       {!insights && !loading && !error && (
-        <div className="p-6">
-          <div className="border border-[rgba(240,240,250,0.15)] p-8 text-center">
+        <div className="py-6">
+          <div className="bg-transparent py-8 text-center">
             <div className="w-16 h-16 bg-linear-to-br from-purple-500/20 to-cyan-500/20 border border-purple-500/30 flex items-center justify-center mx-auto mb-4">
               <Sparkles className="w-8 h-8 text-purple-400" />
             </div>
@@ -315,7 +312,7 @@ function InsightPanel({
 
   return (
     <div className={cn(
-      " border  p-5 transition-all duration-300",
+      " bg-transparent p-0 transition-all duration-300",
       c.border
     )}>
       <div className="flex items-center gap-3 mb-4">

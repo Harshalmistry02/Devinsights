@@ -22,10 +22,9 @@ export function CommitQualityCard({ metrics, className }: CommitQualityCardProps
     return (
       <div
         style={{
-          background: "rgba(240,240,250,0.02)",
-          border: "1px solid rgba(240,240,250,0.06)",
-          borderRadius: "var(--radius-sharp)",
-          padding: "20px",
+          background: "transparent",
+          border: "none",
+          padding: "0",
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "24px" }}>
@@ -70,16 +69,14 @@ export function CommitQualityCard({ metrics, className }: CommitQualityCardProps
   return (
     <div
       style={{
-        background: "rgba(240,240,250,0.02)",
-        border: "1px solid rgba(240,240,250,0.06)",
-        borderRadius: "var(--radius-sharp)",
-        overflow: "hidden",
+        background: "transparent",
+        border: "none",
       }}
     >
       {/* Header */}
       <div
         style={{
-          padding: "16px 20px",
+          padding: "16px 0",
           borderBottom: "1px solid rgba(240,240,250,0.05)",
           display: "flex",
           alignItems: "center",
@@ -124,7 +121,7 @@ export function CommitQualityCard({ metrics, className }: CommitQualityCardProps
       </div>
 
       {/* Content */}
-      <div style={{ padding: "20px" }}>
+      <div style={{ padding: "20px 0" }}>
         {/* Score Breakdown */}
         <div style={{ display: "flex", flexDirection: "column", gap: "12px", marginBottom: "20px" }}>
           <MetricBar label="Conventional Commits" value={metrics.conventionalCommitScore} tooltip="% of commits following conventional format" />
@@ -279,10 +276,9 @@ export function CommitQualityCardCompact({ metrics, className }: CommitQualityCa
     return (
       <div
         style={{
-          background: "rgba(240,240,250,0.02)",
-          border: "1px solid rgba(240,240,250,0.06)",
-          borderRadius: "var(--radius-sharp)",
-          padding: "14px 16px",
+          background: "transparent",
+          border: "none",
+          padding: "14px 0",
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "6px" }}>
@@ -308,10 +304,9 @@ export function CommitQualityCardCompact({ metrics, className }: CommitQualityCa
   return (
     <div
       style={{
-        background: "rgba(240,240,250,0.02)",
-        border: "1px solid rgba(240,240,250,0.06)",
-        borderRadius: "var(--radius-sharp)",
-        padding: "14px 16px",
+        background: "transparent",
+        border: "none",
+        padding: "14px 0",
       }}
     >
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>

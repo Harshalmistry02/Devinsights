@@ -42,11 +42,11 @@ export function InsightsFilters({
   };
 
   return (
-    <div className="space-y-4 border border-[rgba(240,240,250,0.15)] p-4 backdrop-blur-sm">
+    <div className="space-y-4 bg-transparent p-0">
       {/* Advanced Filters Toggle */}
       <button
         onClick={() => setShowAdvanced(!showAdvanced)}
-        className="flex items-center gap-2 px-3 py-2 text-sm font-medium opacity-80 hover:opacity-80 border border-[rgba(240,240,250,0.15)] hover:border-[rgba(240,240,250,0.15)] transition-all w-full justify-center"
+        className="flex items-center gap-2 px-3 py-4 text-micro uppercase tracking-[2px] font-medium opacity-80 border-b border-[rgba(240,240,250,0.05)] hover:border-[rgba(240,240,250,0.15)] transition-all w-full justify-center"
       >
         <Filter className="w-4 h-4" />
         Advanced Filters
@@ -58,13 +58,13 @@ export function InsightsFilters({
         <div className="space-y-4 border-t border-[rgba(240,240,250,0.15)] pt-4">
           {/* Repository Type Filter */}
           <div>
-            <label className="block text-xs font-medium opacity-80 mb-2">Repository Type</label>
+            <label className="block text-micro uppercase tracking-[1px] opacity-60 mb-2">Repository Type</label>
             <select
               value={filters.repoType}
               onChange={(e) =>
                 handleFilterChange({ repoType: e.target.value as InsightFilters['repoType'] })
               }
-              className="w-full px-3 py-2 border border-[rgba(240,240,250,0.15)] opacity-80 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
+              className="w-full px-3 py-3 bg-transparent border-b border-[rgba(240,240,250,0.15)] text-[#f0f0fa] text-micro tracking-[1px] uppercase focus:outline-none focus:border-[#f0f0fa]"
             >
               <option value="all">All Repositories</option>
               <option value="personal">Personal Only</option>
@@ -76,13 +76,13 @@ export function InsightsFilters({
           {/* Language Filter */}
           <div>
             <div className="flex items-center justify-between mb-2">
-              <label className="block text-xs font-medium opacity-80">
+              <label className="block text-micro uppercase tracking-[1px] opacity-60">
                 Languages {filters.languages.length > 0 && `(${filters.languages.length})`}
               </label>
               {filters.languages.length > 0 && (
                 <button
                   onClick={clearLanguages}
-                  className="text-xs text-red-400 hover:text-red-300 transition-colors flex items-center gap-1"
+                  className="text-micro uppercase tracking-[1px] opacity-60 hover:opacity-100 transition-colors flex items-center gap-1"
                 >
                   <X className="w-3 h-3" />
                   Clear
@@ -95,10 +95,10 @@ export function InsightsFilters({
                   <button
                     key={lang}
                     onClick={() => toggleLanguage(lang)}
-                    className={`px-3 py-1.5 -full text-xs font-medium transition-all ${
+                    className={`px-3 py-2 text-micro uppercase tracking-[1px] transition-all ${
                       filters.languages.includes(lang)
-                        ? 'bg-cyan-500/20 text-[#f0f0fa] border border-cyan-500/30'
-                        : ' opacity-80 hover:opacity-80 border border-[rgba(240,240,250,0.15)] hover:border-[rgba(240,240,250,0.15)]'
+                        ? 'bg-[rgba(240,240,250,0.1)] text-[#f0f0fa] border-b-2 border-[#f0f0fa]'
+                        : 'opacity-60 hover:opacity-100 border-b-2 border-transparent hover:border-[rgba(240,240,250,0.15)]'
                     }`}
                   >
                     {lang}
@@ -127,7 +127,7 @@ export function InsightsFilters({
 
       {/* Active Filters Summary */}
       {(filters.languages.length > 0 || filters.repoType !== 'all' || filters.includeForked) && (
-        <div className="text-xs opacity-80 pt-2 border-t border-[rgba(240,240,250,0.15)]">
+        <div className="text-micro uppercase tracking-[1px] opacity-60 pt-4 border-t border-[rgba(240,240,250,0.05)]">
           Active filters: 
           {filters.repoType !== 'all' && <span className="ml-1 text-[#f0f0fa]">{filters.repoType}</span>}
           {filters.languages.length > 0 && (

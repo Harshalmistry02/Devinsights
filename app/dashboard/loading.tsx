@@ -4,18 +4,22 @@
 export default function DashboardLoading() {
   return (
     <div
-      className="app-canvas"
+      className="section-cinematic bg-black"
       role="status"
       aria-busy="true"
       aria-label="Loading dashboard content"
     >
-      <div
-        style={{
-          maxWidth: "1400px",
-          margin: "0 auto",
-          padding: "40px clamp(16px, 4vw, 48px)",
-        }}
-      >
+      <div 
+        className="section-photo" 
+        style={{ 
+          backgroundImage: "url('/space-hero.png')", 
+          backgroundSize: "cover", 
+          backgroundPosition: "center",
+          position: "fixed"
+        }} 
+      />
+      <div className="section-overlay" style={{ position: "fixed" }} />
+      <div className="section-content relative z-20 w-full" style={{ padding: "120px clamp(24px, 6vw, 80px) 40px" }}>
         <div
           style={{
             display: "grid",
@@ -34,14 +38,12 @@ export default function DashboardLoading() {
           <aside aria-hidden="true">
             <div
               style={{
-                background: "rgba(240,240,250,0.02)",
-                border: "1px solid rgba(240,240,250,0.06)",
-                borderRadius: "var(--radius-sharp)",
-                overflow: "hidden",
+                background: "transparent",
+                border: "none",
+                borderRadius: "0",
               }}
             >
-              <div style={{ height: "3px", background: "rgba(240,240,250,0.06)" }} />
-              <div style={{ padding: "24px" }}>
+              <div style={{ padding: "24px 0 0" }}>
                 <div className="skeleton" style={{ width: "64px", height: "64px", borderRadius: "50%", marginBottom: "16px" }} />
                 <div className="skeleton" style={{ width: "70%", height: "14px", marginBottom: "8px" }} />
                 <div className="skeleton" style={{ width: "50%", height: "10px", marginBottom: "20px" }} />
@@ -75,15 +77,13 @@ export default function DashboardLoading() {
                 style={{
                   display: "grid",
                   gridTemplateColumns: "repeat(2, 1fr)",
-                  gap: "1px",
-                  background: "rgba(240,240,250,0.06)",
-                  border: "1px solid rgba(240,240,250,0.06)",
-                  borderRadius: "var(--radius-sharp)",
-                  overflow: "hidden",
+                  gap: "24px",
+                  background: "transparent",
+                  border: "none",
                 }}
               >
                 {[...Array(4)].map((_, i) => (
-                  <div key={i} style={{ background: "rgba(0,0,0,0.6)", padding: "20px" }}>
+                  <div key={i} style={{ background: "transparent", padding: "0" }}>
                     <div className="skeleton" style={{ width: "16px", height: "16px", marginBottom: "12px" }} />
                     <div className="skeleton" style={{ width: "60px", height: "10px", marginBottom: "6px" }} />
                     <div className="skeleton" style={{ width: "80px", height: "28px", marginBottom: "4px" }} />
@@ -100,15 +100,13 @@ export default function DashboardLoading() {
                 style={{
                   display: "grid",
                   gridTemplateColumns: "repeat(3, 1fr)",
-                  gap: "1px",
-                  background: "rgba(240,240,250,0.06)",
-                  border: "1px solid rgba(240,240,250,0.06)",
-                  borderRadius: "var(--radius-sharp)",
-                  overflow: "hidden",
+                  gap: "24px",
+                  background: "transparent",
+                  border: "none",
                 }}
               >
                 {[...Array(3)].map((_, i) => (
-                  <div key={i} style={{ background: "rgba(0,0,0,0.6)", padding: "20px" }}>
+                  <div key={i} style={{ background: "transparent", padding: "0" }}>
                     <div className="skeleton" style={{ width: "60%", height: "10px", marginBottom: "8px" }} />
                     <div className="skeleton" style={{ width: "40%", height: "22px", marginBottom: "4px" }} />
                     <div className="skeleton" style={{ width: "45%", height: "8px" }} />
@@ -120,18 +118,16 @@ export default function DashboardLoading() {
             {/* Activity section skeleton */}
             <div
               style={{
-                background: "rgba(240,240,250,0.02)",
-                border: "1px solid rgba(240,240,250,0.06)",
-                borderRadius: "var(--radius-sharp)",
-                overflow: "hidden",
+                background: "transparent",
+                border: "none",
               }}
             >
-              <div style={{ padding: "16px 20px", borderBottom: "1px solid rgba(240,240,250,0.05)" }}>
+              <div style={{ padding: "16px 0", borderBottom: "1px solid rgba(240,240,250,0.05)" }}>
                 <div className="skeleton" style={{ width: "120px", height: "12px" }} />
               </div>
-              <div style={{ padding: "20px", display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: "1px", background: "rgba(240,240,250,0.05)", borderRadius: "var(--radius-sharp)", overflow: "hidden" }}>
+              <div style={{ padding: "20px 0", display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: "24px", background: "transparent" }}>
                 {[...Array(4)].map((_, i) => (
-                  <div key={i} style={{ background: "#000", padding: "16px" }}>
+                  <div key={i} style={{ background: "transparent", padding: "0" }}>
                     <div className="skeleton" style={{ width: "60px", height: "8px", marginBottom: "6px" }} />
                     <div className="skeleton" style={{ width: "45px", height: "20px" }} />
                   </div>

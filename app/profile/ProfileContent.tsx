@@ -83,14 +83,18 @@ export function ProfileContent({ session }: ProfileContentProps) {
   };
 
   return (
-    <div className="app-canvas">
-      <div
-        style={{
-          maxWidth: "800px",
-          margin: "0 auto",
-          padding: "40px clamp(16px, 4vw, 48px)",
-        }}
-      >
+    <div className="section-cinematic bg-black">
+      <div 
+        className="section-photo" 
+        style={{ 
+          backgroundImage: "url('/space-hero.png')", 
+          backgroundSize: "cover", 
+          backgroundPosition: "center",
+          position: "fixed"
+        }} 
+      />
+      <div className="section-overlay" style={{ position: "fixed" }} />
+      <div className="section-content relative z-20 w-full" style={{ padding: "120px clamp(24px, 6vw, 80px) 40px", maxWidth: "800px", margin: "0 auto" }}>
         {/* Header */}
         <header style={{ marginBottom: "40px" }}>
           <Link
@@ -125,16 +129,16 @@ export function ProfileContent({ session }: ProfileContentProps) {
         {/* Profile identity */}
         <div
           style={{
-            background: "rgba(240,240,250,0.02)",
-            border: "1px solid rgba(240,240,250,0.06)",
-            borderRadius: "var(--radius-sharp)",
-            overflow: "hidden",
+            background: "transparent",
+            border: "none",
+            borderRadius: "0",
+            overflow: "visible",
           }}
         >
           {/* Hero row */}
           <div
             style={{
-              padding: "28px",
+              padding: "28px 0",
               borderBottom: "1px solid rgba(240,240,250,0.05)",
               display: "flex",
               alignItems: "center",
@@ -207,13 +211,13 @@ export function ProfileContent({ session }: ProfileContentProps) {
           </div>
 
           {/* Account information */}
-          <div style={{ padding: "24px 28px" }}>
+          <div style={{ padding: "24px 0" }}>
             <section aria-labelledby="account-info-heading">
               <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "16px", opacity: 0.4 }}>
                 <Shield size={12} />
                 <h3 id="account-info-heading" className="text-micro">Account Information</h3>
               </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: "1px", background: "rgba(240,240,250,0.05)", borderRadius: "var(--radius-sharp)", overflow: "hidden" }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: "24px", background: "transparent", borderRadius: "0", overflow: "visible" }}>
                 <InfoRow
                   icon={<Mail size={12} />}
                   label="Email"
@@ -270,7 +274,7 @@ export function ProfileContent({ session }: ProfileContentProps) {
                   </div>
                 </div>
               ) : (
-                <div style={{ display: "flex", flexDirection: "column", gap: "1px", background: "rgba(240,240,250,0.05)", borderRadius: "var(--radius-sharp)", overflow: "hidden" }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: "24px", background: "transparent", borderRadius: "0", overflow: "visible" }}>
                   <InfoRow
                     icon={githubData?.isConnected
                       ? <CheckCircle2 size={12} style={{ color: "rgba(134,239,172,0.7)" }} />
@@ -354,10 +358,11 @@ export function ProfileContent({ session }: ProfileContentProps) {
                 <h3 id="dev-info-heading" className="text-micro" style={{ opacity: 0.3, marginBottom: "8px" }}>DEV INFO</h3>
                 <div
                   style={{
-                    padding: "12px 16px",
-                    background: "rgba(240,240,250,0.02)",
-                    border: "1px solid rgba(240,240,250,0.05)",
-                    borderRadius: "var(--radius-sharp)",
+                    padding: "12px 0",
+                    background: "transparent",
+                    border: "none",
+                    borderBottom: "1px solid rgba(240,240,250,0.05)",
+                    borderRadius: "0",
                   }}
                 >
                   <p className="text-micro" style={{ opacity: 0.3 }}>
@@ -434,8 +439,8 @@ function InfoRow({
         display: "flex",
         alignItems: "flex-start",
         gap: "12px",
-        padding: "14px 18px",
-        background: "rgba(0,0,0,0.5)",
+        padding: "14px 0",
+        background: "transparent",
         transition: "background 0.2s ease",
       }}
       
