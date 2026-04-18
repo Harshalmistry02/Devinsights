@@ -85,7 +85,7 @@ export function EnhancedInsightsDisplay({
       case 'declining':
         return <TrendingDown className="w-5 h-5 text-red-400" />;
       default:
-        return <Minus className="w-5 h-5 text-slate-400" />;
+        return <Minus className="w-5 h-5 opacity-80" />;
     }
   };
 
@@ -96,24 +96,24 @@ export function EnhancedInsightsDisplay({
       case 'declining':
         return 'text-red-400 bg-red-500/10 border-red-500/30';
       default:
-        return 'text-slate-400 bg-slate-800/30 border-slate-700/20';
+        return 'opacity-80  border-[rgba(240,240,250,0.15)]';
     }
   };
 
   if (!insights) {
     return (
-      <div className="bg-slate-900/50 border border-slate-700/30 rounded-xl p-8 text-center">
-        <Lightbulb className="w-12 h-12 text-cyan-400 mx-auto mb-4" />
-        <h3 className="text-lg font-semibold text-slate-200 mb-2">
+      <div className="border border-[rgba(240,240,250,0.15)] p-8 text-center">
+        <Lightbulb className="w-12 h-12 text-[#f0f0fa] mx-auto mb-4" />
+        <h3 className="text-lg font-semibold opacity-80 mb-2">
           No Enhanced Insights Yet
         </h3>
-        <p className="text-sm text-slate-400 mb-6">
+        <p className="text-sm opacity-80 mb-6">
           Generate AI-powered insights with historical comparison and anomaly detection
         </p>
         <button
           onClick={handleGenerateInsights}
           disabled={isLoading}
-          className="px-6 py-3 bg-cyan-500/20 border border-cyan-500/30 rounded-lg text-cyan-400 hover:bg-cyan-500/30 transition-all font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2"
+          className="px-6 py-3 bg-cyan-500/20 border border-cyan-500/30 text-[#f0f0fa] hover:bg-cyan-500/30 transition-all font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2"
         >
           {isLoading ? (
             <>
@@ -136,8 +136,8 @@ export function EnhancedInsightsDisplay({
       {/* Header with Trend Indicator */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <h3 className="text-lg font-semibold text-slate-200">Enhanced AI Insights</h3>
-          <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium border ${getTrendColor()}`}>
+          <h3 className="text-lg font-semibold opacity-80">Enhanced AI Insights</h3>
+          <div className={`flex items-center gap-2 px-3 py-1.5  text-sm font-medium border ${getTrendColor()}`}>
             {getTrendIcon()}
             <span className="capitalize">{contextData.trend}</span>
           </div>
@@ -145,7 +145,7 @@ export function EnhancedInsightsDisplay({
         <button
           onClick={handleGenerateInsights}
           disabled={isLoading}
-          className="px-4 py-2 bg-slate-800/50 border border-slate-700/30 rounded-lg text-slate-300 hover:text-slate-200 hover:border-slate-600/30 transition-all text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2"
+          className="px-4 py-2 border border-[rgba(240,240,250,0.15)] opacity-80 hover:opacity-80 hover:border-[rgba(240,240,250,0.15)] transition-all text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2"
         >
           {isLoading ? (
             <Loader2 className="w-4 h-4 animate-spin" />
@@ -159,39 +159,39 @@ export function EnhancedInsightsDisplay({
       {/* Comparison Stats */}
       {contextData.comparison && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-slate-800/30 border border-slate-700/20 rounded-lg p-4">
-            <p className="text-xs text-slate-500 mb-1">Commits</p>
+          <div className="border border-[rgba(240,240,250,0.15)] p-4">
+            <p className="text-xs opacity-80 mb-1">Commits</p>
             <div className="flex items-baseline gap-2">
-              <p className="text-2xl font-bold text-slate-200">
+              <p className="text-2xl font-bold opacity-80">
                 {contextData.comparison.commitChange > 0 ? '+' : ''}
                 {contextData.comparison.commitChange}
               </p>
-              <p className="text-sm text-slate-400">
+              <p className="text-sm opacity-80">
                 ({contextData.comparison.commitChangePercentage > 0 ? '+' : ''}
                 {contextData.comparison.commitChangePercentage}%)
               </p>
             </div>
           </div>
           
-          <div className="bg-slate-800/30 border border-slate-700/20 rounded-lg p-4">
-            <p className="text-xs text-slate-500 mb-1">Streak</p>
+          <div className="border border-[rgba(240,240,250,0.15)] p-4">
+            <p className="text-xs opacity-80 mb-1">Streak</p>
             <div className="flex items-baseline gap-2">
-              <p className="text-2xl font-bold text-slate-200">
+              <p className="text-2xl font-bold opacity-80">
                 {contextData.comparison.streakChange > 0 ? '+' : ''}
                 {contextData.comparison.streakChange}
               </p>
-              <p className="text-sm text-slate-400">days</p>
+              <p className="text-sm opacity-80">days</p>
             </div>
           </div>
 
-          <div className="bg-slate-800/30 border border-slate-700/20 rounded-lg p-4">
-            <p className="text-xs text-slate-500 mb-1">Consistency</p>
+          <div className="border border-[rgba(240,240,250,0.15)] p-4">
+            <p className="text-xs opacity-80 mb-1">Consistency</p>
             <div className="flex items-baseline gap-2">
-              <p className="text-2xl font-bold text-slate-200">
+              <p className="text-2xl font-bold opacity-80">
                 {contextData.comparison.consistencyChange > 0 ? '+' : ''}
                 {contextData.comparison.consistencyChange}
               </p>
-              <p className="text-sm text-slate-400">points</p>
+              <p className="text-sm opacity-80">points</p>
             </div>
           </div>
         </div>
@@ -199,7 +199,7 @@ export function EnhancedInsightsDisplay({
 
       {/* Anomalies */}
       {contextData.anomalies.length > 0 && (
-        <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4">
+        <div className="bg-amber-500/10 border border-amber-500/30 p-4">
           <div className="flex items-start gap-3">
             <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
             <div className="flex-1">
@@ -222,15 +222,15 @@ export function EnhancedInsightsDisplay({
       {/* Insights Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Patterns */}
-        <div className="bg-slate-900/50 border border-slate-700/30 rounded-xl p-5">
+        <div className="border border-[rgba(240,240,250,0.15)] p-5">
           <div className="flex items-center gap-2 mb-4">
-            <Target className="w-5 h-5 text-blue-400" />
-            <h4 className="font-semibold text-slate-200">Patterns</h4>
+            <Target className="w-5 h-5 text-[#f0f0fa]" />
+            <h4 className="font-semibold opacity-80">Patterns</h4>
           </div>
           <ul className="space-y-3">
             {insights.patterns.map((pattern, idx) => (
-              <li key={idx} className="text-sm text-slate-300 flex items-start gap-2">
-                <span className="text-blue-400 mt-1 shrink-0">•</span>
+              <li key={idx} className="text-sm opacity-80 flex items-start gap-2">
+                <span className="text-[#f0f0fa] mt-1 shrink-0">•</span>
                 <span>{pattern}</span>
               </li>
             ))}
@@ -238,14 +238,14 @@ export function EnhancedInsightsDisplay({
         </div>
 
         {/* Strengths */}
-        <div className="bg-slate-900/50 border border-slate-700/30 rounded-xl p-5">
+        <div className="border border-[rgba(240,240,250,0.15)] p-5">
           <div className="flex items-center gap-2 mb-4">
             <CheckCircle2 className="w-5 h-5 text-green-400" />
-            <h4 className="font-semibold text-slate-200">Strengths</h4>
+            <h4 className="font-semibold opacity-80">Strengths</h4>
           </div>
           <ul className="space-y-3">
             {insights.strengths.map((strength, idx) => (
-              <li key={idx} className="text-sm text-slate-300 flex items-start gap-2">
+              <li key={idx} className="text-sm opacity-80 flex items-start gap-2">
                 <span className="text-green-400 mt-1 shrink-0">•</span>
                 <span>{strength}</span>
               </li>
@@ -254,15 +254,15 @@ export function EnhancedInsightsDisplay({
         </div>
 
         {/* Suggestions */}
-        <div className="bg-slate-900/50 border border-slate-700/30 rounded-xl p-5">
+        <div className="border border-[rgba(240,240,250,0.15)] p-5">
           <div className="flex items-center gap-2 mb-4">
-            <Lightbulb className="w-5 h-5 text-cyan-400" />
-            <h4 className="font-semibold text-slate-200">Suggestions</h4>
+            <Lightbulb className="w-5 h-5 text-[#f0f0fa]" />
+            <h4 className="font-semibold opacity-80">Suggestions</h4>
           </div>
           <ul className="space-y-3">
             {insights.suggestions.map((suggestion, idx) => (
-              <li key={idx} className="text-sm text-slate-300 flex items-start gap-2">
-                <span className="text-cyan-400 mt-1 shrink-0">•</span>
+              <li key={idx} className="text-sm opacity-80 flex items-start gap-2">
+                <span className="text-[#f0f0fa] mt-1 shrink-0">•</span>
                 <span>{suggestion}</span>
               </li>
             ))}

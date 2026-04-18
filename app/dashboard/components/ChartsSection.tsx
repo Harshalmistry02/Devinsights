@@ -34,8 +34,8 @@ export function ChartsSection({ analytics }: ChartsSectionProps) {
   return (
     <section className="space-y-6 mt-6" aria-labelledby="charts-title">
       <div className="flex items-center justify-between">
-        <h3 id="charts-title" className="text-xl font-semibold text-slate-200 flex items-center gap-2">
-          <BarChart3 className="w-5 h-5 text-cyan-400" aria-hidden="true" />
+        <h3 id="charts-title" className="text-xl font-semibold opacity-80 flex items-center gap-2">
+          <BarChart3 className="w-5 h-5 text-[#f0f0fa]" aria-hidden="true" />
           Charts & Visualizations
         </h3>
       </div>
@@ -70,9 +70,9 @@ export function ChartsSection({ analytics }: ChartsSectionProps) {
           {hasLanguageData ? (
             <DynamicLanguageBreakdown data={topLanguages} />
           ) : (
-            <div className="bg-slate-900/50 border border-slate-700/30 rounded-xl p-4 sm:p-6 backdrop-blur-sm h-full">
-              <h3 className="text-base sm:text-lg font-semibold text-slate-200 mb-4 flex items-center gap-2">
-                <PieChart className="w-5 h-5 text-cyan-400" aria-hidden="true" />
+            <div className="border border-[rgba(240,240,250,0.15)] p-4 sm:p-6 backdrop-blur-sm h-full">
+              <h3 className="text-base sm:text-lg font-semibold opacity-80 mb-4 flex items-center gap-2">
+                <PieChart className="w-5 h-5 text-[#f0f0fa]" aria-hidden="true" />
                 Language Breakdown
               </h3>
               <LanguageEmptyState />
@@ -83,9 +83,9 @@ export function ChartsSection({ analytics }: ChartsSectionProps) {
           {repoStats.length > 0 ? (
             <DynamicRepoStatsChart data={repoStats} limit={6} />
           ) : (
-            <div className="bg-slate-900/50 border border-slate-700/30 rounded-xl p-4 sm:p-6 backdrop-blur-sm h-full">
-              <h3 className="text-base sm:text-lg font-semibold text-slate-200 mb-4 flex items-center gap-2">
-                <GitBranch className="w-5 h-5 text-cyan-400" aria-hidden="true" />
+            <div className="border border-[rgba(240,240,250,0.15)] p-4 sm:p-6 backdrop-blur-sm h-full">
+              <h3 className="text-base sm:text-lg font-semibold opacity-80 mb-4 flex items-center gap-2">
+                <GitBranch className="w-5 h-5 text-[#f0f0fa]" aria-hidden="true" />
                 Repository Stats
               </h3>
               <ChartEmptyState chartType="bar" />

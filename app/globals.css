@@ -21,6 +21,7 @@
   --input: 240 5.9% 90%;
   --ring: 240 5.9% 10%;
   --radius: 0.5rem;
+  --radius-button: 32px;
 }
 
 .dark {
@@ -143,5 +144,164 @@ body {
   /* Smooth focus styles for accessibility */
   .focus-ring {
     @apply focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:ring-offset-2 focus:ring-offset-slate-900;
+  }
+}
+
+/* SpaceX Design System Utilities */
+@layer components {
+  .section-cinematic {
+    @apply relative w-full overflow-hidden flex items-end justify-start;
+    min-height: 100vh;
+  }
+  
+  .section-photo {
+    @apply absolute inset-0 w-full h-full object-cover z-0;
+  }
+  
+  .section-overlay {
+    @apply absolute inset-0 z-10;
+    pointer-events: none;
+    background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 40%, rgba(0,0,0,0.1) 100%);
+  }
+  
+  .section-content {
+    @apply relative z-20 w-full;
+    padding-bottom: 15vh;
+    padding-left: clamp(24px, 6vw, 80px);
+    padding-right: clamp(24px, 6vw, 80px);
+  }
+  
+  /* Typography */
+  .text-display-hero {
+    font-family: var(--font-barlow-condensed), sans-serif;
+    font-weight: 700;
+    font-size: 48px;
+    line-height: 1;
+    letter-spacing: 0.96px;
+    text-transform: uppercase;
+    color: #f0f0fa;
+  }
+  
+  .text-section-head {
+    font-family: var(--font-barlow-condensed), sans-serif;
+    font-weight: 700;
+    font-size: 24px;
+    line-height: 1;
+    letter-spacing: 0.96px;
+    text-transform: uppercase;
+    color: #f0f0fa;
+  }
+  
+  .text-body {
+    font-family: var(--font-barlow), sans-serif;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 1.5;
+    color: #f0f0fa;
+    text-transform: uppercase;
+  }
+  
+  .text-micro {
+    font-family: var(--font-barlow), sans-serif;
+    font-weight: 400;
+    font-size: 10px;
+    line-height: 0.94;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: #f0f0fa;
+  }
+  
+  .text-dim {
+    opacity: 0.7;
+  }
+  
+  /* Buttons */
+  .btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(240, 240, 250, 0.1);
+    color: #f0f0fa;
+    padding: 18px 36px;
+    border-radius: 32px;
+    border: 1px solid rgba(240, 240, 250, 0.35);
+    font-family: var(--font-barlow-condensed), sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 1.17px;
+    text-transform: uppercase;
+    transition: all 0.2s ease;
+  }
+  
+  .btn-ghost:hover {
+    background: rgba(240, 240, 250, 0.2);
+    color: #ffffff;
+  }
+  
+  /* Navbar */
+  .nav-overlay {
+    @apply fixed top-0 left-0 right-0 z-50 flex items-center justify-between transition-all duration-300;
+    padding: 24px clamp(24px, 6vw, 80px);
+  }
+  
+  .nav-overlay.scrolled {
+    @apply backdrop-blur-md;
+    background: rgba(0, 0, 0, 0.85);
+    border-bottom: 1px solid rgba(240, 240, 250, 0.05);
+    padding-top: 16px;
+    padding-bottom: 16px;
+  }
+  
+  .text-nav {
+    font-family: var(--font-barlow), sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 1.17px;
+    text-transform: uppercase;
+    color: #f0f0fa;
+  }
+  
+  .btn-ghost-sm {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: rgba(240, 240, 250, 0.1);
+    color: #f0f0fa;
+    padding: 10px 20px;
+    border-radius: 32px;
+    border: 1px solid rgba(240, 240, 250, 0.35);
+    font-family: var(--font-barlow-condensed), sans-serif;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    transition: all 0.2s ease;
+  }
+  
+  .btn-ghost-sm:hover {
+    background: rgba(240, 240, 250, 0.2);
+    color: #ffffff;
+  }
+  
+  .text-caption {
+    font-family: var(--font-barlow), sans-serif;
+    font-weight: 400;
+    font-size: 12px;
+    line-height: 1;
+    text-transform: uppercase;
+    color: #f0f0fa;
+  }
+  
+  .skeleton {
+    border-radius: 4px;
+    background: linear-gradient(
+      90deg,
+      rgba(240, 240, 250, 0.02) 25%,
+      rgba(240, 240, 250, 0.08) 50%,
+      rgba(240, 240, 250, 0.02) 75%
+    );
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.5s ease-in-out infinite;
   }
 }

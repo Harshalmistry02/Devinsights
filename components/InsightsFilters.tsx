@@ -42,11 +42,11 @@ export function InsightsFilters({
   };
 
   return (
-    <div className="space-y-4 bg-slate-900/50 border border-slate-700/30 rounded-xl p-4 backdrop-blur-sm">
+    <div className="space-y-4 border border-[rgba(240,240,250,0.15)] p-4 backdrop-blur-sm">
       {/* Advanced Filters Toggle */}
       <button
         onClick={() => setShowAdvanced(!showAdvanced)}
-        className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium bg-slate-800/50 text-slate-400 hover:text-slate-300 border border-slate-700/20 hover:border-slate-600/30 transition-all w-full justify-center"
+        className="flex items-center gap-2 px-3 py-2 text-sm font-medium opacity-80 hover:opacity-80 border border-[rgba(240,240,250,0.15)] hover:border-[rgba(240,240,250,0.15)] transition-all w-full justify-center"
       >
         <Filter className="w-4 h-4" />
         Advanced Filters
@@ -55,16 +55,16 @@ export function InsightsFilters({
 
       {/* Advanced Filters */}
       {showAdvanced && (
-        <div className="space-y-4 border-t border-slate-700/30 pt-4">
+        <div className="space-y-4 border-t border-[rgba(240,240,250,0.15)] pt-4">
           {/* Repository Type Filter */}
           <div>
-            <label className="block text-xs font-medium text-slate-400 mb-2">Repository Type</label>
+            <label className="block text-xs font-medium opacity-80 mb-2">Repository Type</label>
             <select
               value={filters.repoType}
               onChange={(e) =>
                 handleFilterChange({ repoType: e.target.value as InsightFilters['repoType'] })
               }
-              className="w-full px-3 py-2 bg-slate-800/50 border border-slate-700/30 rounded-lg text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-[rgba(240,240,250,0.15)] opacity-80 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
             >
               <option value="all">All Repositories</option>
               <option value="personal">Personal Only</option>
@@ -76,7 +76,7 @@ export function InsightsFilters({
           {/* Language Filter */}
           <div>
             <div className="flex items-center justify-between mb-2">
-              <label className="block text-xs font-medium text-slate-400">
+              <label className="block text-xs font-medium opacity-80">
                 Languages {filters.languages.length > 0 && `(${filters.languages.length})`}
               </label>
               {filters.languages.length > 0 && (
@@ -95,10 +95,10 @@ export function InsightsFilters({
                   <button
                     key={lang}
                     onClick={() => toggleLanguage(lang)}
-                    className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+                    className={`px-3 py-1.5 -full text-xs font-medium transition-all ${
                       filters.languages.includes(lang)
-                        ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30'
-                        : 'bg-slate-800/50 text-slate-400 hover:text-slate-300 border border-slate-700/20 hover:border-slate-600/30'
+                        ? 'bg-cyan-500/20 text-[#f0f0fa] border border-cyan-500/30'
+                        : ' opacity-80 hover:opacity-80 border border-[rgba(240,240,250,0.15)] hover:border-[rgba(240,240,250,0.15)]'
                     }`}
                   >
                     {lang}
@@ -106,7 +106,7 @@ export function InsightsFilters({
                 ))}
               </div>
             ) : (
-              <p className="text-xs text-slate-500 italic">No languages available</p>
+              <p className="text-xs opacity-80 italic">No languages available</p>
             )}
           </div>
 
@@ -116,9 +116,9 @@ export function InsightsFilters({
               type="checkbox"
               checked={filters.includeForked}
               onChange={(e) => handleFilterChange({ includeForked: e.target.checked })}
-              className="w-4 h-4 rounded border-slate-600 bg-slate-800 text-cyan-500 focus:ring-cyan-500 focus:ring-offset-slate-900 cursor-pointer"
+              className="w-4 h-4 border-[rgba(240,240,250,0.15)] text-[#f0f0fa] focus:ring-cyan-500 focus:ring-offset-slate-900 cursor-pointer"
             />
-            <span className="text-sm text-slate-300 group-hover:text-slate-200 transition-colors">
+            <span className="text-sm opacity-80 group-hover:opacity-80 transition-colors">
               Include forked repositories
             </span>
           </label>
@@ -127,13 +127,13 @@ export function InsightsFilters({
 
       {/* Active Filters Summary */}
       {(filters.languages.length > 0 || filters.repoType !== 'all' || filters.includeForked) && (
-        <div className="text-xs text-slate-500 pt-2 border-t border-slate-700/30">
+        <div className="text-xs opacity-80 pt-2 border-t border-[rgba(240,240,250,0.15)]">
           Active filters: 
-          {filters.repoType !== 'all' && <span className="ml-1 text-cyan-400">{filters.repoType}</span>}
+          {filters.repoType !== 'all' && <span className="ml-1 text-[#f0f0fa]">{filters.repoType}</span>}
           {filters.languages.length > 0 && (
-            <span className="ml-1 text-cyan-400">{filters.languages.length} languages</span>
+            <span className="ml-1 text-[#f0f0fa]">{filters.languages.length} languages</span>
           )}
-          {filters.includeForked && <span className="ml-1 text-cyan-400">+forks</span>}
+          {filters.includeForked && <span className="ml-1 text-[#f0f0fa]">+forks</span>}
         </div>
       )}
     </div>

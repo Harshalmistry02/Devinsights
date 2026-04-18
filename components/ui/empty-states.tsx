@@ -1,11 +1,11 @@
 'use client';
 
 import React from 'react';
-import { 
-  Github, 
-  Activity, 
-  Code, 
-  TrendingUp, 
+import {
+  Github,
+  Activity,
+  Code,
+  TrendingUp,
   BarChart3,
   PieChart,
   Calendar,
@@ -18,10 +18,7 @@ import {
 import Link from 'next/link';
 
 /**
- * Empty State Components for Dashboard
- * 
- * Provides meaningful feedback when data is not available,
- * guiding users on what actions to take next.
+ * Empty State Components — SpaceX-inspired, minimal achromatic design
  */
 
 interface EmptyStateProps {
@@ -37,37 +34,40 @@ interface EmptyStateProps {
 }
 
 // Generic Empty State Component
-export function EmptyState({ 
-  icon, 
-  title, 
-  description, 
+export function EmptyState({
+  icon,
+  title,
+  description,
   action,
   variant = 'default'
 }: EmptyStateProps) {
   const isCompact = variant === 'compact';
-  
+
   return (
-    <div 
-      className={`flex items-center justify-center ${isCompact ? 'h-32' : 'h-48'} text-slate-500`}
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        minHeight: isCompact ? "100px" : "160px",
+      }}
       role="status"
       aria-label={`${title}: ${description}`}
     >
-      <div className="text-center">
+      <div style={{ textAlign: "center" }}>
         {icon && (
-          <div className={`mx-auto ${isCompact ? 'mb-2' : 'mb-3'} opacity-50`} aria-hidden="true">
+          <div style={{ marginBottom: isCompact ? "8px" : "12px", opacity: 0.15 }} aria-hidden="true">
             {icon}
           </div>
         )}
-        <p className={`${isCompact ? 'text-xs' : 'text-sm'} font-medium text-slate-400`}>{title}</p>
-        <p className={`${isCompact ? 'text-xs' : 'text-xs'} mt-1 text-slate-600`}>
-          {description}
-        </p>
+        <p className="text-caption-bold" style={{ opacity: 0.45, marginBottom: "4px" }}>{title}</p>
+        <p className="text-micro" style={{ opacity: 0.25, maxWidth: "240px" }}>{description}</p>
         {action && (
-          <div className="mt-3">
+          <div style={{ marginTop: "16px" }}>
             {action.href ? (
               <Link
                 href={action.href}
-                className="inline-flex items-center gap-2 px-4 py-2 text-xs font-medium text-cyan-400 bg-cyan-500/10 border border-cyan-500/30 rounded-lg hover:bg-cyan-500/20 transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2 focus:ring-offset-slate-900"
+                className="btn-ghost btn-ghost-sm"
                 aria-label={action.label}
               >
                 {action.label}
@@ -75,7 +75,7 @@ export function EmptyState({
             ) : (
               <button
                 onClick={action.onClick}
-                className="inline-flex items-center gap-2 px-4 py-2 text-xs font-medium text-cyan-400 bg-cyan-500/10 border border-cyan-500/30 rounded-lg hover:bg-cyan-500/20 transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2 focus:ring-offset-slate-900"
+                className="btn-ghost btn-ghost-sm"
                 aria-label={action.label}
               >
                 {action.label}
@@ -91,37 +91,51 @@ export function EmptyState({
 // First-time user empty state - No synced data
 export function NoDataEmptyState() {
   return (
-    <div 
-      className="bg-slate-900/50 border border-slate-700/30 rounded-xl p-8 backdrop-blur-sm"
+    <div
+      style={{
+        background: "rgba(240,240,250,0.02)",
+        border: "1px solid rgba(240,240,250,0.06)",
+        borderRadius: "var(--radius-sharp)",
+        padding: "40px 24px",
+        textAlign: "center",
+      }}
       role="region"
       aria-label="No data available"
     >
-      <div className="text-center max-w-md mx-auto">
-        <div 
-          className="w-16 h-16 mx-auto mb-4 rounded-full bg-linear-to-br from-cyan-500/20 to-blue-500/20 flex items-center justify-center border border-cyan-500/30"
+      <div style={{ maxWidth: "360px", margin: "0 auto" }}>
+        <div
+          style={{
+            width: "52px",
+            height: "52px",
+            margin: "0 auto 20px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            opacity: 0.2,
+          }}
           aria-hidden="true"
         >
-          <Github className="w-8 h-8 text-cyan-400" />
+          <Github size={40} />
         </div>
-        <h3 className="text-lg font-semibold text-slate-200 mb-2">
+        <h3 className="text-caption-bold" style={{ fontSize: "0.875rem", marginBottom: "8px", opacity: 0.7 }}>
           Sync your GitHub data to see insights
         </h3>
-        <p className="text-sm text-slate-400 mb-6">
-          Connect and sync your GitHub repositories to unlock powerful analytics, 
+        <p className="text-micro" style={{ opacity: 0.3, marginBottom: "24px", maxWidth: "280px", margin: "0 auto 24px" }}>
+          Connect and sync your GitHub repositories to unlock powerful analytics,
           activity tracking, and AI-powered insights about your coding patterns.
         </p>
-        <div className="flex flex-col sm:flex-row gap-3 justify-center" aria-label="Benefits of syncing">
-          <div className="flex items-center gap-2 text-xs text-slate-500">
-            <Activity className="w-4 h-4" aria-hidden="true" />
-            <span>Track your commits</span>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "16px", justifyContent: "center" }} aria-label="Benefits of syncing">
+          <div style={{ display: "flex", alignItems: "center", gap: "6px", opacity: 0.3 }}>
+            <Activity size={12} aria-hidden="true" />
+            <span className="text-micro">Track your commits</span>
           </div>
-          <div className="flex items-center gap-2 text-xs text-slate-500">
-            <Code className="w-4 h-4" aria-hidden="true" />
-            <span>Analyze languages</span>
+          <div style={{ display: "flex", alignItems: "center", gap: "6px", opacity: 0.3 }}>
+            <Code size={12} aria-hidden="true" />
+            <span className="text-micro">Analyze languages</span>
           </div>
-          <div className="flex items-center gap-2 text-xs text-slate-500">
-            <TrendingUp className="w-4 h-4" aria-hidden="true" />
-            <span>Discover patterns</span>
+          <div style={{ display: "flex", alignItems: "center", gap: "6px", opacity: 0.3 }}>
+            <TrendingUp size={12} aria-hidden="true" />
+            <span className="text-micro">Discover patterns</span>
           </div>
         </div>
       </div>
@@ -133,7 +147,7 @@ export function NoDataEmptyState() {
 export function ActivityEmptyState() {
   return (
     <EmptyState
-      icon={<Activity className="w-12 h-12" />}
+      icon={<Activity size={40} />}
       title="No activity data yet"
       description='Use the "Sync GitHub Data" button to get started'
     />
@@ -143,21 +157,31 @@ export function ActivityEmptyState() {
 // Chart Empty State
 export function ChartEmptyState({ chartType = 'chart' }: { chartType?: string }) {
   const icons: Record<string, React.ReactNode> = {
-    timeline: <TrendingUp className="w-10 h-10" />,
-    heatmap: <Calendar className="w-10 h-10" />,
-    bar: <BarChart3 className="w-10 h-10" />,
-    pie: <PieChart className="w-10 h-10" />,
-    chart: <BarChart3 className="w-10 h-10" />,
+    timeline: <TrendingUp size={32} />,
+    heatmap: <Calendar size={32} />,
+    bar: <BarChart3 size={32} />,
+    pie: <PieChart size={32} />,
+    chart: <BarChart3 size={32} />,
   };
 
   return (
-    <div className="h-64 flex items-center justify-center bg-slate-800/30 rounded-lg border border-slate-700/20">
-      <div className="text-center text-slate-500">
-        <div className="mx-auto mb-2 opacity-40">
+    <div
+      style={{
+        height: "200px",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        background: "rgba(240,240,250,0.02)",
+        border: "1px solid rgba(240,240,250,0.05)",
+        borderRadius: "var(--radius-sharp)",
+      }}
+    >
+      <div style={{ textAlign: "center" }}>
+        <div style={{ opacity: 0.1, marginBottom: "8px" }}>
           {icons[chartType] || icons.chart}
         </div>
-        <p className="text-sm">No data available</p>
-        <p className="text-xs text-slate-600 mt-1">Sync your GitHub data to see {chartType}</p>
+        <p className="text-micro" style={{ opacity: 0.25 }}>No data available</p>
+        <p className="text-micro" style={{ opacity: 0.15, marginTop: "3px" }}>Sync your GitHub data to see {chartType}</p>
       </div>
     </div>
   );
@@ -167,7 +191,7 @@ export function ChartEmptyState({ chartType = 'chart' }: { chartType?: string })
 export function LanguageEmptyState() {
   return (
     <EmptyState
-      icon={<Code className="w-10 h-10" />}
+      icon={<Code size={32} />}
       title="No language data yet"
       description="Language statistics will appear after syncing repositories"
       variant="compact"
@@ -178,10 +202,10 @@ export function LanguageEmptyState() {
 // Streak Empty State
 export function StreakEmptyState() {
   return (
-    <div className="text-center py-2">
-      <Zap className="w-5 h-5 mx-auto mb-1 text-slate-500 opacity-50" />
-      <p className="text-sm text-slate-400">Start today!</p>
-      <p className="text-xs text-slate-600">Make a commit to begin your streak</p>
+    <div style={{ textAlign: "center", padding: "8px 0" }}>
+      <Zap size={16} style={{ margin: "0 auto 4px", opacity: 0.15 }} />
+      <p className="text-caption" style={{ opacity: 0.35 }}>Start today!</p>
+      <p className="text-micro" style={{ opacity: 0.2 }}>Make a commit to begin your streak</p>
     </div>
   );
 }
@@ -194,39 +218,54 @@ interface ErrorBannerProps {
   onDismiss?: () => void;
 }
 
-export function ErrorBanner({ 
-  title = "Sync Error", 
-  message, 
-  onRetry, 
-  onDismiss 
+export function ErrorBanner({
+  title = "Sync Error",
+  message,
+  onRetry,
+  onDismiss
 }: ErrorBannerProps) {
   return (
-    <div 
-      className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 backdrop-blur-sm mb-6 animate-in slide-in-from-top-2 duration-300"
+    <div
+      style={{
+        background: "rgba(252,165,165,0.04)",
+        border: "1px solid rgba(252,165,165,0.12)",
+        borderRadius: "var(--radius-sharp)",
+        padding: "16px 20px",
+        marginBottom: "20px",
+      }}
       role="alert"
       aria-live="assertive"
     >
-      <div className="flex items-start gap-3">
-        <XCircle className="w-5 h-5 text-red-400 shrink-0 mt-0.5" aria-hidden="true" />
-        <div className="flex-1">
-          <h4 className="text-sm font-medium text-red-400 mb-1">{title}</h4>
-          <p className="text-sm text-red-300/80">{message}</p>
-          <div className="flex gap-2 mt-3">
+      <div style={{ display: "flex", alignItems: "flex-start", gap: "12px" }}>
+        <XCircle size={14} style={{ color: "rgba(252,165,165,0.6)", flexShrink: 0, marginTop: "1px" }} aria-hidden="true" />
+        <div style={{ flex: 1 }}>
+          <p className="text-caption-bold" style={{ color: "rgba(252,165,165,0.7)", marginBottom: "4px" }}>{title}</p>
+          <p className="text-caption" style={{ color: "rgba(252,165,165,0.5)" }}>{message}</p>
+          <div style={{ display: "flex", gap: "8px", marginTop: "10px" }}>
             {onRetry && (
               <button
                 onClick={onRetry}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-red-400 bg-red-500/10 border border-red-500/30 rounded-lg hover:bg-red-500/20 transition-colors focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-offset-2 focus:ring-offset-slate-900"
+                className="btn-ghost btn-ghost-sm"
+                style={{ fontSize: "0.625rem" }}
                 aria-label="Retry the failed sync"
               >
-                <RefreshCw className="w-3 h-3" aria-hidden="true" />
+                <RefreshCw size={10} />
                 Retry Sync
               </button>
             )}
             {onDismiss && (
               <button
                 onClick={onDismiss}
-                className="px-3 py-1.5 text-xs text-slate-400 hover:text-slate-300 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-slate-900"
-                aria-label="Dismiss this error banner"
+                className="text-micro"
+                style={{
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  color: "var(--spectral-white)",
+                  opacity: 0.3,
+                  transition: "opacity 0.2s ease",
+                }}
+                aria-label="Dismiss error"
               >
                 Dismiss
               </button>
@@ -245,36 +284,51 @@ interface WarningBannerProps {
   onRetry?: () => void;
 }
 
-export function PartialSyncWarning({ 
-  syncedRepos, 
-  totalRepos, 
-  onRetry 
+export function PartialSyncWarning({
+  syncedRepos,
+  totalRepos,
+  onRetry
 }: WarningBannerProps) {
   return (
-    <div 
-      className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 backdrop-blur-sm mb-6 animate-in slide-in-from-top-2 duration-300"
+    <div
+      style={{
+        background: "rgba(251,191,36,0.04)",
+        border: "1px solid rgba(251,191,36,0.12)",
+        borderRadius: "var(--radius-sharp)",
+        padding: "16px 20px",
+        marginBottom: "20px",
+      }}
       role="status"
       aria-label="Partial sync notice"
     >
-      <div className="flex items-start gap-3">
-        <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" aria-hidden="true" />
-        <div className="flex-1">
-          <div className="flex items-center gap-2 mb-1">
-            <h4 className="text-sm font-medium text-amber-400">Partial Sync</h4>
-            <span className="px-2 py-0.5 text-xs bg-amber-500/20 border border-amber-500/30 rounded-full text-amber-400">
+      <div style={{ display: "flex", alignItems: "flex-start", gap: "12px" }}>
+        <AlertTriangle size={14} style={{ color: "rgba(251,191,36,0.6)", flexShrink: 0, marginTop: "1px" }} aria-hidden="true" />
+        <div style={{ flex: 1 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
+            <p className="text-caption-bold" style={{ color: "rgba(251,191,36,0.7)" }}>Partial Sync</p>
+            <span
+              className="text-micro"
+              style={{
+                padding: "2px 6px",
+                border: "1px solid rgba(251,191,36,0.2)",
+                color: "rgba(251,191,36,0.5)",
+                borderRadius: "2px",
+              }}
+            >
               {syncedRepos}/{totalRepos} repos
             </span>
           </div>
-          <p className="text-sm text-amber-300/80">
-            Some repositories couldn't be synced. Showing available data.
+          <p className="text-caption" style={{ color: "rgba(251,191,36,0.4)" }}>
+            Some repositories couldn&apos;t be synced. Showing available data.
           </p>
           {onRetry && (
             <button
               onClick={onRetry}
-              className="inline-flex items-center gap-1.5 mt-2 px-3 py-1.5 text-xs font-medium text-amber-400 bg-amber-500/10 border border-amber-500/30 rounded-lg hover:bg-amber-500/20 transition-colors focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2 focus:ring-offset-slate-900"
+              className="btn-ghost btn-ghost-sm"
+              style={{ marginTop: "10px", fontSize: "0.625rem" }}
               aria-label="Retry sync for remaining repositories"
             >
-              <RefreshCw className="w-3 h-3" aria-hidden="true" />
+              <RefreshCw size={10} />
               Retry Sync
             </button>
           )}
@@ -292,45 +346,54 @@ interface SyncProgressBannerProps {
   totalRepos?: number;
 }
 
-export function SyncProgressBanner({ 
-  progress = 0, 
+export function SyncProgressBanner({
+  progress = 0,
   message = "Syncing GitHub data...",
   processedRepos,
-  totalRepos 
+  totalRepos
 }: SyncProgressBannerProps) {
   return (
-    <div 
-      className="bg-cyan-500/10 border border-cyan-500/30 rounded-xl p-4 backdrop-blur-sm mb-6 animate-in fade-in duration-300"
+    <div
+      style={{
+        background: "rgba(240,240,250,0.03)",
+        border: "1px solid rgba(240,240,250,0.08)",
+        borderRadius: "var(--radius-sharp)",
+        padding: "16px 20px",
+        marginBottom: "20px",
+      }}
       role="region"
       aria-label="Sync progress"
     >
-      <div className="flex items-center gap-3">
-        <div className="relative">
-          <RefreshCw className="w-5 h-5 text-cyan-400 animate-spin" aria-hidden="true" />
-        </div>
-        <div className="flex-1">
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-sm text-cyan-400 font-medium">{message}</p>
+      <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+        <RefreshCw
+          size={14}
+          style={{ opacity: 0.4, animation: "spin 1s linear infinite", flexShrink: 0 }}
+          aria-hidden="true"
+        />
+        <div style={{ flex: 1 }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "8px" }}>
+            <p className="text-caption" style={{ opacity: 0.6 }}>{message}</p>
             {processedRepos !== undefined && totalRepos !== undefined && (
-              <span className="text-xs text-cyan-400/70" aria-label={`${processedRepos} of ${totalRepos} repositories processed`}>
+              <span
+                className="text-micro"
+                style={{ opacity: 0.35 }}
+                aria-label={`${processedRepos} of ${totalRepos} repositories processed`}
+              >
                 {processedRepos}/{totalRepos} repos
               </span>
             )}
           </div>
-          <div 
-            className="h-1.5 bg-slate-800/80 rounded-full overflow-hidden"
+          <div
+            className="progress-bar-track"
             role="progressbar"
             aria-valuenow={progress}
             aria-valuemin={0}
             aria-valuemax={100}
             aria-label={`Sync progress: ${progress}%`}
           >
-            <div
-              className="h-full bg-linear-to-r from-cyan-500 via-blue-500 to-cyan-500 rounded-full transition-all duration-500"
-              style={{ width: `${progress}%` }}
-            />
+            <div className="progress-bar-fill" style={{ width: `${progress}%` }} />
           </div>
-          <p className="text-xs text-slate-500 mt-1.5" aria-hidden="true">{progress}% complete</p>
+          <p className="text-micro" style={{ marginTop: "4px", opacity: 0.2 }}>{progress}% complete</p>
         </div>
       </div>
     </div>
@@ -345,9 +408,19 @@ interface InfoNoticeProps {
 
 export function InfoNotice({ icon, message }: InfoNoticeProps) {
   return (
-    <div className="flex items-center gap-2 px-3 py-2 bg-slate-800/30 border border-slate-700/20 rounded-lg text-slate-500 text-xs">
-      {icon || <AlertCircle className="w-4 h-4" />}
-      <span>{message}</span>
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: "8px",
+        padding: "8px 12px",
+        background: "rgba(240,240,250,0.02)",
+        border: "1px solid rgba(240,240,250,0.06)",
+        borderRadius: "2px",
+      }}
+    >
+      <span style={{ opacity: 0.3 }}>{icon || <AlertCircle size={12} />}</span>
+      <span className="text-micro" style={{ opacity: 0.4 }}>{message}</span>
     </div>
   );
 }

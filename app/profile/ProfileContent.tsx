@@ -19,8 +19,7 @@ import Link from "next/link";
 import type { Session } from "next-auth";
 
 /**
- * Profile Content Component
- * Main profile display with user information and GitHub connection status
+ * Profile Content Component — SpaceX-inspired aesthetic
  */
 
 interface ProfileContentProps {
@@ -40,7 +39,6 @@ export function ProfileContent({ session }: ProfileContentProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [isReconnecting, setIsReconnecting] = useState(false);
 
-  // Format the creation date
   const joinedDate = user.email
     ? new Date().toLocaleDateString("en-US", {
         year: "numeric",
@@ -49,7 +47,6 @@ export function ProfileContent({ session }: ProfileContentProps) {
       })
     : "N/A";
 
-  // Fetch GitHub connection status
   useEffect(() => {
     async function fetchGitHubStatus() {
       try {
@@ -77,105 +74,158 @@ export function ProfileContent({ session }: ProfileContentProps) {
         setIsLoading(false);
       }
     }
-
     fetchGitHubStatus();
   }, []);
 
   const handleReconnectGitHub = async () => {
     setIsReconnecting(true);
-    // Redirect to GitHub OAuth flow
     window.location.href = "/api/auth/signin/github?callbackUrl=/profile";
   };
 
   return (
-    <div className="min-h-screen p-4 sm:p-6">
-      <div className="max-w-4xl mx-auto">
+    <div className="app-canvas">
+      <div
+        style={{
+          maxWidth: "800px",
+          margin: "0 auto",
+          padding: "40px clamp(16px, 4vw, 48px)",
+        }}
+      >
         {/* Header */}
-        <header className="mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div className="flex-1">
-            <Link
-              href="/dashboard"
-              className="text-cyan-400 hover:text-cyan-300 transition-colors text-sm mb-2 inline-flex items-center gap-2 group"
-              aria-label="Back to Dashboard"
-            >
-              <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-              Back to Dashboard
-            </Link>
-            <h1 className="text-3xl sm:text-4xl font-bold bg-linear-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
-              Profile
-            </h1>
+        <header style={{ marginBottom: "40px" }}>
+          <Link
+            href="/dashboard"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "8px",
+              textDecoration: "none",
+              marginBottom: "20px",
+              opacity: 0.4,
+              transition: "opacity 0.2s ease",
+            }}
+            className="text-micro"
+            aria-label="Back to Dashboard"
+            onMouseOver={(e) => (e.currentTarget.style.opacity = "0.8")}
+            onMouseOut={(e) => (e.currentTarget.style.opacity = "0.4")}
+          >
+            <ArrowLeft size={11} />
+            Dashboard
+          </Link>
+
+          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", flexWrap: "wrap", gap: "16px" }}>
+            <div>
+              <p className="text-micro" style={{ marginBottom: "8px", opacity: 0.4 }}>Account</p>
+              <h1 className="text-section-head">Profile</h1>
+            </div>
+            <LogoutButton />
           </div>
-          <LogoutButton />
         </header>
 
-        {/* Profile Card */}
-        <main
-          className="bg-slate-900/50 border border-slate-700/30 rounded-xl overflow-hidden backdrop-blur-sm shadow-2xl"
-          role="main"
+        {/* Profile identity */}
+        <div
+          style={{
+            background: "rgba(240,240,250,0.02)",
+            border: "1px solid rgba(240,240,250,0.06)",
+            borderRadius: "var(--radius-sharp)",
+            overflow: "hidden",
+          }}
         >
-          {/* Header Section */}
-          <div className="bg-linear-to-r from-cyan-500/10 to-blue-500/10 border-b border-slate-700/30 p-6 sm:p-8">
-            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
-              {/* Avatar */}
-              {user.image ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={user.image}
-                  alt={user.name || "User avatar"}
-                  className="w-24 h-24 sm:w-32 sm:h-32 rounded-full border-4 border-cyan-500/30 shadow-lg shadow-cyan-500/20 hover:scale-105 transition-transform duration-300"
-                  loading="lazy"
-                />
-              ) : (
-                <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-linear-to-br from-cyan-500/20 to-blue-500/20 border-4 border-cyan-500/30 flex items-center justify-center shadow-lg shadow-cyan-500/20">
-                  <User className="w-12 h-12 sm:w-16 sm:h-16 text-cyan-400" />
-                </div>
-              )}
-
-              {/* User Info */}
-              <div className="flex-1 text-center sm:text-left">
-                <h2 className="text-2xl sm:text-3xl font-bold text-slate-200 mb-2">
-                  {user.name || user.username || "Anonymous User"}
-                </h2>
-                {user.username && (
-                  <a
-                    href={`https://github.com/${user.username}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-cyan-400 hover:text-cyan-300 transition-colors inline-flex items-center gap-2 text-base sm:text-lg group"
-                    aria-label={`View ${user.username}'s GitHub profile`}
-                  >
-                    <Github className="w-5 h-5 group-hover:rotate-12 transition-transform" />
-                    <span>@{user.username}</span>
-                  </a>
-                )}
+          {/* Hero row */}
+          <div
+            style={{
+              padding: "28px",
+              borderBottom: "1px solid rgba(240,240,250,0.05)",
+              display: "flex",
+              alignItems: "center",
+              gap: "20px",
+              flexWrap: "wrap",
+            }}
+          >
+            {/* Avatar */}
+            {user.image ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={user.image}
+                alt={user.name || "User avatar"}
+                style={{
+                  width: "72px",
+                  height: "72px",
+                  borderRadius: "50%",
+                  border: "1px solid rgba(240,240,250,0.12)",
+                }}
+                loading="lazy"
+              />
+            ) : (
+              <div
+                style={{
+                  width: "72px",
+                  height: "72px",
+                  borderRadius: "50%",
+                  background: "rgba(240,240,250,0.05)",
+                  border: "1px solid rgba(240,240,250,0.1)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <User size={32} style={{ opacity: 0.3 }} />
               </div>
+            )}
+
+            {/* Name + GH link */}
+            <div>
+              <h2
+                className="text-section-head"
+                style={{ fontSize: "clamp(1.25rem, 3vw, 1.75rem)", marginBottom: "6px" }}
+              >
+                {user.name || user.username || "Anonymous User"}
+              </h2>
+              {user.username && (
+                <a
+                  href={`https://github.com/${user.username}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "6px",
+                    textDecoration: "none",
+                    opacity: 0.4,
+                    transition: "opacity 0.2s ease",
+                  }}
+                  className="text-caption"
+                  aria-label={`View ${user.username}'s GitHub profile`}
+                  onMouseOver={(e) => (e.currentTarget.style.opacity = "0.8")}
+                  onMouseOut={(e) => (e.currentTarget.style.opacity = "0.4")}
+                >
+                  <Github size={12} />
+                  @{user.username}
+                </a>
+              )}
             </div>
           </div>
 
-          {/* Details Section */}
-          <div className="p-6 sm:p-8 space-y-6">
-            {/* Account Information */}
+          {/* Account information */}
+          <div style={{ padding: "24px 28px" }}>
             <section aria-labelledby="account-info-heading">
-              <h3
-                id="account-info-heading"
-                className="text-lg font-semibold text-slate-300 mb-4 flex items-center gap-2"
-              >
-                <Shield className="w-5 h-5 text-cyan-400" aria-hidden="true" />
-                Account Information
-              </h3>
-              <div className="space-y-4">
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "16px", opacity: 0.4 }}>
+                <Shield size={12} />
+                <h3 id="account-info-heading" className="text-micro">Account Information</h3>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: "1px", background: "rgba(240,240,250,0.05)", borderRadius: "var(--radius-sharp)", overflow: "hidden" }}>
                 <InfoRow
-                  icon={<Mail aria-hidden="true" />}
+                  icon={<Mail size={12} />}
                   label="Email"
                   value={user.email || "Not provided"}
                 />
                 <InfoRow
-                  icon={<Github aria-hidden="true" />}
+                  icon={<Github size={12} />}
                   label="GitHub Username"
                   value={user.username || "N/A"}
                 />
                 <InfoRow
-                  icon={<Calendar aria-hidden="true" />}
+                  icon={<Calendar size={12} />}
                   label="Account Created"
                   value={joinedDate}
                 />
@@ -185,55 +235,54 @@ export function ProfileContent({ session }: ProfileContentProps) {
             {/* GitHub Connection Status */}
             <section
               aria-labelledby="github-status-heading"
-              className="border-t border-slate-700/30 pt-6"
+              style={{ marginTop: "28px" }}
             >
-              <h3
-                id="github-status-heading"
-                className="text-lg font-semibold text-slate-300 mb-4 flex items-center gap-2"
-              >
-                <Github className="w-5 h-5 text-cyan-400" aria-hidden="true" />
-                GitHub Connection
-              </h3>
-              
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "16px", opacity: 0.4 }}>
+                <Github size={12} />
+                <h3 id="github-status-heading" className="text-micro">GitHub Connection</h3>
+              </div>
+
               {isLoading ? (
-                <div className="flex items-start gap-4 p-4 bg-slate-800/30 rounded-lg border border-slate-700/20">
-                  <div className="w-10 h-10 bg-slate-800/50 rounded-lg animate-pulse" />
-                  <div className="flex-1 space-y-2">
-                    <div className="h-4 w-24 bg-slate-800/50 rounded animate-pulse" />
-                    <div className="h-5 w-48 bg-slate-800/50 rounded animate-pulse" />
+                <div style={{ display: "flex", gap: "12px", padding: "16px", background: "rgba(240,240,250,0.02)", border: "1px solid rgba(240,240,250,0.05)", borderRadius: "var(--radius-sharp)" }}>
+                  <div className="skeleton" style={{ width: "40px", height: "40px", borderRadius: "50%", flexShrink: 0 }} />
+                  <div style={{ flex: 1 }}>
+                    <div className="skeleton" style={{ width: "100px", height: "10px", marginBottom: "6px" }} />
+                    <div className="skeleton" style={{ width: "160px", height: "14px" }} />
                   </div>
                 </div>
               ) : githubData?.error ? (
-                <div className="flex items-start gap-4 p-4 bg-red-500/10 rounded-lg border border-red-500/30">
-                  <AlertCircle className="w-5 h-5 text-red-400 mt-0.5" aria-hidden="true" />
-                  <div className="flex-1">
-                    <p className="text-sm text-slate-500 mb-1">Status</p>
-                    <p className="text-red-400 font-medium">Error loading GitHub status</p>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "flex-start",
+                    gap: "10px",
+                    padding: "16px",
+                    background: "rgba(252,165,165,0.04)",
+                    border: "1px solid rgba(252,165,165,0.12)",
+                    borderRadius: "var(--radius-sharp)",
+                  }}
+                  role="alert"
+                >
+                  <AlertCircle size={14} style={{ color: "rgba(252,165,165,0.6)", flexShrink: 0, marginTop: "2px" }} />
+                  <div>
+                    <p className="text-micro" style={{ opacity: 0.35, marginBottom: "4px" }}>Status</p>
+                    <p className="text-caption" style={{ color: "rgba(252,165,165,0.7)" }}>Error loading GitHub status</p>
                   </div>
                 </div>
               ) : (
-                <div className="space-y-4">
+                <div style={{ display: "flex", flexDirection: "column", gap: "1px", background: "rgba(240,240,250,0.05)", borderRadius: "var(--radius-sharp)", overflow: "hidden" }}>
                   <InfoRow
-                    icon={
-                      githubData?.isConnected ? (
-                        <CheckCircle2 className="text-green-400" aria-hidden="true" />
-                      ) : (
-                        <AlertCircle className="text-amber-400" aria-hidden="true" />
-                      )
+                    icon={githubData?.isConnected
+                      ? <CheckCircle2 size={12} style={{ color: "rgba(134,239,172,0.7)" }} />
+                      : <AlertCircle size={12} style={{ color: "rgba(251,191,36,0.7)" }} />
                     }
                     label="Connection Status"
-                    value={
-                      githubData?.isConnected
-                        ? "Connected via GitHub OAuth"
-                        : "Not connected"
-                    }
-                    valueClassName={
-                      githubData?.isConnected ? "text-green-400" : "text-amber-400"
-                    }
+                    value={githubData?.isConnected ? "Connected via GitHub OAuth" : "Not connected"}
+                    valueColor={githubData?.isConnected ? "rgba(134,239,172,0.7)" : "rgba(251,191,36,0.7)"}
                   />
                   {githubData?.lastSync && (
                     <InfoRow
-                      icon={<Clock aria-hidden="true" />}
+                      icon={<Clock size={12} />}
                       label="Last Synced"
                       value={new Date(githubData.lastSync).toLocaleString("en-US", {
                         year: "numeric",
@@ -249,85 +298,98 @@ export function ProfileContent({ session }: ProfileContentProps) {
             </section>
 
             {/* Account Status */}
-            <section
-              aria-labelledby="account-status-heading"
-              className="border-t border-slate-700/30 pt-6"
-            >
-              <h3
-                id="account-status-heading"
-                className="text-lg font-semibold text-slate-300 mb-4"
-              >
+            <section aria-labelledby="account-status-heading" style={{ marginTop: "28px" }}>
+              <h3 id="account-status-heading" className="text-micro" style={{ opacity: 0.4, marginBottom: "12px" }}>
                 Account Status
               </h3>
-              <div className="flex flex-wrap gap-3">
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
                 <span
-                  className="px-4 py-2 bg-green-500/10 border border-green-500/30 rounded-lg text-sm text-green-400 flex items-center gap-2"
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    padding: "6px 14px",
+                    background: "rgba(134,239,172,0.04)",
+                    border: "1px solid rgba(134,239,172,0.14)",
+                    borderRadius: "var(--radius-button)",
+                  }}
+                  className="text-micro"
                   role="status"
-                  aria-label="Account is active and authenticated"
                 >
                   <span
-                    className="w-2 h-2 bg-green-400 rounded-full animate-pulse"
+                    style={{
+                      width: "6px",
+                      height: "6px",
+                      borderRadius: "50%",
+                      background: "rgba(134,239,172,0.7)",
+                      animation: "pulse 2s ease infinite",
+                    }}
                     aria-hidden="true"
                   />
                   Active & Authenticated
                 </span>
                 {githubData?.isConnected && (
                   <span
-                    className="px-4 py-2 bg-cyan-500/10 border border-cyan-500/30 rounded-lg text-sm text-cyan-400 flex items-center gap-2"
-                    role="status"
-                    aria-label="Connected via GitHub OAuth"
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "8px",
+                      padding: "6px 14px",
+                      background: "rgba(240,240,250,0.03)",
+                      border: "1px solid rgba(240,240,250,0.08)",
+                      borderRadius: "var(--radius-button)",
+                    }}
+                    className="text-micro"
                   >
-                    <Github className="w-4 h-4" aria-hidden="true" />
+                    <Github size={10} />
                     GitHub OAuth
                   </span>
                 )}
               </div>
             </section>
 
-            {/* Developer Info (Development Only) */}
+            {/* Dev info (development only) */}
             {process.env.NODE_ENV === "development" && (
-              <section
-                aria-labelledby="dev-info-heading"
-                className="border-t border-slate-700/30 pt-6"
-              >
-                <h3
-                  id="dev-info-heading"
-                  className="text-lg font-semibold text-slate-300 mb-4"
+              <section aria-labelledby="dev-info-heading" style={{ marginTop: "28px" }}>
+                <h3 id="dev-info-heading" className="text-micro" style={{ opacity: 0.3, marginBottom: "8px" }}>DEV INFO</h3>
+                <div
+                  style={{
+                    padding: "12px 16px",
+                    background: "rgba(240,240,250,0.02)",
+                    border: "1px solid rgba(240,240,250,0.05)",
+                    borderRadius: "var(--radius-sharp)",
+                  }}
                 >
-                  Developer Info
-                </h3>
-                <div className="bg-slate-950/50 rounded-lg p-4 border border-slate-700/30">
-                  <div className="text-sm space-y-1">
-                    <div>
-                      <span className="text-slate-500">User ID:</span>
-                      <span className="text-slate-300 ml-2 font-mono">{user.id}</span>
-                    </div>
-                    {githubData?.provider && (
-                      <div>
-                        <span className="text-slate-500">Provider:</span>
-                        <span className="text-slate-300 ml-2 font-mono">
-                          {githubData.provider}
-                        </span>
-                      </div>
-                    )}
-                  </div>
+                  <p className="text-micro" style={{ opacity: 0.3 }}>
+                    User ID: <span style={{ fontFamily: "monospace", letterSpacing: 0 }}>{user.id}</span>
+                  </p>
+                  {githubData?.provider && (
+                    <p className="text-micro" style={{ opacity: 0.3, marginTop: "4px" }}>
+                      Provider: <span style={{ fontFamily: "monospace", letterSpacing: 0 }}>{githubData.provider}</span>
+                    </p>
+                  )}
                 </div>
               </section>
             )}
           </div>
-        </main>
+        </div>
 
         {/* Actions */}
-        <div className="mt-8 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+        <div
+          style={{
+            marginTop: "24px",
+            display: "flex",
+            alignItems: "center",
+            gap: "12px",
+            flexWrap: "wrap",
+          }}
+        >
           <Link
             href="/settings"
-            className="px-6 py-3 bg-slate-900/50 border border-slate-700/30 rounded-lg hover:bg-slate-800/50 hover:border-cyan-500/30 transition-all duration-300 text-slate-300 hover:text-cyan-400 flex items-center justify-center gap-2 group"
+            className="btn-ghost btn-ghost-sm"
             aria-label="Manage account settings"
           >
-            <Settings
-              className="w-4 h-4 group-hover:rotate-90 transition-transform duration-300"
-              aria-hidden="true"
-            />
+            <Settings size={13} />
             Manage Settings
           </Link>
 
@@ -335,14 +397,15 @@ export function ProfileContent({ session }: ProfileContentProps) {
             <button
               onClick={handleReconnectGitHub}
               disabled={isReconnecting}
-              className="px-6 py-3 bg-cyan-500/10 border border-cyan-500/30 rounded-lg hover:bg-cyan-500/20 hover:border-cyan-500/50 transition-all duration-300 text-cyan-400 hover:text-cyan-300 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed group"
+              className="btn-ghost btn-ghost-sm"
               aria-label="Reconnect GitHub account"
+              style={{ opacity: isReconnecting ? 0.5 : 1 }}
             >
               <RefreshCw
-                className={`w-4 h-4 group-hover:rotate-180 transition-transform duration-500 ${
-                  isReconnecting ? "animate-spin" : ""
-                }`}
-                aria-hidden="true"
+                size={13}
+                style={{
+                  animation: isReconnecting ? "spin 1s linear infinite" : "none",
+                }}
               />
               {isReconnecting ? "Reconnecting..." : "Reconnect GitHub"}
             </button>
@@ -354,22 +417,43 @@ export function ProfileContent({ session }: ProfileContentProps) {
 }
 
 // Info Row Component
-interface InfoRowProps {
+function InfoRow({
+  icon,
+  label,
+  value,
+  valueColor,
+}: {
   icon: React.ReactNode;
   label: string;
   value: string;
-  valueClassName?: string;
-}
-
-function InfoRow({ icon, label, value, valueClassName = "text-slate-200" }: InfoRowProps) {
+  valueColor?: string;
+}) {
   return (
-    <div className="flex items-start gap-4 p-4 bg-slate-800/30 rounded-lg border border-slate-700/20 hover:bg-slate-800/50 hover:border-slate-700/40 transition-all duration-300 group">
-      <div className="p-2 bg-slate-900/50 rounded-lg border border-slate-700/30 text-cyan-400 group-hover:scale-110 transition-transform">
-        {icon}
-      </div>
-      <div className="flex-1 min-w-0">
-        <p className="text-sm text-slate-500 mb-1">{label}</p>
-        <p className={`font-medium wrap-break-word ${valueClassName}`}>{value}</p>
+    <div
+      style={{
+        display: "flex",
+        alignItems: "flex-start",
+        gap: "12px",
+        padding: "14px 18px",
+        background: "rgba(0,0,0,0.5)",
+        transition: "background 0.2s ease",
+      }}
+      onMouseOver={(e) => (e.currentTarget.style.background = "rgba(240,240,250,0.02)")}
+      onMouseOut={(e) => (e.currentTarget.style.background = "rgba(0,0,0,0.5)")}
+    >
+      <span style={{ opacity: 0.3, flexShrink: 0, marginTop: "2px" }}>{icon}</span>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <p className="text-micro" style={{ opacity: 0.3, marginBottom: "3px" }}>{label}</p>
+        <p
+          className="text-caption"
+          style={{
+            color: valueColor || "var(--spectral-white)",
+            opacity: valueColor ? 1 : 0.65,
+            overflowWrap: "break-word",
+          }}
+        >
+          {value}
+        </p>
       </div>
     </div>
   );

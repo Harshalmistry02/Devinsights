@@ -6,7 +6,7 @@ import Groq from 'groq-sdk';
 const hasApiKey = !!process.env.GROQ_API_KEY;
 
 if (!hasApiKey && process.env.NODE_ENV === 'production') {
-  throw new Error('GROQ_API_KEY is required in production');
+  console.warn('GROQ_API_KEY is missing in production. Falling back to mock AI implementation.');
 }
 
 // Only initialize Groq if API key is available

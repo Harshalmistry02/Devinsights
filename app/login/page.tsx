@@ -1,8 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { Github, Lock, Shield, Home, AlertCircle } from "lucide-react";
-import Prism from "@/components/ui/Prism";
+import { Github, Lock, Home, AlertCircle } from "lucide-react";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
@@ -34,158 +32,149 @@ function LoginForm() {
   const errorMessage = error ? errorMessages[error] || errorMessages.Default : null;
 
   return (
-    <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-slate-950 w-full">
-      {/* Animated Background */}
-      <div className="absolute inset-0 z-0" style={{ height: '100vh' }}>
-        <Prism
-          animationType="rotate"
-          timeScale={0.5}
-          height={3.5}
-          baseWidth={5.5}
-          scale={3.6}
-          hueShift={0}
-          colorFrequency={1}
-          noise={0.5}
-          glow={1}
-        />
-      </div>
+    <div
+      className="section-cinematic"
+      style={{ justifyContent: "center", alignItems: "center" }}
+    >
+      {/* Photography background */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src="/space-hero.png"
+        alt="Space background"
+        className="section-photo"
+      />
 
-      {/* Home Button */}
-      <Link href="/">
-        <motion.button
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1, duration: 0.5 }}
-          className="absolute top-6 left-6 z-20 p-2 rounded-lg bg-slate-950/40 border border-slate-700/30 backdrop-blur-sm hover:bg-slate-950/60 hover:border-cyan-500/50 transition-all duration-300 group"
-        >
-          <Home className="w-5 h-5 text-slate-300 group-hover:text-cyan-400 transition-colors duration-300" />
-        </motion.button>
+      {/* Dark overlay */}
+      <div
+        aria-hidden="true"
+        style={{
+          position: "absolute",
+          inset: 0,
+          background: "rgba(0,0,0,0.6)",
+          zIndex: 1,
+        }}
+      />
+
+      {/* Home link — top-left */}
+      <Link
+        href="/"
+        style={{
+          position: "absolute",
+          top: "20px",
+          left: "30px",
+          zIndex: 10,
+          display: "flex",
+          alignItems: "center",
+          gap: "8px",
+          opacity: 0.6,
+          transition: "opacity 0.2s ease",
+          textDecoration: "none",
+        }}
+        className="text-nav"
+        aria-label="Back to home"
+        onMouseOver={(e) => (e.currentTarget.style.opacity = "1")}
+        onMouseOut={(e) => (e.currentTarget.style.opacity = "0.6")}
+      >
+        <Home size={14} />
+        Home
       </Link>
 
-      {/* Login Card */}
-      <div className="relative z-10 flex flex-col items-center px-4 max-w-sm mx-auto w-full">
-        <motion.div
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{
-            delay: 0.2,
-            duration: 0.8,
-            ease: "easeInOut",
-          }}
-          className="w-full bg-slate-950/60 border border-slate-700/30 backdrop-blur-xl rounded-2xl shadow-2xl shadow-cyan-500/10 p-6 sm:p-8"
+      {/* Login Content — centered, text on image, NO card/panel */}
+      <div
+        style={{
+          position: "relative",
+          zIndex: 2,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          textAlign: "center",
+          padding: "0 24px",
+          maxWidth: "420px",
+          width: "100%",
+        }}
+      >
+        {/* Label */}
+        <p
+          className="text-micro"
+          style={{ marginBottom: "24px", letterSpacing: "2px" }}
         >
-          {/* Lock Icon */}
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{
-              delay: 0.4,
-              duration: 0.5,
-              type: "spring",
-              stiffness: 200,
-            }}
-            className="flex justify-center mb-4"
-          >
-            <div className="p-3 bg-linear-to-br from-cyan-500/20 to-blue-500/20 rounded-full border border-cyan-500/30">
-              <Shield className="w-6 h-6 text-cyan-400" strokeWidth={2} />
-            </div>
-          </motion.div>
+          Developer Intelligence Platform
+        </p>
 
-          {/* Heading */}
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{
-              delay: 0.5,
-              duration: 0.8,
-              ease: "easeInOut",
-            }}
-            className="text-2xl sm:text-3xl font-bold text-center bg-linear-to-br from-slate-300 to-slate-500 bg-clip-text text-transparent mb-2"
-          >
-            Sign in to DevInsight
-          </motion.h1>
+        {/* Headline — text on image */}
+        <h1
+          className="text-display-hero"
+          style={{ fontSize: "clamp(1.75rem, 4vw, 2.5rem)", marginBottom: "16px" }}
+        >
+          Sign in to DevInsight
+        </h1>
 
-          {/* Subtitle */}
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{
-              delay: 0.6,
-              duration: 0.8,
-              ease: "easeInOut",
-            }}
-            className="text-center text-slate-400 mb-6 text-xs sm:text-sm"
-          >
-            Analyze your GitHub activity and coding insights
-          </motion.p>
-
-          {/* Error Message */}
-          {errorMessage && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg flex items-center gap-2"
-            >
-              <AlertCircle className="w-4 h-4 text-red-400 shrink-0" />
-              <span className="text-sm text-red-400">{errorMessage}</span>
-            </motion.div>
-          )}
-
-          {/* GitHub Login Button */}
-          <motion.button
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{
-              delay: 0.7,
-              duration: 0.8,
-              ease: "easeInOut",
-            }}
-            onClick={handleGithubLogin}
-            className="w-full relative group"
-          >
-          {/* Button Glow Effect */}
-            <div className="absolute -inset-0.5 bg-linear-to-r from-cyan-500 to-blue-500 rounded-xl blur opacity-30 group-hover:opacity-50 transition duration-300"></div>
-            
-            {/* Button Content */}
-            <div className="relative flex items-center justify-center gap-2 px-5 py-3 bg-slate-950 border border-cyan-500/30 rounded-xl transition-all duration-300 group-hover:bg-slate-900 group-hover:border-cyan-500/50">
-              <Github className="w-4 h-4 text-slate-300 group-hover:text-cyan-400 transition-colors duration-300" strokeWidth={2.5} />
-              <span className="text-sm sm:text-base font-semibold text-slate-300 group-hover:text-cyan-400 transition-colors duration-300">
-                Continue with GitHub
-              </span>
-            </div>
-          </motion.button>
-
-          {/* Trust Indicators */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{
-              delay: 0.9,
-              duration: 0.8,
-              ease: "easeInOut",
-            }}
-            className="mt-5 pt-4 border-t border-slate-700/30"
-          >
-            <div className="flex items-center justify-center gap-2 text-xs text-slate-500">
-              <Lock className="w-3 h-3" />
-              <span>Secure authentication via GitHub OAuth</span>
-            </div>
-          </motion.div>
-        </motion.div>
-
-        {/* Footer Text */}
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{
-            delay: 1,
-            duration: 0.8,
-            ease: "easeInOut",
+        {/* Subtitle */}
+        <p
+          className="text-body"
+          style={{
+            opacity: 0.55,
+            marginBottom: "48px",
+            fontSize: "0.875rem",
           }}
-          className="mt-4 text-center text-xs text-slate-500"
+        >
+          Analyze your GitHub activity and coding insights
+        </p>
+
+        {/* Error Message */}
+        {errorMessage && (
+          <div
+            role="alert"
+            aria-live="assertive"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "10px",
+              padding: "14px 20px",
+              background: "rgba(252,165,165,0.1)",
+              border: "1px solid rgba(252,165,165,0.25)",
+              borderRadius: "var(--radius-button)",
+              marginBottom: "24px",
+              width: "100%",
+            }}
+          >
+            <AlertCircle size={16} style={{ color: "rgba(252,165,165,0.8)", flexShrink: 0 }} />
+            <span
+              className="text-caption"
+              style={{ color: "rgba(252,165,165,0.8)", textAlign: "left" }}
+            >
+              {errorMessage}
+            </span>
+          </div>
+        )}
+
+        {/* GitHub Login — Ghost Button */}
+        <button
+          onClick={handleGithubLogin}
+          className="btn-ghost"
+          style={{ width: "100%", justifyContent: "center", marginBottom: "32px" }}
+          aria-label="Continue with GitHub OAuth"
+        >
+          <Github size={16} />
+          Continue with GitHub
+        </button>
+
+        {/* Trust indicator */}
+        <p
+          className="text-micro"
+          style={{ display: "flex", alignItems: "center", gap: "8px", opacity: 0.35 }}
+        >
+          <Lock size={10} />
+          Secure authentication via GitHub OAuth
+        </p>
+
+        {/* Footer */}
+        <p
+          className="text-micro"
+          style={{ marginTop: "48px", opacity: 0.25, maxWidth: "300px" }}
         >
           By signing in, you agree to our Terms of Service and Privacy Policy
-        </motion.p>
+        </p>
       </div>
     </div>
   );
@@ -193,7 +182,24 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-slate-950" />}>
+    <Suspense
+      fallback={
+        <div
+          style={{
+            minHeight: "100vh",
+            background: "#000",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <div
+            className="skeleton"
+            style={{ width: "200px", height: "20px" }}
+          />
+        </div>
+      }
+    >
       <LoginForm />
     </Suspense>
   );

@@ -53,12 +53,12 @@ export function DayOfWeekChart({ data, className = '' }: DayOfWeekChartProps) {
   const total = weekdayTotal + weekendTotal;
 
   return (
-    <div className={`bg-slate-900/50 border border-slate-700/30 rounded-xl backdrop-blur-sm ${className}`}>
+    <div className={` border border-[rgba(240,240,250,0.15)]  backdrop-blur-sm ${className}`}>
       {/* Header */}
-      <div className="p-4 sm:p-6 border-b border-slate-700/30">
-        <h3 className="text-lg font-semibold text-slate-200">Weekly Pattern</h3>
-        <p className="text-sm text-slate-500">
-          Most productive on <span className="text-cyan-400 font-medium">{mostProductiveDay}</span>
+      <div className="p-4 sm:p-6 border-b border-[rgba(240,240,250,0.15)]">
+        <h3 className="text-lg font-semibold opacity-80">Weekly Pattern</h3>
+        <p className="text-sm opacity-80">
+          Most productive on <span className="text-[#f0f0fa] font-medium">{mostProductiveDay}</span>
         </p>
       </div>
 
@@ -99,23 +99,23 @@ export function DayOfWeekChart({ data, className = '' }: DayOfWeekChartProps) {
             {/* Weekday vs Weekend Stats */}
             <div className="mt-4 flex items-center justify-center gap-8">
               <div className="text-center">
-                <p className="text-lg font-semibold text-slate-200">{weekdayTotal}</p>
-                <p className="text-xs text-slate-500">Weekday commits</p>
+                <p className="text-lg font-semibold opacity-80">{weekdayTotal}</p>
+                <p className="text-xs opacity-80">Weekday commits</p>
               </div>
               <div className="text-center">
                 <p className="text-lg font-semibold text-purple-400">{weekendTotal}</p>
-                <p className="text-xs text-slate-500">Weekend commits</p>
+                <p className="text-xs opacity-80">Weekend commits</p>
               </div>
               <div className="text-center">
-                <p className="text-lg font-semibold text-cyan-400">
+                <p className="text-lg font-semibold text-[#f0f0fa]">
                   {total > 0 ? Math.round((weekdayTotal / total) * 100) : 0}%
                 </p>
-                <p className="text-xs text-slate-500">Weekday ratio</p>
+                <p className="text-xs opacity-80">Weekday ratio</p>
               </div>
             </div>
           </>
         ) : (
-          <div className="h-48 flex items-center justify-center text-slate-500">
+          <div className="h-48 flex items-center justify-center opacity-80">
             <p>No activity data available</p>
           </div>
         )}
@@ -134,9 +134,9 @@ function CustomTooltip({ active, payload }: any) {
   const data = payload[0].payload;
 
   return (
-    <div className="bg-slate-800 border border-slate-700 rounded-lg p-3 shadow-xl">
-      <p className="text-xs text-slate-400 mb-1">{data.fullDay}</p>
-      <p className="text-lg font-semibold text-cyan-400">
+    <div className="border border-[rgba(240,240,250,0.15)] p-3">
+      <p className="text-xs opacity-80 mb-1">{data.fullDay}</p>
+      <p className="text-lg font-semibold text-[#f0f0fa]">
         {data.commits} commit{data.commits !== 1 ? 's' : ''}
       </p>
     </div>

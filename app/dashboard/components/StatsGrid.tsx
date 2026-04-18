@@ -3,7 +3,6 @@
 import { Code, Activity, Flame, Star, RefreshCw } from "lucide-react";
 import { useState, useMemo } from "react";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
 import {
   calculateComparativePeriod,
   formatChangePercent,
@@ -14,12 +13,12 @@ import {
 
 interface StatsGridProps {
   analytics: any;
-  previousAnalytics?: any; // Optional: previous period snapshot
+  previousAnalytics?: any;
 }
 
 /**
  * Enhanced Stats Grid with Comparative Period Analytics
- * Shows current metrics with trends compared to previous period
+ * SpaceX-inspired: minimal, achromatic, uppercase labels
  */
 export function StatsGrid({ analytics: initialAnalytics, previousAnalytics }: StatsGridProps) {
   const [analytics, setAnalytics] = useState(initialAnalytics);
@@ -27,7 +26,6 @@ export function StatsGrid({ analytics: initialAnalytics, previousAnalytics }: St
 
   const hasSyncedData = analytics !== null && (analytics.totalCommits > 0 || analytics.totalRepos > 0);
 
-  // Calculate comparative metrics
   const comparativePeriod = useMemo(() => {
     return calculateComparativePeriod(
       analytics?.dailyCommits,
@@ -41,9 +39,7 @@ export function StatsGrid({ analytics: initialAnalytics, previousAnalytics }: St
     setIsRefreshing(true);
     try {
       const response = await fetch('/api/analytics?refresh=true');
-      if (!response.ok) {
-        throw new Error('Failed to refresh stats');
-      }
+      if (!response.ok) throw new Error('Failed to refresh stats');
       const data = await response.json();
       setAnalytics(data.data);
       toast.success('Statistics refreshed successfully');
@@ -57,24 +53,55 @@ export function StatsGrid({ analytics: initialAnalytics, previousAnalytics }: St
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold text-slate-200">Statistics</h3>
+      {/* Section header */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
+        <p className="text-micro" style={{ letterSpacing: "1.5px" }}>Statistics</p>
         <button
           onClick={refreshStats}
           disabled={isRefreshing}
-          className={cn(
-            "p-2 rounded-lg transition-colors",
-            "hover:bg-slate-800/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400",
-            isRefreshing && "cursor-wait"
-          )}
+          style={{
+            background: "none",
+            border: "none",
+            color: "var(--spectral-white)",
+            cursor: isRefreshing ? "wait" : "pointer",
+            opacity: isRefreshing ? 0.3 : 0.4,
+            transition: "opacity 0.2s ease",
+            padding: "4px",
+            display: "flex",
+            alignItems: "center",
+          }}
           title="Refresh statistics"
           aria-label="Refresh statistics"
+          onMouseOver={(e) => !isRefreshing && (e.currentTarget.style.opacity = "0.8")}
+          onMouseOut={(e) => !isRefreshing && (e.currentTarget.style.opacity = "0.4")}
         >
-          <RefreshCw className={cn("w-4 h-4 text-slate-400", isRefreshing && "animate-spin")} />
+          <RefreshCw
+            size={14}
+            style={{ animation: isRefreshing ? "spin 1s linear infinite" : "none" }}
+          />
         </button>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(2, 1fr)",
+          gap: "1px",
+          background: "rgba(240,240,250,0.06)",
+          border: "1px solid rgba(240,240,250,0.06)",
+          borderRadius: "var(--radius-sharp)",
+          overflow: "hidden",
+        }}
+        className="stats-responsive"
+      >
+        <style>{`
+          @media (min-width: 1024px) {
+            .stats-responsive {
+              grid-template-columns: repeat(4, 1fr) !important;
+            }
+          }
+        `}</style>
+
         {isRefreshing ? (
           <>
             <StatCardSkeleton />
@@ -84,30 +111,23 @@ export function StatsGrid({ analytics: initialAnalytics, previousAnalytics }: St
           </>
         ) : (
           <>
-            {/* Repositories Card */}
             <StatCard
-              icon={<Code className="w-6 h-6" />}
+              icon={<Code size={16} />}
               title="Repositories"
               value={analytics?.totalRepos?.toString() || "0"}
               subtitle={hasSyncedData ? "synced repos" : "sync to see"}
-              color="blue"
-              metrics={null} // No comparative data for repos
+              metrics={null}
             />
-
-            {/* Total Commits Card with Trend */}
             <StatCard
-              icon={<Activity className="w-6 h-6" />}
+              icon={<Activity size={16} />}
               title="Total Commits"
               value={formatNumber(analytics?.totalCommits || 0)}
               subtitle={hasSyncedData ? "all time" : "sync to see"}
-              color="cyan"
               metrics={comparativePeriod.totalCommits}
               period="30d"
             />
-
-            {/* Current Streak Card with Trend */}
             <StatCard
-              icon={<Flame className="w-6 h-6" />}
+              icon={<Flame size={16} />}
               title="Current Streak"
               value={analytics?.currentStreak?.toString() || "0"}
               subtitle={
@@ -115,19 +135,15 @@ export function StatsGrid({ analytics: initialAnalytics, previousAnalytics }: St
                   ? `${analytics.currentStreak} day${analytics.currentStreak !== 1 ? "s" : ""}`
                   : "days"
               }
-              color="orange"
               highlight={analytics?.isActiveToday}
               metrics={comparativePeriod.streak}
               period="30d"
             />
-
-            {/* Stars Card */}
             <StatCard
-              icon={<Star className="w-6 h-6" />}
+              icon={<Star size={16} />}
               title="Stars Earned"
               value={formatNumber(analytics?.totalStars || 0)}
               subtitle="across repos"
-              color="yellow"
               metrics={null}
             />
           </>
@@ -137,15 +153,11 @@ export function StatsGrid({ analytics: initialAnalytics, previousAnalytics }: St
   );
 }
 
-/**
- * Enhanced Stat Card Component with Trend Indicator
- */
 interface StatCardProps {
   icon: React.ReactNode;
   title: string;
   value: string;
   subtitle?: string;
-  color: "cyan" | "blue" | "purple" | "yellow" | "orange";
   highlight?: boolean;
   metrics?: PeriodMetrics | null;
   period?: "7d" | "30d" | "90d";
@@ -156,125 +168,111 @@ function StatCard({
   title,
   value,
   subtitle,
-  color,
   highlight = false,
   metrics,
   period = "30d",
 }: StatCardProps) {
-  const colorClasses = {
-    cyan: "from-cyan-500/20 to-cyan-500/5 border-cyan-500/30 text-cyan-400",
-    blue: "from-blue-500/20 to-blue-500/5 border-blue-500/30 text-blue-400",
-    purple: "from-purple-500/20 to-purple-500/5 border-purple-500/30 text-purple-400",
-    yellow: "from-yellow-500/20 to-yellow-500/5 border-yellow-500/30 text-yellow-400",
-    orange: "from-orange-500/20 to-orange-500/5 border-orange-500/30 text-orange-400",
-  };
-
   const trendIndicator = metrics ? getTrendIndicator(metrics.trend, metrics.isImprovement) : null;
 
   return (
     <div
       role="region"
       aria-label={`${title} statistics`}
-      className={`bg-linear-to-br ${colorClasses[color]} border rounded-xl p-3 sm:p-5 backdrop-blur-sm hover:scale-[1.02] transition-all duration-300 group relative overflow-hidden min-h-[120px] focus-within:ring-2 focus-within:ring-cyan-400 focus-within:ring-offset-2 focus-within:ring-offset-slate-900`}
+      style={{
+        background: "rgba(0,0,0,0.6)",
+        padding: "20px 20px 18px",
+        position: "relative",
+        transition: "background 0.2s ease",
+      }}
+      onMouseOver={(e) => (e.currentTarget.style.background = "rgba(240,240,250,0.03)")}
+      onMouseOut={(e) => (e.currentTarget.style.background = "rgba(0,0,0,0.6)")}
     >
-      {/* Subtle glow effect for cards with trends */}
-      {metrics && metrics.trend !== 'stable' && (
-        <div 
-          className={cn(
-            "absolute inset-0 opacity-10 blur-2xl transition-opacity duration-500",
-            metrics.isImprovement ? "bg-emerald-500" : "bg-rose-500"
-          )}
-          aria-hidden="true"
+      {/* Active pulse indicator */}
+      {highlight && (
+        <div
+          style={{
+            position: "absolute",
+            top: "12px",
+            right: "12px",
+            width: "6px",
+            height: "6px",
+            borderRadius: "50%",
+            background: "rgba(251,191,36,0.7)",
+            animation: "pulse 2s ease infinite",
+          }}
+          aria-label="Active today"
         />
       )}
 
-      {/* Active indicator */}
-      {highlight && (
-        <div className="absolute top-2 right-2" aria-label="Active indicator">
-          <span className="flex h-2 w-2">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-orange-500"></span>
-          </span>
-        </div>
-      )}
-
-      {/* Icon and Title */}
-      <div className="flex items-start justify-between mb-2 sm:mb-3">
-        <div className="group-hover:scale-110 transition-transform [&>svg]:w-5 [&>svg]:h-5 sm:[&>svg]:w-6 sm:[&>svg]:h-6" aria-hidden="true">
+      {/* Icon + trend badge row */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "12px" }}>
+        <div style={{ opacity: 0.35 }} aria-hidden="true">
           {icon}
         </div>
-        
-        {/* Trend badge in top right */}
+
+        {/* Trend badge */}
         {metrics && metrics.trend !== 'stable' && (
-          <div 
-            className={cn(
-              "flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-medium backdrop-blur-sm",
-              metrics.isImprovement 
-                ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30" 
-                : "bg-rose-500/20 text-rose-400 border border-rose-500/30"
-            )}
+          <span
+            style={{
+              fontSize: "0.625rem",
+              letterSpacing: "0.5px",
+              textTransform: "uppercase",
+              padding: "2px 6px",
+              border: `1px solid ${metrics.isImprovement ? "rgba(134,239,172,0.2)" : "rgba(252,165,165,0.2)"}`,
+              color: metrics.isImprovement ? "rgba(134,239,172,0.7)" : "rgba(252,165,165,0.7)",
+              borderRadius: "2px",
+            }}
             aria-label={trendIndicator?.label}
           >
-            <span className="text-xs">{trendIndicator?.emoji}</span>
-            <span className="hidden sm:inline">{formatChangePercent(metrics.changePercent)}</span>
-          </div>
+            {formatChangePercent(metrics.changePercent)}
+          </span>
         )}
       </div>
 
-      <h3 className="text-slate-400 text-xs sm:text-sm mb-0.5 sm:mb-1">{title}</h3>
+      {/* Label */}
+      <p className="text-micro" style={{ opacity: 0.35, marginBottom: "6px" }}>{title}</p>
 
-      {/* Main Value */}
-      <p className="text-xl sm:text-2xl font-bold text-slate-200 mb-1" aria-live="polite">
+      {/* Value */}
+      <p className="stat-value" style={{ fontSize: "clamp(1.25rem, 2.5vw, 1.75rem)" }} aria-live="polite">
         {value}
       </p>
 
       {/* Subtitle */}
-      {subtitle && <p className="text-[10px] sm:text-xs text-slate-500">{subtitle}</p>}
+      {subtitle && (
+        <p className="text-micro" style={{ marginTop: "4px", opacity: 0.25 }}>{subtitle}</p>
+      )}
 
-      {/* Comparative Trend Section */}
+      {/* Comparative section */}
       {metrics && (
-        <div className="pt-2 border-t border-slate-700/30 mt-2">
-          <div className="flex items-center justify-between gap-2">
-            {/* Change Value with Trend Arrow */}
-            <div className="flex items-center gap-1.5">
-              <span 
-                className={cn(
-                  "text-sm font-bold transition-colors",
-                  trendIndicator?.color
-                )}
-                aria-hidden="true"
-              >
-                {trendIndicator?.emoji}
-              </span>
-              <div className="flex flex-col">
-                <span
-                  className={cn(
-                    "text-xs font-semibold tabular-nums",
-                    metrics.trend === "up"
-                      ? "text-emerald-400"
-                      : metrics.trend === "down"
-                        ? "text-rose-400"
-                        : "text-slate-400"
-                  )}
-                  aria-label={`Change: ${formatChange(metrics.change)} (${formatChangePercent(metrics.changePercent)})`}
-                >
-                  {formatChange(metrics.change, 0)}
-                </span>
-              </div>
-            </div>
-
-            {/* Period comparison label */}
-            <span className="text-[10px] text-slate-500 text-right">
-              vs prev {period}
+        <div
+          style={{
+            marginTop: "12px",
+            paddingTop: "10px",
+            borderTop: "1px solid rgba(240,240,250,0.05)",
+          }}
+        >
+          <div style={{ display: "flex", justifyContent: "space-between", gap: "8px" }}>
+            <span
+              style={{
+                fontSize: "0.688rem",
+                fontWeight: 700,
+                textTransform: "uppercase",
+                letterSpacing: "0.5px",
+                color: metrics.trend === "up"
+                  ? "rgba(134,239,172,0.6)"
+                  : metrics.trend === "down"
+                  ? "rgba(252,165,165,0.6)"
+                  : "rgba(240,240,250,0.3)",
+              }}
+              aria-label={`Change: ${formatChange(metrics.change)} (${formatChangePercent(metrics.changePercent)})`}
+            >
+              {trendIndicator?.emoji} {formatChange(metrics.change, 0)}
             </span>
+            <span className="text-micro" style={{ opacity: 0.25 }}>vs prev {period}</span>
           </div>
-
-          {/* Previous value context */}
-          <div className="flex items-center gap-1 mt-1">
-            <span className="text-[10px] text-slate-500">
-              Prev: {metrics.previous > 0 ? formatNumber(Math.round(metrics.previous)) : '—'}
-            </span>
-          </div>
+          <p className="text-micro" style={{ marginTop: "3px", opacity: 0.2 }}>
+            Prev: {metrics.previous > 0 ? formatNumber(Math.round(metrics.previous)) : '—'}
+          </p>
         </div>
       )}
     </div>
@@ -283,26 +281,17 @@ function StatCard({
 
 function StatCardSkeleton() {
   return (
-    <div className="bg-slate-800/30 border border-slate-700/30 rounded-xl p-3 sm:p-5 backdrop-blur-sm min-h-[120px] animate-pulse">
-      <div className="flex items-start justify-between mb-2 sm:mb-3">
-        <div className="w-6 h-6 bg-slate-700/50 rounded" />
-      </div>
-      <div className="h-4 w-24 bg-slate-700/50 rounded mb-2" />
-      <div className="h-8 w-16 bg-slate-700/50 rounded mb-2" />
-      <div className="h-3 w-20 bg-slate-700/50 rounded" />
-      <div className="pt-2 border-t border-slate-700/30 mt-3">
-        <div className="h-3 w-full bg-slate-700/50 rounded" />
-      </div>
+    <div style={{ background: "rgba(0,0,0,0.6)", padding: "20px 20px 18px" }}>
+      <div className="skeleton" style={{ width: "16px", height: "16px", marginBottom: "12px" }} />
+      <div className="skeleton" style={{ width: "60px", height: "10px", marginBottom: "6px" }} />
+      <div className="skeleton" style={{ width: "80px", height: "28px", marginBottom: "4px" }} />
+      <div className="skeleton" style={{ width: "50px", height: "8px" }} />
     </div>
   );
 }
 
 function formatNumber(num: number): string {
-  if (num >= 1000000) {
-    return (num / 1000000).toFixed(1) + "M";
-  }
-  if (num >= 1000) {
-    return (num / 1000).toFixed(1) + "K";
-  }
+  if (num >= 1000000) return (num / 1000000).toFixed(1) + "M";
+  if (num >= 1000) return (num / 1000).toFixed(1) + "K";
   return num.toString();
 }

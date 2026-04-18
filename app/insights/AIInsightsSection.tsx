@@ -126,18 +126,18 @@ export function AIInsightsSection({ analytics }: AIInsightsSectionProps) {
   return (
     <div className="space-y-6">
       {/* Header with Generate Button */}
-      <div className="bg-linear-to-r from-purple-500/10 via-cyan-500/10 to-blue-500/10 border border-purple-500/20 rounded-2xl p-6 backdrop-blur-sm">
+      <div className="bg-linear-to-r from-purple-500/10 via-cyan-500/10 to-blue-500/10 border border-purple-500/20 p-6 backdrop-blur-sm">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <h2 className="text-xl font-semibold text-slate-200 mb-1 flex items-center gap-2">
+            <h2 className="text-xl font-semibold opacity-80 mb-1 flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-purple-400" />
               AI-Powered Analysis
             </h2>
-            <p className="text-slate-400 text-sm">
+            <p className="opacity-80 text-sm">
               Unlock deep insights into your coding patterns using advanced AI
             </p>
             {generatedAt && (
-              <p className="text-slate-500 text-xs mt-1 flex items-center gap-1">
+              <p className="opacity-80 text-xs mt-1 flex items-center gap-1">
                 <Clock className="w-3 h-3" />
                 {isCached ? 'Cached' : 'Generated'}: {generatedAt.toLocaleString()}
               </p>
@@ -145,7 +145,7 @@ export function AIInsightsSection({ analytics }: AIInsightsSectionProps) {
           </div>
           <div className="flex items-center gap-3">
             {meta?.quotaRemaining !== undefined && (
-              <span className={`text-xs ${meta.quotaRemaining < 5 ? 'text-amber-400' : 'text-slate-500'}`}>
+              <span className={`text-xs ${meta.quotaRemaining < 5 ? 'text-amber-400' : 'opacity-80'}`}>
                 {meta.quotaRemaining} requests left today
               </span>
             )}
@@ -153,11 +153,11 @@ export function AIInsightsSection({ analytics }: AIInsightsSectionProps) {
               onClick={generateInsights}
               disabled={loading}
               className={`
-                flex items-center gap-3 px-6 py-3 rounded-xl font-medium text-sm
+                flex items-center gap-3 px-6 py-3  font-medium text-sm
                 transition-all duration-300 min-w-[200px] justify-center
                 ${loading 
-                  ? "bg-slate-800/50 border border-slate-700/30 text-slate-400 cursor-not-allowed"
-                  : "bg-linear-to-r from-purple-500 to-cyan-500 text-white hover:from-purple-600 hover:to-cyan-600 shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40"}
+                  ? " border border-[rgba(240,240,250,0.15)] opacity-80 cursor-not-allowed"
+                  : "bg-linear-to-r from-purple-500 to-cyan-500 text-white hover:from-purple-600 hover:to-cyan-600  -500/25 hover:-500/40"}
               `}
             >
               {loading ? (
@@ -183,7 +183,7 @@ export function AIInsightsSection({ analytics }: AIInsightsSectionProps) {
 
       {/* Error State */}
       {error && (
-        <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 flex items-start gap-3">
+        <div className="bg-red-500/10 border border-red-500/30 p-4 flex items-start gap-3">
           <AlertTriangle className="w-5 h-5 text-red-400 mt-0.5" />
           <div>
             <p className="text-red-400 font-medium">Unable to generate insights</p>
@@ -207,7 +207,7 @@ export function AIInsightsSection({ analytics }: AIInsightsSectionProps) {
           <DataQualityCard
             title="Consistency Score"
             value={meta.dataQuality.consistencyScore}
-            icon={<TrendingUp className="w-5 h-5 text-cyan-400" />}
+            icon={<TrendingUp className="w-5 h-5 text-[#f0f0fa]" />}
             suffix="/100"
             description="How regular your coding habits are"
             color="cyan"
@@ -231,8 +231,8 @@ export function AIInsightsSection({ analytics }: AIInsightsSectionProps) {
 
       {/* Milestone Tracker */}
       {meta?.daysToMilestone && (
-        <div className="bg-linear-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/20 rounded-xl p-4 flex items-center gap-4">
-          <div className="p-3 bg-amber-500/20 rounded-lg">
+        <div className="bg-linear-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/20 p-4 flex items-center gap-4">
+          <div className="p-3 bg-amber-500/20">
             <Target className="w-6 h-6 text-amber-400" />
           </div>
           <div className="flex-1">
@@ -253,7 +253,7 @@ export function AIInsightsSection({ analytics }: AIInsightsSectionProps) {
       {insights && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
           <InsightCard
-            icon={<Brain className="w-5 h-5 text-cyan-400" />}
+            icon={<Brain className="w-5 h-5 text-[#f0f0fa]" />}
             title="Patterns"
             items={insights.patterns}
             color="cyan"
@@ -275,12 +275,12 @@ export function AIInsightsSection({ analytics }: AIInsightsSectionProps) {
 
       {/* Empty State */}
       {!insights && !loading && !error && (
-        <div className="bg-slate-900/50 border border-slate-700/30 rounded-xl p-8 text-center">
-          <div className="w-16 h-16 bg-purple-500/10 border border-purple-500/30 rounded-full flex items-center justify-center mx-auto mb-4">
+        <div className="border border-[rgba(240,240,250,0.15)] p-8 text-center">
+          <div className="w-16 h-16 bg-purple-500/10 border border-purple-500/30 -full flex items-center justify-center mx-auto mb-4">
             <Sparkles className="w-8 h-8 text-purple-400" />
           </div>
-          <h3 className="text-lg font-medium text-slate-200 mb-2">No insights yet</h3>
-          <p className="text-slate-400 text-sm max-w-md mx-auto">
+          <h3 className="text-lg font-medium opacity-80 mb-2">No insights yet</h3>
+          <p className="opacity-80 text-sm max-w-md mx-auto">
             Click "Generate Insights" to get AI-powered analysis of your coding patterns, 
             strengths, and personalized suggestions to level up your development skills.
           </p>
@@ -318,15 +318,15 @@ function InsightCard({
   };
 
   return (
-    <div className={`bg-slate-900/50 border ${colorClasses[color as keyof typeof colorClasses] || colorClasses.cyan} rounded-xl p-6 backdrop-blur-sm transition-all duration-300 hover:bg-slate-900/70`}>
+    <div className={` border ${colorClasses[color as keyof typeof colorClasses] || colorClasses.cyan}  p-6 backdrop-blur-sm transition-all duration-300 hover:`}>
       <div className="flex items-center gap-3 mb-4">
-        <div className="p-2 bg-slate-800/50 rounded-lg">{icon}</div>
-        <h3 className="text-lg font-semibold text-slate-200">{title}</h3>
+        <div className="p-2">{icon}</div>
+        <h3 className="text-lg font-semibold opacity-80">{title}</h3>
       </div>
       <ul className="space-y-3">
         {items.map((item, index) => (
-          <li key={index} className="flex items-start gap-2 text-sm text-slate-300">
-            <span className={`w-1.5 h-1.5 rounded-full ${dotColors[color as keyof typeof dotColors] || dotColors.cyan} mt-1.5 shrink-0`} />
+          <li key={index} className="flex items-start gap-2 text-sm opacity-80">
+            <span className={`w-1.5 h-1.5 -full ${dotColors[color as keyof typeof dotColors] || dotColors.cyan} mt-1.5 shrink-0`} />
             {item}
           </li>
         ))}
@@ -357,16 +357,16 @@ function DataQualityCard({
   };
 
   return (
-    <div className={`bg-linear-to-br ${colorClasses[color as keyof typeof colorClasses]} border rounded-xl p-4 backdrop-blur-sm`}>
+    <div className={`bg-linear-to-br ${colorClasses[color as keyof typeof colorClasses]} border  p-4 backdrop-blur-sm`}>
       <div className="flex items-center gap-2 mb-2">
         {icon}
-        <span className="text-sm text-slate-400">{title}</span>
+        <span className="text-sm opacity-80">{title}</span>
       </div>
       <div className="flex items-baseline gap-1">
-        <span className="text-2xl font-bold text-slate-200">{value}</span>
-        {suffix && <span className="text-slate-500 text-sm">{suffix}</span>}
+        <span className="text-2xl font-bold opacity-80">{value}</span>
+        {suffix && <span className="opacity-80 text-sm">{suffix}</span>}
       </div>
-      <p className="text-xs text-slate-500 mt-1">{description}</p>
+      <p className="text-xs opacity-80 mt-1">{description}</p>
     </div>
   );
 }
@@ -388,10 +388,10 @@ function StreakHealthCard({
       text: 'text-emerald-400',
     },
     good: {
-      icon: <Flame className="w-5 h-5 text-cyan-400" />,
+      icon: <Flame className="w-5 h-5 text-[#f0f0fa]" />,
       label: 'Good',
       color: 'from-cyan-500/20 to-cyan-500/5 border-cyan-500/30',
-      text: 'text-cyan-400',
+      text: 'text-[#f0f0fa]',
     },
     warning: {
       icon: <AlertTriangle className="w-5 h-5 text-amber-400" />,
@@ -406,25 +406,25 @@ function StreakHealthCard({
       text: 'text-red-400',
     },
     inactive: {
-      icon: <CheckCircle2 className="w-5 h-5 text-slate-400" />,
+      icon: <CheckCircle2 className="w-5 h-5 opacity-80" />,
       label: 'Start Fresh',
-      color: 'from-slate-500/20 to-slate-500/5 border-slate-500/30',
-      text: 'text-slate-400',
+      color: 'from-slate-500/20 to-slate-500/5 border-[rgba(240,240,250,0.15)]',
+      text: 'opacity-80',
     },
   };
 
   const { icon, label, color, text } = config[health];
 
   return (
-    <div className={`bg-linear-to-br ${color} border rounded-xl p-4 backdrop-blur-sm`}>
+    <div className={`bg-linear-to-br ${color} border  p-4 backdrop-blur-sm`}>
       <div className="flex items-center gap-2 mb-2">
         {icon}
-        <span className="text-sm text-slate-400">Streak Health</span>
+        <span className="text-sm opacity-80">Streak Health</span>
       </div>
       <div className="flex items-baseline gap-2">
         <span className={`text-2xl font-bold ${text}`}>{label}</span>
       </div>
-      <p className="text-xs text-slate-500 mt-1">
+      <p className="text-xs opacity-80 mt-1">
         {currentStreak > 0 
           ? `${currentStreak} day streak ${isActiveToday ? '✓' : '- commit today!'}`
           : 'Start your streak today'}

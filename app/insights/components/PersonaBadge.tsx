@@ -59,7 +59,7 @@ export function PersonaBadge({
   };
   
   const rarityStyles = {
-    common: 'border-slate-500/30 bg-slate-800/50',
+    common: 'border-[rgba(240,240,250,0.15)] ',
     uncommon: 'border-cyan-500/30 bg-cyan-500/10',
     rare: 'border-purple-500/30 bg-purple-500/10',
     legendary: 'border-amber-500/30 bg-amber-500/10 animate-pulse',
@@ -67,16 +67,16 @@ export function PersonaBadge({
   
   const rarityGlow = {
     common: '',
-    uncommon: 'hover:shadow-[0_0_15px_rgba(6,182,212,0.3)]',
-    rare: 'hover:shadow-[0_0_20px_rgba(168,85,247,0.4)]',
-    legendary: 'shadow-[0_0_25px_rgba(251,191,36,0.3)] hover:shadow-[0_0_30px_rgba(251,191,36,0.5)]',
+    uncommon: 'hover:-[0_0_15px_rgba(6,182,212,0.3)]',
+    rare: 'hover:-[0_0_20px_rgba(168,85,247,0.4)]',
+    legendary: '-[0_0_25px_rgba(251,191,36,0.3)] hover:-[0_0_30px_rgba(251,191,36,0.5)]',
   };
 
   return (
     <div className="relative inline-block">
       <div
         className={cn(
-          "inline-flex items-center rounded-full border transition-all duration-300",
+          "inline-flex items-center -full border transition-all duration-300",
           sizeClasses[size],
           rarityStyles[persona.rarity],
           interactive && rarityGlow[persona.rarity],
@@ -93,21 +93,21 @@ export function PersonaBadge({
       {/* Tooltip */}
       {showTooltip && isHovered && (
         <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-50 animate-in fade-in slide-in-from-bottom-2 duration-200">
-          <div className="bg-slate-900 border border-slate-700/50 rounded-lg p-3 shadow-xl min-w-[200px]">
-            <div className="text-sm text-slate-200 font-medium mb-1">
+          <div className="border border-[rgba(240,240,250,0.15)] p-3 min-w-[200px]">
+            <div className="text-sm opacity-80 font-medium mb-1">
               {persona.emoji} {persona.name}
             </div>
-            <div className="text-xs text-slate-400 mb-2">
+            <div className="text-xs opacity-80 mb-2">
               {persona.description}
             </div>
-            <div className="text-xs text-slate-500 border-t border-slate-700/30 pt-2">
-              <span className="text-slate-400">Criteria:</span> {persona.criteria}
+            <div className="text-xs opacity-80 border-t border-[rgba(240,240,250,0.15)] pt-2">
+              <span className="opacity-80">Criteria:</span> {persona.criteria}
             </div>
             <div className="flex items-center gap-2 mt-2">
               <span className={cn(
-                "text-xs px-2 py-0.5 rounded-full capitalize",
-                persona.rarity === 'common' && "bg-slate-700 text-slate-300",
-                persona.rarity === 'uncommon' && "bg-cyan-500/20 text-cyan-400",
+                "text-xs px-2 py-0.5 -full capitalize",
+                persona.rarity === 'common' && " opacity-80",
+                persona.rarity === 'uncommon' && "bg-cyan-500/20 text-[#f0f0fa]",
                 persona.rarity === 'rare' && "bg-purple-500/20 text-purple-400",
                 persona.rarity === 'legendary' && "bg-amber-500/20 text-amber-400"
               )}>
@@ -115,7 +115,7 @@ export function PersonaBadge({
               </span>
             </div>
             {/* Arrow */}
-            <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 border-r border-b border-slate-700/50 rotate-45" />
+            <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 border-r border-b border-[rgba(240,240,250,0.15)] rotate-45" />
           </div>
         </div>
       )}
@@ -138,9 +138,9 @@ export function PersonaDisplay({
 
   return (
     <div className={cn(
-      "bg-linear-to-r rounded-xl p-4 border backdrop-blur-sm transition-all duration-300",
+      "bg-linear-to-r  p-4 border backdrop-blur-sm transition-all duration-300",
       personaResult.primary.gradient,
-      "border-slate-700/30 hover:border-slate-600/50",
+      "border-[rgba(240,240,250,0.15)] hover:border-[rgba(240,240,250,0.15)]",
       className
     )}>
       <div className="flex items-center justify-between">
@@ -154,16 +154,16 @@ export function PersonaDisplay({
                 {personaResult.primary.name}
               </span>
               <span className={cn(
-                "text-xs px-2 py-0.5 rounded-full capitalize",
-                personaResult.primary.rarity === 'common' && "bg-slate-700/50 text-slate-400",
-                personaResult.primary.rarity === 'uncommon' && "bg-cyan-500/20 text-cyan-400",
+                "text-xs px-2 py-0.5 -full capitalize",
+                personaResult.primary.rarity === 'common' && " opacity-80",
+                personaResult.primary.rarity === 'uncommon' && "bg-cyan-500/20 text-[#f0f0fa]",
                 personaResult.primary.rarity === 'rare' && "bg-purple-500/20 text-purple-400",
                 personaResult.primary.rarity === 'legendary' && "bg-amber-500/20 text-amber-400"
               )}>
                 {personaResult.primary.rarity}
               </span>
             </div>
-            <p className="text-xs text-slate-400 mt-0.5">
+            <p className="text-xs opacity-80 mt-0.5">
               {personaResult.primary.description}
             </p>
           </div>
@@ -171,16 +171,16 @@ export function PersonaDisplay({
         
         {/* Confidence indicator */}
         <div className="text-right">
-          <div className="text-lg font-bold text-slate-200 tabular-nums">
+          <div className="text-lg font-bold opacity-80 tabular-nums">
             {personaResult.confidence}%
           </div>
-          <div className="text-xs text-slate-500">match</div>
+          <div className="text-xs opacity-80">match</div>
         </div>
       </div>
       
       {/* Secondary persona hint */}
       {personaResult.secondary && (
-        <div className="mt-3 pt-3 border-t border-slate-700/30 flex items-center gap-2 text-xs text-slate-500">
+        <div className="mt-3 pt-3 border-t border-[rgba(240,240,250,0.15)] flex items-center gap-2 text-xs opacity-80">
           <span>Also:</span>
           <PersonaBadge persona={personaResult.secondary} size="sm" showTooltip={false} />
         </div>
@@ -188,8 +188,8 @@ export function PersonaDisplay({
       
       {/* Additional earned badges */}
       {earnedBadges && earnedBadges.length > 0 && (
-        <div className="mt-3 pt-3 border-t border-slate-700/30">
-          <div className="flex items-center gap-2 text-xs text-slate-500 mb-2">
+        <div className="mt-3 pt-3 border-t border-[rgba(240,240,250,0.15)]">
+          <div className="flex items-center gap-2 text-xs opacity-80 mb-2">
             <Award className="w-3 h-3" />
             <span>Earned Badges</span>
           </div>
@@ -225,14 +225,14 @@ export function PersonaBadgeCompact({
     <div className="relative inline-block">
       <div 
         className={cn(
-          "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full",
+          "inline-flex items-center gap-1.5 px-3 py-1.5 -full",
           "bg-linear-to-r border cursor-pointer",
           "transition-all duration-300 hover:scale-105",
           persona.gradient,
           persona.rarity === 'legendary' && "animate-pulse",
           persona.rarity === 'rare' && "border-purple-500/40",
           persona.rarity === 'uncommon' && "border-cyan-500/40",
-          "border-slate-600/30",
+          "border-[rgba(240,240,250,0.15)]",
           className
         )}
         onMouseEnter={() => setShowTooltip(true)}
@@ -247,11 +247,11 @@ export function PersonaBadgeCompact({
       {/* Tooltip */}
       {showTooltip && (
         <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-50 animate-in fade-in slide-in-from-bottom-2 duration-200">
-          <div className="bg-slate-900 border border-slate-700/50 rounded-lg px-3 py-2 shadow-xl whitespace-nowrap">
-            <div className="text-xs text-slate-300">
+          <div className="border border-[rgba(240,240,250,0.15)] px-3 py-2 whitespace-nowrap">
+            <div className="text-xs opacity-80">
               {persona.criteria}
             </div>
-            <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 border-r border-b border-slate-700/50 rotate-45" />
+            <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 border-r border-b border-[rgba(240,240,250,0.15)] rotate-45" />
           </div>
         </div>
       )}
@@ -280,24 +280,24 @@ export function PersonaShowcase({ context, className }: PersonaShowcaseProps) {
   return (
     <div className={cn(
       "bg-linear-to-r from-purple-500/10 via-cyan-500/10 to-blue-500/10",
-      "border border-purple-500/20 rounded-2xl overflow-hidden backdrop-blur-sm",
+      "border border-purple-500/20  overflow-hidden backdrop-blur-sm",
       className
     )}>
       {/* Header */}
-      <div className="px-6 py-4 border-b border-slate-700/30 flex items-center justify-between">
+      <div className="px-6 py-4 border-b border-[rgba(240,240,250,0.15)] flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-purple-500/20 rounded-lg">
+          <div className="p-2 bg-purple-500/20">
             <Sparkles className="w-5 h-5 text-purple-400" />
           </div>
           <div>
-            <h3 className="font-medium text-slate-200">Your Developer Persona</h3>
-            <p className="text-xs text-slate-500">Based on your coding patterns</p>
+            <h3 className="font-medium opacity-80">Your Developer Persona</h3>
+            <p className="text-xs opacity-80">Based on your coding patterns</p>
           </div>
         </div>
         
         <button
           onClick={() => setExpanded(!expanded)}
-          className="p-2 text-slate-400 hover:text-slate-200 transition-colors"
+          className="p-2 opacity-80 hover:opacity-80 transition-colors"
         >
           <ChevronRight 
             className={cn(
@@ -313,10 +313,10 @@ export function PersonaShowcase({ context, className }: PersonaShowcaseProps) {
         <div className="flex items-center gap-4">
           <div 
             className={cn(
-              "w-20 h-20 rounded-2xl flex items-center justify-center text-4xl",
+              "w-20 h-20  flex items-center justify-center text-4xl",
               "bg-linear-to-br border",
               personaResult.primary.gradient,
-              "border-slate-700/30"
+              "border-[rgba(240,240,250,0.15)]"
             )}
           >
             {personaResult.primary.emoji}
@@ -328,35 +328,35 @@ export function PersonaShowcase({ context, className }: PersonaShowcaseProps) {
                 {personaResult.primary.name}
               </span>
               <span className={cn(
-                "text-xs px-2 py-0.5 rounded-full capitalize",
+                "text-xs px-2 py-0.5 -full capitalize",
                 personaResult.primary.rarity === 'legendary' && "bg-amber-500/20 text-amber-400",
                 personaResult.primary.rarity === 'rare' && "bg-purple-500/20 text-purple-400",
-                personaResult.primary.rarity === 'uncommon' && "bg-cyan-500/20 text-cyan-400",
-                personaResult.primary.rarity === 'common' && "bg-slate-700 text-slate-400"
+                personaResult.primary.rarity === 'uncommon' && "bg-cyan-500/20 text-[#f0f0fa]",
+                personaResult.primary.rarity === 'common' && " opacity-80"
               )}>
                 {personaResult.primary.rarity}
               </span>
             </div>
-            <p className="text-sm text-slate-400">
+            <p className="text-sm opacity-80">
               {personaResult.primary.description}
             </p>
-            <p className="text-xs text-slate-500 mt-1">
+            <p className="text-xs opacity-80 mt-1">
               {personaResult.primary.criteria}
             </p>
           </div>
           
           <div className="text-center">
-            <div className="text-3xl font-bold text-slate-200 tabular-nums">
+            <div className="text-3xl font-bold opacity-80 tabular-nums">
               {personaResult.confidence}%
             </div>
-            <div className="text-xs text-slate-500">confidence</div>
+            <div className="text-xs opacity-80">confidence</div>
           </div>
         </div>
         
         {/* Earned Badges Section */}
         {expanded && additionalBadges.length > 0 && (
-          <div className="mt-6 pt-6 border-t border-slate-700/30">
-            <h4 className="text-sm font-medium text-slate-300 mb-3 flex items-center gap-2">
+          <div className="mt-6 pt-6 border-t border-[rgba(240,240,250,0.15)]">
+            <h4 className="text-sm font-medium opacity-80 mb-3 flex items-center gap-2">
               <Award className="w-4 h-4 text-amber-400" />
               All Earned Badges ({additionalBadges.length + 1})
             </h4>

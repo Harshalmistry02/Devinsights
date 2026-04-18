@@ -46,12 +46,12 @@ export function HourlyActivity({ data, className = '' }: HourlyActivityProps) {
   const codingStyle = getCodingStyle(morningCommits, afternoonCommits, eveningCommits, nightCommits);
 
   return (
-    <div className={`bg-slate-900/50 border border-slate-700/30 rounded-xl backdrop-blur-sm ${className}`}>
+    <div className={` border border-[rgba(240,240,250,0.15)]  backdrop-blur-sm ${className}`}>
       {/* Header */}
-      <div className="p-4 sm:p-6 border-b border-slate-700/30">
-        <h3 className="text-lg font-semibold text-slate-200">Daily Pattern</h3>
-        <p className="text-sm text-slate-500">
-          Peak coding time: <span className="text-cyan-400 font-medium">{formatPeakTime(peakHour)}</span>
+      <div className="p-4 sm:p-6 border-b border-[rgba(240,240,250,0.15)]">
+        <h3 className="text-lg font-semibold opacity-80">Daily Pattern</h3>
+        <p className="text-sm opacity-80">
+          Peak coding time: <span className="text-[#f0f0fa] font-medium">{formatPeakTime(peakHour)}</span>
           <span className="mx-2">·</span>
           <span className="text-purple-400">{codingStyle}</span>
         </p>
@@ -131,7 +131,7 @@ export function HourlyActivity({ data, className = '' }: HourlyActivityProps) {
             </div>
           </>
         ) : (
-          <div className="h-48 flex items-center justify-center text-slate-500">
+          <div className="h-48 flex items-center justify-center opacity-80">
             <p>No hourly data available</p>
           </div>
         )}
@@ -162,15 +162,15 @@ function TimePeriodStat({
   const colorClasses = {
     indigo: 'text-indigo-400',
     amber: 'text-amber-400',
-    cyan: 'text-cyan-400',
+    cyan: 'text-[#f0f0fa]',
     purple: 'text-purple-400',
   };
 
   return (
-    <div className="bg-slate-800/30 rounded-lg p-2">
+    <div className="p-2">
       <p className={`text-lg font-semibold ${colorClasses[color]}`}>{percentage}%</p>
-      <p className="text-xs text-slate-400">{label}</p>
-      <p className="text-xs text-slate-600">{sublabel}</p>
+      <p className="text-xs opacity-80">{label}</p>
+      <p className="text-xs opacity-80">{sublabel}</p>
     </div>
   );
 }
@@ -228,11 +228,11 @@ function CustomTooltip({ active, payload }: any) {
   const displayHour = data.hour % 12 || 12;
 
   return (
-    <div className="bg-slate-800 border border-slate-700 rounded-lg p-3 shadow-xl">
-      <p className="text-xs text-slate-400 mb-1">
+    <div className="border border-[rgba(240,240,250,0.15)] p-3">
+      <p className="text-xs opacity-80 mb-1">
         {displayHour}:00 - {displayHour}:59 {period}
       </p>
-      <p className="text-lg font-semibold text-cyan-400">
+      <p className="text-lg font-semibold text-[#f0f0fa]">
         {data.commits} commit{data.commits !== 1 ? 's' : ''}
       </p>
     </div>

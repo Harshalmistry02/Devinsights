@@ -1,13 +1,12 @@
 'use client';
 
-import { 
-  Calendar, 
-  TrendingUp, 
-  TrendingDown, 
+import {
+  Calendar,
+  TrendingUp,
+  TrendingDown,
   Minus,
-  Flame, 
-  Trophy, 
-  Clock, 
+  Flame,
+  Clock,
   GitCommit,
   Code,
   Target,
@@ -15,7 +14,6 @@ import {
   Sparkles
 } from "lucide-react";
 import { useMemo } from "react";
-import { cn } from "@/lib/utils";
 import {
   buildWeeklySummary,
   getWeekLabel,
@@ -35,17 +33,11 @@ interface WeeklySummaryProps {
 }
 
 /**
- * Weekly Summary Widget
- * 
- * Shows "This Week at a Glance" with:
- * - Progress metrics with week-over-week comparison
- * - Highlights (best day, most active time, streak milestone)
- * - Quick action buttons
+ * Weekly Summary Widget — SpaceX-inspired minimal aesthetic
  */
 export function WeeklySummary({ analytics, className }: WeeklySummaryProps) {
   const summaryData = useMemo(() => {
     if (!analytics) return null;
-    
     return buildWeeklySummary(
       analytics.dailyCommits || null,
       analytics.hourlyStats || null,
@@ -57,17 +49,20 @@ export function WeeklySummary({ analytics, className }: WeeklySummaryProps) {
 
   if (!summaryData) {
     return (
-      <div className={cn(
-        "relative overflow-hidden rounded-2xl",
-        "bg-linear-to-r from-cyan-500/10 via-blue-500/10 to-purple-500/10",
-        "border border-cyan-500/20",
-        "p-6",
-        className
-      )}>
-        <div className="flex items-center gap-3 text-slate-400">
-          <Calendar className="w-5 h-5" />
-          <span>Sync your data to see weekly summary</span>
-        </div>
+      <div
+        style={{
+          background: "rgba(240,240,250,0.02)",
+          border: "1px solid rgba(240,240,250,0.06)",
+          borderRadius: "var(--radius-sharp)",
+          padding: "20px",
+          display: "flex",
+          alignItems: "center",
+          gap: "10px",
+          opacity: 0.5,
+        }}
+      >
+        <Calendar size={14} />
+        <span className="text-caption">Sync your data to see weekly summary</span>
       </div>
     );
   }
@@ -75,150 +70,159 @@ export function WeeklySummary({ analytics, className }: WeeklySummaryProps) {
   const { currentWeek, comparison, highlights, streakInfo } = summaryData;
 
   return (
-    <div className={cn(
-      "relative overflow-hidden rounded-2xl",
-      "bg-linear-to-r from-cyan-500/10 via-blue-500/10 to-purple-500/10",
-      "border border-cyan-500/20",
-      "backdrop-blur-sm",
-      className
-    )}>
-      {/* Decorative background elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-20 -right-20 w-40 h-40 bg-cyan-500/10 rounded-full blur-3xl" />
-        <div className="absolute -bottom-20 -left-20 w-40 h-40 bg-purple-500/10 rounded-full blur-3xl" />
-      </div>
-
-      <div className="relative z-10 p-6">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-cyan-500/20 rounded-lg">
-              <Calendar className="w-5 h-5 text-cyan-400" />
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold text-slate-200 flex items-center gap-2">
-                <span>📊</span>
-                {getWeekLabel(currentWeek.weekNumber, currentWeek.year)}
-              </h3>
-              <p className="text-xs text-slate-500">This Week at a Glance</p>
-            </div>
+    <div
+      style={{
+        background: "rgba(240,240,250,0.02)",
+        border: "1px solid rgba(240,240,250,0.06)",
+        borderRadius: "var(--radius-sharp)",
+        overflow: "hidden",
+      }}
+    >
+      {/* Header */}
+      <div
+        style={{
+          padding: "16px 20px",
+          borderBottom: "1px solid rgba(240,240,250,0.05)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          <Calendar size={14} style={{ opacity: 0.35 }} aria-hidden="true" />
+          <div>
+            <p className="text-caption-bold" style={{ fontSize: "0.75rem" }}>
+              {getWeekLabel(currentWeek.weekNumber, currentWeek.year)}
+            </p>
+            <p className="text-micro" style={{ opacity: 0.3, marginTop: "2px" }}>This Week at a Glance</p>
           </div>
-          
-          {/* Overall Trend Badge */}
-          <TrendBadge 
-            trend={comparison.trend} 
-            percentChange={comparison.commitsPercentChange} 
-          />
         </div>
 
-        {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Progress Section */}
-          <div className="lg:col-span-1">
-            <h4 className="text-sm font-medium text-slate-400 mb-3 flex items-center gap-2">
-              <Target className="w-4 h-4" />
-              Progress
-            </h4>
-            <div className="space-y-2">
-              <ProgressItem
-                icon={<GitCommit className="w-4 h-4" />}
-                label="commits"
-                value={currentWeek.totalCommits}
-                change={comparison.commitsDiff}
-                changeLabel="vs last week"
-                positive={comparison.commitsDiff >= 0}
-              />
-              <ProgressItem
-                icon={<Flame className="w-4 h-4" />}
-                label="day streak"
-                value={streakInfo.current}
-                badge={streakInfo.isActive ? "🔥" : undefined}
-                positive={true}
-              />
-              <ProgressItem
-                icon={<Code className="w-4 h-4" />}
-                label="repos touched"
-                value={highlights.totalReposTouched}
-                positive={true}
-              />
-              {comparison.weekendChange !== 0 && (
-                <div className={cn(
-                  "flex items-center gap-2 text-xs py-1.5 px-2 rounded-lg",
-                  comparison.weekendChange < 0 
-                    ? "bg-amber-500/10 text-amber-400" 
-                    : "bg-emerald-500/10 text-emerald-400"
-                )}>
-                  <span>⚠️</span>
-                  <span>
-                    Weekend activity {comparison.weekendChange > 0 ? 'up' : 'down'} {Math.abs(comparison.weekendChange)}%
-                  </span>
-                </div>
-              )}
-            </div>
-          </div>
+        {/* Overall trend */}
+        <TrendBadge trend={comparison.trend} percentChange={comparison.commitsPercentChange} />
+      </div>
 
-          {/* Highlights Section */}
-          <div className="lg:col-span-1">
-            <h4 className="text-sm font-medium text-slate-400 mb-3 flex items-center gap-2">
-              <Sparkles className="w-4 h-4" />
-              Highlights
-            </h4>
-            <div className="space-y-2">
-              {highlights.bestDay && (
-                <HighlightItem
-                  emoji="🏆"
-                  label="Best day"
-                  value={`${highlights.bestDay.dayName} (${highlights.bestDay.commits} commits)`}
-                />
-              )}
-              {highlights.mostActiveHour && (
-                <HighlightItem
-                  emoji="💻"
-                  label="Most active"
-                  value={highlights.mostActiveHour.label}
-                />
-              )}
-              {streakInfo.daysToMilestone && streakInfo.milestoneLabel && (
-                <HighlightItem
-                  emoji="🎯"
-                  label="Streak milestone"
-                  value={`${streakInfo.daysToMilestone} day${streakInfo.daysToMilestone !== 1 ? 's' : ''} to ${streakInfo.milestoneLabel} badge`}
-                  highlight
-                />
-              )}
-              {highlights.topRepos.length > 0 && (
-                <HighlightItem
-                  emoji="📦"
-                  label="Top repos"
-                  value={highlights.topRepos.slice(0, 2).join(', ')}
-                />
-              )}
-            </div>
-          </div>
+      {/* Content Grid */}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1fr",
+          gap: "1px",
+          background: "rgba(240,240,250,0.05)",
+        }}
+        className="weekly-grid"
+      >
+        <style>{`
+          @media (min-width: 960px) {
+            .weekly-grid {
+              grid-template-columns: repeat(3, 1fr) !important;
+            }
+          }
+        `}</style>
 
-          {/* Mini Activity Chart */}
-          <div className="lg:col-span-1">
-            <h4 className="text-sm font-medium text-slate-400 mb-3 flex items-center gap-2">
-              <TrendingUp className="w-4 h-4" />
-              This Week
-            </h4>
-            <WeekMiniChart data={currentWeek.dailyBreakdown} />
-            
-            {/* Quick Actions */}
-            <div className="flex gap-2 mt-4">
-              {!streakInfo.isActive && (
-                <QuickActionButton
-                  label="Commit Today"
-                  icon={<GitCommit className="w-3.5 h-3.5" />}
-                  variant="primary"
-                />
-              )}
-              <QuickActionButton
-                label="Weekly Report"
-                icon={<ExternalLink className="w-3.5 h-3.5" />}
-                variant="secondary"
+        {/* Progress Section */}
+        <div style={{ background: "#000", padding: "20px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "14px", opacity: 0.4 }}>
+            <Target size={12} />
+            <p className="text-micro">Progress</p>
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+            <ProgressItem
+              icon={<GitCommit size={12} />}
+              label="commits"
+              value={currentWeek.totalCommits}
+              change={comparison.commitsDiff}
+              changeLabel="vs last week"
+              positive={comparison.commitsDiff >= 0}
+            />
+            <ProgressItem
+              icon={<Flame size={12} />}
+              label="day streak"
+              value={streakInfo.current}
+              badge={streakInfo.isActive ? "🔥" : undefined}
+              positive={true}
+            />
+            <ProgressItem
+              icon={<Code size={12} />}
+              label="repos touched"
+              value={highlights.totalReposTouched}
+              positive={true}
+            />
+            {comparison.weekendChange !== 0 && (
+              <p
+                className="text-micro"
+                style={{
+                  padding: "6px 10px",
+                  border: `1px solid ${comparison.weekendChange < 0 ? "rgba(251,191,36,0.2)" : "rgba(134,239,172,0.2)"}`,
+                  color: comparison.weekendChange < 0 ? "rgba(251,191,36,0.6)" : "rgba(134,239,172,0.6)",
+                  borderRadius: "2px",
+                }}
+              >
+                Weekend activity {comparison.weekendChange > 0 ? 'up' : 'down'} {Math.abs(comparison.weekendChange)}%
+              </p>
+            )}
+          </div>
+        </div>
+
+        {/* Highlights Section */}
+        <div style={{ background: "#000", padding: "20px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "14px", opacity: 0.4 }}>
+            <Sparkles size={12} />
+            <p className="text-micro">Highlights</p>
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+            {highlights.bestDay && (
+              <HighlightItem
+                emoji="🏆"
+                label="Best day"
+                value={`${highlights.bestDay.dayName} (${highlights.bestDay.commits} commits)`}
               />
-            </div>
+            )}
+            {highlights.mostActiveHour && (
+              <HighlightItem
+                emoji="💻"
+                label="Most active"
+                value={highlights.mostActiveHour.label}
+              />
+            )}
+            {streakInfo.daysToMilestone && streakInfo.milestoneLabel && (
+              <HighlightItem
+                emoji="🎯"
+                label="Streak milestone"
+                value={`${streakInfo.daysToMilestone} day${streakInfo.daysToMilestone !== 1 ? 's' : ''} to ${streakInfo.milestoneLabel} badge`}
+                highlight
+              />
+            )}
+            {highlights.topRepos.length > 0 && (
+              <HighlightItem
+                emoji="📦"
+                label="Top repos"
+                value={highlights.topRepos.slice(0, 2).join(', ')}
+              />
+            )}
+          </div>
+        </div>
+
+        {/* Mini Chart Section */}
+        <div style={{ background: "#000", padding: "20px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "14px", opacity: 0.4 }}>
+            <TrendingUp size={12} />
+            <p className="text-micro">This Week</p>
+          </div>
+          <WeekMiniChart data={currentWeek.dailyBreakdown} />
+
+          {/* Quick Actions */}
+          <div style={{ display: "flex", gap: "8px", marginTop: "16px" }}>
+            {!streakInfo.isActive && (
+              <button className="btn-ghost btn-ghost-sm" style={{ fontSize: "0.625rem", padding: "8px 16px" }}>
+                <GitCommit size={11} />
+                Commit Today
+              </button>
+            )}
+            <button className="btn-ghost btn-ghost-sm" style={{ fontSize: "0.625rem", padding: "8px 16px" }}>
+              <ExternalLink size={11} />
+              Weekly Report
+            </button>
           </div>
         </div>
       </div>
@@ -226,55 +230,39 @@ export function WeeklySummary({ analytics, className }: WeeklySummaryProps) {
   );
 }
 
-/**
- * Trend Badge Component
- */
-function TrendBadge({ 
-  trend, 
-  percentChange 
-}: { 
+function TrendBadge({
+  trend,
+  percentChange
+}: {
   trend: 'up' | 'down' | 'stable';
   percentChange: number;
 }) {
   const config = {
-    up: {
-      icon: TrendingUp,
-      bg: 'bg-emerald-500/20',
-      border: 'border-emerald-500/30',
-      text: 'text-emerald-400',
-    },
-    down: {
-      icon: TrendingDown,
-      bg: 'bg-rose-500/20',
-      border: 'border-rose-500/30',
-      text: 'text-rose-400',
-    },
-    stable: {
-      icon: Minus,
-      bg: 'bg-slate-500/20',
-      border: 'border-slate-500/30',
-      text: 'text-slate-400',
-    },
+    up: { icon: TrendingUp, color: "rgba(134,239,172,0.6)", border: "rgba(134,239,172,0.2)" },
+    down: { icon: TrendingDown, color: "rgba(252,165,165,0.6)", border: "rgba(252,165,165,0.2)" },
+    stable: { icon: Minus, color: "rgba(240,240,250,0.3)", border: "rgba(240,240,250,0.08)" },
   };
-
-  const { icon: Icon, bg, border, text } = config[trend];
+  const { icon: Icon, color, border } = config[trend];
 
   return (
-    <div className={cn(
-      "flex items-center gap-1.5 px-3 py-1.5 rounded-full border",
-      bg, border
-    )}>
-      <Icon className={cn("w-4 h-4", text)} />
-      <span className={cn("text-sm font-medium", text)}>
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: "6px",
+        padding: "4px 10px",
+        border: `1px solid ${border}`,
+        borderRadius: "2px",
+      }}
+    >
+      <Icon size={12} style={{ color }} />
+      <span className="text-micro" style={{ color }}>
         {percentChange > 0 ? '+' : ''}{percentChange}%
       </span>
     </div>
   );
 }
 
-/**
- * Progress Item Component
- */
 function ProgressItem({
   icon,
   label,
@@ -293,22 +281,25 @@ function ProgressItem({
   positive?: boolean;
 }) {
   return (
-    <div className="flex items-center justify-between py-1.5">
-      <div className="flex items-center gap-2 text-slate-300">
-        <span className="text-cyan-400">{icon}</span>
-        <span className="text-sm">
-          <span className="font-semibold text-slate-200">{value}</span>
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+        <span style={{ opacity: 0.3 }}>{icon}</span>
+        <span className="text-caption">
+          <span className="text-caption-bold" style={{ fontSize: "0.75rem" }}>{value}</span>
           {' '}{label}
-          {badge && <span className="ml-1">{badge}</span>}
+          {badge && <span style={{ marginLeft: "4px" }}>{badge}</span>}
         </span>
       </div>
       {change !== undefined && (
-        <span className={cn(
-          "text-xs font-medium px-2 py-0.5 rounded",
-          change >= 0 
-            ? "bg-emerald-500/20 text-emerald-400" 
-            : "bg-rose-500/20 text-rose-400"
-        )}>
+        <span
+          className="text-micro"
+          style={{
+            padding: "2px 6px",
+            border: `1px solid ${change >= 0 ? "rgba(134,239,172,0.15)" : "rgba(252,165,165,0.15)"}`,
+            color: change >= 0 ? "rgba(134,239,172,0.6)" : "rgba(252,165,165,0.6)",
+            borderRadius: "2px",
+          }}
+        >
           {formatWeekChange(change)} {changeLabel}
         </span>
       )}
@@ -316,9 +307,6 @@ function ProgressItem({
   );
 }
 
-/**
- * Highlight Item Component
- */
 function HighlightItem({
   emoji,
   label,
@@ -331,17 +319,24 @@ function HighlightItem({
   highlight?: boolean;
 }) {
   return (
-    <div className={cn(
-      "flex items-start gap-2 py-1.5 px-2 rounded-lg transition-colors",
-      highlight ? "bg-cyan-500/10" : "hover:bg-slate-800/30"
-    )}>
-      <span className="text-base">{emoji}</span>
-      <div className="flex-1 min-w-0">
-        <span className="text-xs text-slate-500">{label}: </span>
-        <span className={cn(
-          "text-sm",
-          highlight ? "text-cyan-300 font-medium" : "text-slate-300"
-        )}>
+    <div
+      style={{
+        display: "flex",
+        alignItems: "flex-start",
+        gap: "8px",
+        padding: "6px 8px",
+        borderRadius: "2px",
+        background: highlight ? "rgba(240,240,250,0.03)" : "transparent",
+        border: highlight ? "1px solid rgba(240,240,250,0.06)" : "none",
+      }}
+    >
+      <span style={{ fontSize: "0.875rem", lineHeight: 1 }}>{emoji}</span>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <span className="text-micro" style={{ opacity: 0.3 }}>{label}: </span>
+        <span
+          className="text-caption"
+          style={{ opacity: highlight ? 0.8 : 0.55 }}
+        >
           {value}
         </span>
       </div>
@@ -349,46 +344,46 @@ function HighlightItem({
   );
 }
 
-/**
- * Mini Week Chart Component
- */
-function WeekMiniChart({ 
-  data 
-}: { 
-  data: { date: string; commits: number; dayName: string }[] 
+function WeekMiniChart({
+  data
+}: {
+  data: { date: string; commits: number; dayName: string }[]
 }) {
   const maxCommits = Math.max(...data.map(d => d.commits), 1);
   const today = new Date().toISOString().split('T')[0];
 
   return (
-    <div className="flex items-end justify-between gap-1 h-16">
+    <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: "4px", height: "56px" }}>
       {data.map((day, i) => {
         const height = (day.commits / maxCommits) * 100;
         const isToday = day.date === today;
         const isFuture = day.date > today;
-        
+
         return (
-          <div key={i} className="flex-1 flex flex-col items-center gap-1">
-            <div 
-              className={cn(
-                "w-full rounded-t transition-all duration-300",
-                isFuture 
-                  ? "bg-slate-700/30" 
-                  : day.commits > 0 
-                    ? isToday 
-                      ? "bg-linear-to-t from-cyan-500 to-cyan-400" 
-                      : "bg-linear-to-t from-blue-500 to-cyan-500"
-                    : "bg-slate-700/50",
-                isToday && "ring-2 ring-cyan-400 ring-offset-1 ring-offset-slate-900"
-              )}
-              style={{ height: `${Math.max(height, 8)}%` }}
+          <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: "4px" }}>
+            <div
+              style={{
+                width: "100%",
+                borderRadius: "1px",
+                height: `${Math.max(height, 6)}%`,
+                background: isFuture
+                  ? "rgba(240,240,250,0.05)"
+                  : day.commits > 0
+                    ? isToday
+                      ? "var(--spectral-white)"
+                      : "rgba(240,240,250,0.35)"
+                    : "rgba(240,240,250,0.08)",
+                outline: isToday ? "1px solid rgba(240,240,250,0.4)" : "none",
+                outlineOffset: "1px",
+                transition: "height 0.3s ease",
+              }}
               title={`${day.dayName}: ${day.commits} commits`}
             />
-            <span className={cn(
-              "text-[10px]",
-              isToday ? "text-cyan-400 font-medium" : "text-slate-500"
-            )}>
-              {day.dayName}
+            <span
+              className="text-micro"
+              style={{ fontSize: "0.5rem", opacity: isToday ? 0.7 : 0.25 }}
+            >
+              {day.dayName.charAt(0)}
             </span>
           </div>
         );
@@ -398,44 +393,11 @@ function WeekMiniChart({
 }
 
 /**
- * Quick Action Button Component
- */
-function QuickActionButton({
-  label,
-  icon,
-  variant = 'secondary',
-  onClick,
-}: {
-  label: string;
-  icon?: React.ReactNode;
-  variant?: 'primary' | 'secondary';
-  onClick?: () => void;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className={cn(
-        "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium",
-        "transition-all duration-200",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400",
-        variant === 'primary'
-          ? "bg-cyan-500 text-white hover:bg-cyan-400 shadow-lg shadow-cyan-500/25"
-          : "bg-slate-800/50 text-slate-300 hover:bg-slate-700/50 border border-slate-700/50"
-      )}
-    >
-      {icon}
-      {label}
-    </button>
-  );
-}
-
-/**
- * Compact Weekly Summary for smaller spaces
+ * Compact Weekly Summary
  */
 export function WeeklySummaryCompact({ analytics, className }: WeeklySummaryProps) {
   const summaryData = useMemo(() => {
     if (!analytics) return null;
-    
     return buildWeeklySummary(
       analytics.dailyCommits || null,
       analytics.hourlyStats || null,
@@ -450,25 +412,26 @@ export function WeeklySummaryCompact({ analytics, className }: WeeklySummaryProp
   const { currentWeek, comparison, streakInfo } = summaryData;
 
   return (
-    <div className={cn(
-      "flex items-center justify-between p-4 rounded-xl",
-      "bg-linear-to-r from-cyan-500/10 to-blue-500/10",
-      "border border-cyan-500/20",
-      className
-    )}>
-      <div className="flex items-center gap-4">
-        <div className="text-center">
-          <div className="text-2xl font-bold text-slate-200">{currentWeek.totalCommits}</div>
-          <div className="text-xs text-slate-500">commits</div>
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        padding: "14px 18px",
+        background: "rgba(240,240,250,0.02)",
+        border: "1px solid rgba(240,240,250,0.06)",
+        borderRadius: "var(--radius-sharp)",
+      }}
+    >
+      <div style={{ display: "flex", alignItems: "center", gap: "24px" }}>
+        <div>
+          <p className="stat-value" style={{ fontSize: "1.5rem" }}>{currentWeek.totalCommits}</p>
+          <p className="text-micro" style={{ opacity: 0.3 }}>commits</p>
         </div>
-        <div className="h-8 w-px bg-slate-700" />
-        <div className="flex items-center gap-2">
-          {streakInfo.current > 0 && (
-            <span className="text-lg">🔥</span>
-          )}
-          <span className="text-sm text-slate-300">
-            {streakInfo.current} day streak
-          </span>
+        <div style={{ width: "1px", height: "32px", background: "rgba(240,240,250,0.08)" }} />
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          {streakInfo.current > 0 && <span style={{ fontSize: "1rem" }}>🔥</span>}
+          <span className="text-caption">{streakInfo.current} day streak</span>
         </div>
       </div>
       <TrendBadge trend={comparison.trend} percentChange={comparison.commitsPercentChange} />

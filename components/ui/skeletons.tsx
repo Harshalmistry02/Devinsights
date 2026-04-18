@@ -13,7 +13,7 @@ import React from 'react';
 function Skeleton({ className = '', style }: { className?: string; style?: React.CSSProperties }) {
   return (
     <div
-      className={`animate-pulse bg-slate-700/50 rounded ${className}`}
+      className={`animate-pulse   ${className}`}
       style={style}
     />
   );
@@ -22,13 +22,13 @@ function Skeleton({ className = '', style }: { className?: string; style?: React
 // Profile Card Skeleton (sidebar)
 export function ProfileCardSkeleton() {
   return (
-    <div className="bg-slate-900/50 border border-slate-700/30 rounded-xl overflow-hidden backdrop-blur-sm">
+    <div className="border border-[rgba(240,240,250,0.15)] overflow-hidden backdrop-blur-sm">
       {/* Profile Header Gradient */}
-      <div className="h-24 bg-slate-800/50 animate-pulse" />
+      <div className="h-24 animate-pulse" />
       
       {/* Avatar */}
       <div className="px-6 -mt-12 relative">
-        <Skeleton className="w-24 h-24 rounded-full border-4 border-slate-900" />
+        <Skeleton className="w-24 h-24 -full border-4 border-[rgba(240,240,250,0.15)]" />
       </div>
 
       {/* User Info */}
@@ -39,21 +39,21 @@ export function ProfileCardSkeleton() {
         
         {/* Status Badge */}
         <div className="flex items-center gap-2 pt-2">
-          <Skeleton className="h-6 w-24 rounded-full" />
+          <Skeleton className="h-6 w-24 -full" />
         </div>
         
         {/* Action Buttons */}
         <div className="space-y-2 pt-4">
-          <Skeleton className="h-10 w-full rounded-lg" />
-          <Skeleton className="h-10 w-full rounded-lg" />
+          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-10 w-full" />
         </div>
         
         {/* Divider */}
-        <div className="border-t border-slate-700/30 my-4" />
+        <div className="border-t border-[rgba(240,240,250,0.15)] my-4" />
         
         {/* Sync Button */}
         <Skeleton className="h-4 w-20 mb-2" />
-        <Skeleton className="h-12 w-full rounded-xl" />
+        <Skeleton className="h-12 w-full" />
       </div>
     </div>
   );
@@ -62,9 +62,9 @@ export function ProfileCardSkeleton() {
 // Stats Card Skeleton
 export function StatCardSkeleton() {
   return (
-    <div className="bg-slate-800/50 border border-slate-700/30 rounded-xl p-5 backdrop-blur-sm">
+    <div className="border border-[rgba(240,240,250,0.15)] p-5 backdrop-blur-sm">
       <div className="flex items-start justify-between mb-3">
-        <Skeleton className="w-6 h-6 rounded" />
+        <Skeleton className="w-6 h-6" />
       </div>
       <Skeleton className="h-4 w-20 mb-2" />
       <Skeleton className="h-8 w-16 mb-1" />
@@ -87,12 +87,12 @@ export function StatsGridSkeleton() {
 // Chart Skeleton
 export function ChartSkeleton({ height = "h-64" }: { height?: string }) {
   return (
-    <div className={`${height} bg-slate-800/30 rounded-lg relative overflow-hidden`}>
+    <div className={`${height}   relative overflow-hidden`}>
       <div className="absolute inset-0 flex items-end justify-around px-4 pb-4">
         {[...Array(12)].map((_, i) => (
           <Skeleton 
             key={i} 
-            className={`w-4 rounded-t`} 
+            className={`w-4 -t`} 
             style={{ height: `${Math.random() * 60 + 20}%` }} 
           />
         ))}
@@ -105,9 +105,9 @@ export function ChartSkeleton({ height = "h-64" }: { height?: string }) {
 // Insight Card Skeleton
 export function InsightCardSkeleton() {
   return (
-    <div className="bg-slate-900/50 border border-slate-700/30 rounded-xl p-4 backdrop-blur-sm">
+    <div className="border border-[rgba(240,240,250,0.15)] p-4 backdrop-blur-sm">
       <div className="flex items-center gap-3">
-        <Skeleton className="w-9 h-9 rounded-lg" />
+        <Skeleton className="w-9 h-9" />
         <div className="flex-1 space-y-2">
           <Skeleton className="h-3 w-16" />
           <Skeleton className="h-5 w-24" />
@@ -126,7 +126,7 @@ export function LanguageBarSkeleton() {
         <Skeleton className="h-4 w-20" />
         <Skeleton className="h-4 w-24" />
       </div>
-      <Skeleton className="h-2 w-full rounded-full" />
+      <Skeleton className="h-2 w-full -full" />
     </div>
   );
 }
@@ -134,8 +134,8 @@ export function LanguageBarSkeleton() {
 // Activity Overview Skeleton
 export function ActivityOverviewSkeleton() {
   return (
-    <div className="bg-slate-900/50 border border-slate-700/30 rounded-xl overflow-hidden backdrop-blur-sm">
-      <div className="p-6 border-b border-slate-700/30">
+    <div className="border border-[rgba(240,240,250,0.15)] overflow-hidden backdrop-blur-sm">
+      <div className="p-6 border-b border-[rgba(240,240,250,0.15)]">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Skeleton className="w-5 h-5" />
@@ -146,7 +146,7 @@ export function ActivityOverviewSkeleton() {
       </div>
       <div className="p-6 grid grid-cols-2 md:grid-cols-4 gap-4">
         {[...Array(4)].map((_, i) => (
-          <div key={i} className="text-center p-3 bg-slate-800/30 rounded-lg">
+          <div key={i} className="text-center p-3">
             <Skeleton className="h-6 w-full mb-1" />
             <Skeleton className="h-3 w-16 mx-auto" />
           </div>
@@ -170,7 +170,7 @@ export function DashboardSkeleton() {
           {/* Main Content Area */}
           <main className="lg:col-span-8 xl:col-span-9 space-y-6">
             {/* Welcome Header */}
-            <div className="bg-slate-800/30 border border-slate-700/30 rounded-xl p-6 backdrop-blur-sm">
+            <div className="border border-[rgba(240,240,250,0.15)] p-6 backdrop-blur-sm">
               <Skeleton className="h-8 w-48 mb-2" />
               <Skeleton className="h-4 w-64" />
             </div>
@@ -186,7 +186,7 @@ export function DashboardSkeleton() {
             </div>
 
             {/* Language Distribution */}
-            <div className="bg-slate-900/50 border border-slate-700/30 rounded-xl p-6 backdrop-blur-sm">
+            <div className="border border-[rgba(240,240,250,0.15)] p-6 backdrop-blur-sm">
               <div className="flex items-center gap-2 mb-4">
                 <Skeleton className="w-5 h-5" />
                 <Skeleton className="h-5 w-32" />

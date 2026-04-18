@@ -23,28 +23,28 @@ export function ActivityHeatmap({ data, className = '' }: ActivityHeatmapProps) 
   }, [data]);
 
   return (
-    <div className={`bg-slate-900/50 border border-slate-700/30 rounded-xl backdrop-blur-sm ${className}`}>
+    <div className={` border border-[rgba(240,240,250,0.15)]  backdrop-blur-sm ${className}`}>
       {/* Header */}
-      <div className="p-4 sm:p-6 border-b border-slate-700/30">
+      <div className="p-4 sm:p-6 border-b border-[rgba(240,240,250,0.15)]">
         <div className="flex items-center justify-between flex-wrap gap-4">
           <div>
-            <h3 className="text-lg font-semibold text-slate-200">Contribution Activity</h3>
-            <p className="text-sm text-slate-500">
-              <span className="text-cyan-400 font-medium">{totalCommits.toLocaleString()}</span> commits in the last year
+            <h3 className="text-lg font-semibold opacity-80">Contribution Activity</h3>
+            <p className="text-sm opacity-80">
+              <span className="text-[#f0f0fa] font-medium">{totalCommits.toLocaleString()}</span> commits in the last year
               <span className="mx-2">·</span>
               <span className="text-purple-400">{activeDays}</span> active days
             </p>
           </div>
           
           {/* Legend */}
-          <div className="flex items-center gap-2 text-xs text-slate-500">
+          <div className="flex items-center gap-2 text-xs opacity-80">
             <span>Less</span>
             <div className="flex gap-1">
-              <div className="w-3 h-3 rounded-sm bg-slate-800 border border-slate-700" />
-              <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: getColor(1, 10) }} />
-              <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: getColor(3, 10) }} />
-              <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: getColor(6, 10) }} />
-              <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: getColor(10, 10) }} />
+              <div className="w-3 h-3 border border-[rgba(240,240,250,0.15)]" />
+              <div className="w-3 h-3" style={{ backgroundColor: getColor(1, 10) }} />
+              <div className="w-3 h-3" style={{ backgroundColor: getColor(3, 10) }} />
+              <div className="w-3 h-3" style={{ backgroundColor: getColor(6, 10) }} />
+              <div className="w-3 h-3" style={{ backgroundColor: getColor(10, 10) }} />
             </div>
             <span>More</span>
           </div>
@@ -59,7 +59,7 @@ export function ActivityHeatmap({ data, className = '' }: ActivityHeatmapProps) 
             {months.map((month, index) => (
               <div
                 key={index}
-                className="text-xs text-slate-500"
+                className="text-xs opacity-80"
                 style={{ 
                   width: `${month.weeks * 14}px`,
                   minWidth: `${month.weeks * 14}px`
@@ -73,7 +73,7 @@ export function ActivityHeatmap({ data, className = '' }: ActivityHeatmapProps) 
           {/* Grid */}
           <div className="flex">
             {/* Day Labels */}
-            <div className="flex flex-col gap-[2px] mr-2 text-xs text-slate-500">
+            <div className="flex flex-col gap-[2px] mr-2 text-xs opacity-80">
               {DAYS.map((day, index) => (
                 <div 
                   key={day} 
@@ -92,7 +92,7 @@ export function ActivityHeatmap({ data, className = '' }: ActivityHeatmapProps) 
                   {week.map((day, dayIndex) => (
                     <div
                       key={`${weekIndex}-${dayIndex}`}
-                      className="w-3 h-3 rounded-sm transition-all duration-200 hover:ring-2 hover:ring-cyan-400/50 cursor-pointer group relative"
+                      className="w-3 h-3 transition-all duration-200 hover:ring-2 hover:ring-cyan-400/50 cursor-pointer group relative"
                       style={{
                         backgroundColor: day 
                           ? getColor(day.commits, maxCommits)
@@ -104,11 +104,11 @@ export function ActivityHeatmap({ data, className = '' }: ActivityHeatmapProps) 
                       {/* Tooltip */}
                       {day && (
                         <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block z-10">
-                          <div className="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 shadow-xl whitespace-nowrap">
-                            <p className="text-xs text-slate-400">
+                          <div className="border border-[rgba(240,240,250,0.15)] px-3 py-2 whitespace-nowrap">
+                            <p className="text-xs opacity-80">
                               {formatDate(day.date)}
                             </p>
-                            <p className="text-sm font-semibold text-cyan-400">
+                            <p className="text-sm font-semibold text-[#f0f0fa]">
                               {day.commits} commit{day.commits !== 1 ? 's' : ''}
                             </p>
                           </div>

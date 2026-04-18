@@ -47,7 +47,7 @@ export function RateLimitWarning() {
   );
 
   return (
-    <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 mb-6">
+    <div className="bg-amber-500/10 border border-amber-500/30 p-4 mb-6">
       <div className="flex items-start gap-3">
         <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
         <div className="flex-1">
@@ -57,13 +57,13 @@ export function RateLimitWarning() {
           <p className="text-sm text-amber-300/80 mb-2">
             You have {rateLimitStatus.remaining} of {rateLimitStatus.limit} requests remaining.
           </p>
-          <div className="flex items-center gap-2 text-xs text-slate-500">
+          <div className="flex items-center gap-2 text-xs opacity-80">
             <Clock className="w-3 h-3" />
             <span>Resets in {minutesUntilReset} minutes</span>
           </div>
-          <div className="mt-3 h-2 bg-slate-800/50 rounded-full overflow-hidden">
+          <div className="mt-3 h-2 -full overflow-hidden">
             <div
-              className="h-full bg-amber-500 rounded-full transition-all"
+              className="h-full bg-amber-500 -full transition-all"
               style={{ width: `${percentRemaining}%` }}
             />
           </div>

@@ -1,25 +1,36 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Barlow, Barlow_Condensed } from "next/font/google";
 import "./globals.css";
 import ClientLayout from "./components/ClientLayout";
 import { SessionProviderWrapper } from "@/components/SessionProvider";
 import { ToastProvider } from "@/components/ToastProvider";
 import { KeyboardShortcuts, KeyboardShortcutsHelp } from "@/components/dashboard/KeyboardShortcuts";
 
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+// Self-hosted via next/font — downloaded at build time, served locally (no external requests)
+const barlow = Barlow({
   subsets: ["latin"],
+  weight: ["400", "700"],
+  style: ["normal", "italic"],
+  variable: "--font-barlow",
+  display: "swap",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const barlowCondensed = Barlow_Condensed({
   subsets: ["latin"],
+  weight: ["400", "700"],
+  variable: "--font-barlow-condensed",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "DevInsight - GitHub Analytics",
-  description: "Analyze your GitHub activity and coding insights",
+  title: "DevInsight — GitHub Analytics",
+  description: "AI-powered insights into your GitHub activity, productivity, and coding patterns.",
+  keywords: ["github analytics", "developer insights", "coding patterns", "git activity"],
+  openGraph: {
+    title: "DevInsight — GitHub Analytics",
+    description: "AI-powered insights into your GitHub activity, productivity, and coding patterns.",
+    type: "website",
+  },
 };
 
 export default function RootLayout({
@@ -28,10 +39,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen bg-gradient-to-br from-slate-900 via-purple-900/20 to-slate-900`}
-      >
+    <html lang="en" className={`${barlow.variable} ${barlowCondensed.variable}`}>
+      <body>
         <SessionProviderWrapper>
           <ClientLayout>{children}</ClientLayout>
           <ToastProvider />
@@ -39,7 +48,6 @@ export default function RootLayout({
           <KeyboardShortcutsHelp />
         </SessionProviderWrapper>
       </body>
-
     </html>
   );
 }

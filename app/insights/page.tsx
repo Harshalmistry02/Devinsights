@@ -96,55 +96,75 @@ export default async function InsightsPage() {
   const persona = analytics ? detectPersona(personaContext) : null;
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-slate-950 via-slate-900 to-slate-950 pt-20 sm:pt-24">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="app-canvas">
+      <div
+        style={{
+          maxWidth: "1400px",
+          margin: "0 auto",
+          padding: "40px clamp(16px, 4vw, 48px)",
+        }}
+      >
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center gap-4 mb-4">
-            <Link
-              href="/dashboard"
-              className="p-2 bg-slate-800/50 border border-slate-700/30 rounded-lg hover:bg-slate-800 hover:border-slate-600 transition-all text-slate-400 hover:text-slate-200"
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </Link>
+        <div style={{ marginBottom: "40px" }}>
+          <Link
+            href="/dashboard"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "8px",
+              textDecoration: "none",
+              marginBottom: "20px",
+              opacity: 0.4,
+              transition: "opacity 0.2s ease",
+            }}
+            className="text-micro"
+          >
+            <ArrowLeft size={11} />
+            Dashboard
+          </Link>
+
+          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", flexWrap: "wrap", gap: "12px" }}>
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-slate-200 flex items-center gap-3">
-                <TrendingUp className="w-8 h-8 text-cyan-400" />
+              <p className="text-micro" style={{ marginBottom: "8px", opacity: 0.4 }}>Analytics</p>
+              <h1 className="text-section-head" style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                <TrendingUp size={20} style={{ opacity: 0.5 }} />
                 Coding Insights
               </h1>
-              <p className="text-slate-400 mt-1">
+              <p className="text-body" style={{ opacity: 0.35, marginTop: "6px", fontSize: "0.875rem" }}>
                 Deep dive into your development patterns and productivity
               </p>
             </div>
-          </div>
 
-          {/* Last Updated & Stale Data Warning */}
-          <div className="flex flex-wrap items-center gap-4">
-            {analytics?.calculatedAt && (
-              <div className="flex items-center gap-2 text-sm text-slate-500">
-                <Clock className="w-4 h-4" />
-                <span>
-                  Last updated: {new Date(analytics.calculatedAt).toLocaleDateString('en-US', {
-                    month: 'short',
-                    day: 'numeric',
-                    year: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  })}
-                </span>
-              </div>
-            )}
-            {isDataStale && (
-              <div className="flex items-center gap-2 text-sm text-amber-400">
-                <AlertTriangle className="w-4 h-4" />
-                <span>Data may be outdated. Consider syncing from dashboard.</span>
-              </div>
-            )}
+            {/* Last Updated & Stale Data Warning */}
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "4px" }}>
+              {analytics?.calculatedAt && (
+                <div style={{ display: "flex", alignItems: "center", gap: "6px", opacity: 0.3 }}>
+                  <Clock size={11} />
+                  <span className="text-micro">
+                    Updated: {new Date(analytics.calculatedAt).toLocaleDateString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                      year: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
+                  </span>
+                </div>
+              )}
+              {isDataStale && (
+                <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                  <AlertTriangle size={11} style={{ color: "rgba(251,191,36,0.6)" }} />
+                  <span className="text-micro" style={{ color: "rgba(251,191,36,0.5)" }}>
+                    Data may be outdated. Sync from dashboard.
+                  </span>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
         {hasData ? (
-          <div className="space-y-8">
+          <div style={{ display: "flex", flexDirection: "column", gap: "32px" }}>
             {/* ============================================
                 AI-Powered Insights Hero (TOP - Most Important)
                 ============================================ */}
@@ -181,60 +201,50 @@ export default async function InsightsPage() {
               <CodeImpactCard metrics={codeImpactMetrics} />
               
               {/* Code Quality Summary Card */}
-              <div className="bg-slate-900/50 border border-slate-700/30 rounded-xl p-6 backdrop-blur-sm">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="p-2 bg-slate-800/50 rounded-lg">
-                    <BarChart3 className="w-5 h-5 text-purple-400" />
-                  </div>
+              <div
+                style={{
+                  background: "rgba(240,240,250,0.02)",
+                  border: "1px solid rgba(240,240,250,0.06)",
+                  borderRadius: "var(--radius-sharp)",
+                  padding: "20px",
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "16px" }}>
+                  <BarChart3 size={14} style={{ opacity: 0.3 }} />
                   <div>
-                    <h3 className="font-medium text-slate-200">Code Quality Summary</h3>
-                    <p className="text-xs text-slate-500">Commit message analysis</p>
+                    <p className="text-caption-bold" style={{ fontSize: "0.75rem" }}>Code Quality Summary</p>
+                    <p className="text-micro" style={{ opacity: 0.3, marginTop: "2px" }}>Commit message analysis</p>
                   </div>
                 </div>
-                
+
                 {commitQualityMetrics ? (
-                  <div className="space-y-4">
-                    {/* Quality Grade */}
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-slate-400">Quality Grade</span>
-                      <span className={`text-2xl font-bold ${
-                        commitQualityMetrics.qualityGrade === 'A' ? 'text-emerald-400' :
-                        commitQualityMetrics.qualityGrade === 'B' ? 'text-cyan-400' :
-                        commitQualityMetrics.qualityGrade === 'C' ? 'text-yellow-400' :
-                        commitQualityMetrics.qualityGrade === 'D' ? 'text-orange-400' :
-                        'text-rose-400'
-                      }`}>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <span className="text-micro" style={{ opacity: 0.4 }}>Quality Grade</span>
+                      <span className="stat-value" style={{ fontSize: "1.5rem" }}>
                         {commitQualityMetrics.qualityGrade}
                       </span>
                     </div>
-                    
-                    {/* Metrics */}
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="p-3 bg-slate-800/50 rounded-lg">
-                        <p className="text-xs text-slate-500">Conventional</p>
-                        <p className="text-lg font-semibold text-slate-200">
-                          {commitQualityMetrics.conventionalCommitScore}%
-                        </p>
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1px", background: "rgba(240,240,250,0.05)", borderRadius: "2px", overflow: "hidden" }}>
+                      <div style={{ background: "#000", padding: "12px 14px" }}>
+                        <p className="text-micro" style={{ opacity: 0.3, marginBottom: "4px" }}>Conventional</p>
+                        <p className="stat-value" style={{ fontSize: "1rem" }}>{commitQualityMetrics.conventionalCommitScore}%</p>
                       </div>
-                      <div className="p-3 bg-slate-800/50 rounded-lg">
-                        <p className="text-xs text-slate-500">Ticket Refs</p>
-                        <p className="text-lg font-semibold text-slate-200">
-                          {commitQualityMetrics.hasTicketReferences}%
-                        </p>
+                      <div style={{ background: "#000", padding: "12px 14px" }}>
+                        <p className="text-micro" style={{ opacity: 0.3, marginBottom: "4px" }}>Ticket Refs</p>
+                        <p className="stat-value" style={{ fontSize: "1rem" }}>{commitQualityMetrics.hasTicketReferences}%</p>
                       </div>
                     </div>
-                    
-                    {/* Top insight */}
                     {commitQualityMetrics.insights.length > 0 && (
-                      <p className="text-xs text-slate-400">
+                      <p className="text-micro" style={{ opacity: 0.3 }}>
                         {commitQualityMetrics.insights[0]}
                       </p>
                     )}
                   </div>
                 ) : (
-                  <div className="flex flex-col items-center justify-center py-6 text-center">
-                    <BarChart3 className="w-8 h-8 text-slate-600 mb-2" />
-                    <p className="text-sm text-slate-500">No quality data available</p>
+                  <div style={{ textAlign: "center", padding: "24px 0" }}>
+                    <BarChart3 size={24} style={{ opacity: 0.1, margin: "0 auto 8px" }} />
+                    <p className="text-micro" style={{ opacity: 0.25 }}>No quality data available</p>
                   </div>
                 )}
               </div>
@@ -316,7 +326,7 @@ async function AIStatsBanner({ analytics, userId, persona }: {
     {
       label: 'Avg Daily Commits',
       value: avgDailyCommits,
-      icon: <GitCommit className="w-5 h-5 text-cyan-400" />,
+      icon: <GitCommit className="w-5 h-5 text-[#f0f0fa]" />,
       color: 'cyan',
       sublabel: `across ${activeDaysCount} active days`,
       gradient: 'from-cyan-500/20 to-cyan-500/5',
@@ -325,56 +335,87 @@ async function AIStatsBanner({ analytics, userId, persona }: {
   ];
 
   return (
-    <div className="space-y-4">
+    <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
       {/* Developer Persona Badge */}
       {persona && (
-        <div className="flex items-center justify-between bg-linear-to-r from-slate-800/50 to-slate-900/50 border border-slate-700/30 rounded-xl p-4 backdrop-blur-sm">
-          <div className="flex items-center gap-3">
-            <div className="text-2xl">{persona.primary.emoji}</div>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            padding: "16px 20px",
+            background: "rgba(240,240,250,0.02)",
+            border: "1px solid rgba(240,240,250,0.06)",
+            borderRadius: "var(--radius-sharp)",
+            flexWrap: "wrap",
+            gap: "12px",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            <div style={{ fontSize: "1.25rem" }}>{persona.primary.emoji}</div>
             <div>
-              <div className="flex items-center gap-2">
-                <span className={`font-semibold ${persona.primary.color}`}>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
+                <span className="text-caption-bold" style={{ fontSize: "0.813rem" }}>
                   {persona.primary.name}
                 </span>
-                <span className={`text-xs px-2 py-0.5 rounded-full capitalize ${
-                  persona.primary.rarity === 'legendary' ? 'bg-amber-500/20 text-amber-400' :
-                  persona.primary.rarity === 'rare' ? 'bg-purple-500/20 text-purple-400' :
-                  persona.primary.rarity === 'uncommon' ? 'bg-cyan-500/20 text-cyan-400' :
-                  'bg-slate-700 text-slate-400'
-                }`}>
+                <span
+                  className="text-micro"
+                  style={{
+                    padding: "2px 6px",
+                    border: "1px solid rgba(240,240,250,0.1)",
+                    borderRadius: "2px",
+                    opacity: 0.5,
+                  }}
+                >
                   {persona.primary.rarity}
                 </span>
               </div>
-              <p className="text-xs text-slate-500 mt-0.5">
+              <p className="text-micro" style={{ opacity: 0.3 }}>
                 {persona.primary.description}
               </p>
             </div>
           </div>
-          <div className="text-right">
-            <div className="text-lg font-bold text-slate-200 tabular-nums">
+          <div style={{ textAlign: "right" }}>
+            <div className="stat-value" style={{ fontSize: "1.25rem" }}>
               {persona.confidence}%
             </div>
-            <div className="text-xs text-slate-500">match</div>
+            <div className="text-micro" style={{ opacity: 0.3 }}>match</div>
           </div>
         </div>
       )}
-      
+
       {/* Stats Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(2, 1fr)",
+          gap: "1px",
+          background: "rgba(240,240,250,0.06)",
+          border: "1px solid rgba(240,240,250,0.06)",
+          borderRadius: "var(--radius-sharp)",
+          overflow: "hidden",
+        }}
+        className="insights-stats-grid"
+      >
+        <style>{`.insights-stats-grid { grid-template-columns: repeat(2,1fr) !important; } @media(min-width:1024px){ .insights-stats-grid { grid-template-columns: repeat(4,1fr) !important; } }`}</style>
         {stats.map((stat, index) => (
           <div
             key={index}
-            className={`bg-linear-to-br ${stat.gradient} border ${stat.borderColor} rounded-xl p-4 backdrop-blur-sm hover:scale-105 transition-all duration-300 group`}
+            style={{
+              background: "rgba(0,0,0,0.6)",
+              padding: "20px",
+              transition: "background 0.2s ease",
+            }}
+            onMouseOver={(e) => (e.currentTarget.style.background = "rgba(240,240,250,0.03)")}
+            onMouseOut={(e) => (e.currentTarget.style.background = "rgba(0,0,0,0.6)")}
           >
-            <div className="flex items-center gap-2 mb-2">
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px", opacity: 0.3 }}>
               {stat.icon}
-              <span className="text-xs text-slate-400">{stat.label}</span>
+              <p className="text-micro">{stat.label}</p>
             </div>
-            <div className="text-2xl font-bold text-slate-200 group-hover:scale-110 transition-transform">
-              {stat.value}
-            </div>
+            <p className="stat-value" style={{ fontSize: "1.5rem" }}>{stat.value}</p>
             {stat.sublabel && (
-              <div className="text-xs text-slate-500 mt-1">{stat.sublabel}</div>
+              <p className="text-micro" style={{ marginTop: "4px", opacity: 0.25 }}>{stat.sublabel}</p>
             )}
           </div>
         ))}
@@ -389,22 +430,25 @@ async function AIStatsBanner({ analytics, userId, persona }: {
 
 function EmptyState() {
   return (
-    <div className="bg-slate-900/50 border border-slate-700/30 rounded-xl p-12 backdrop-blur-sm text-center">
-      <div className="max-w-md mx-auto">
-        <div className="w-16 h-16 bg-cyan-500/10 border border-cyan-500/30 rounded-full flex items-center justify-center mx-auto mb-6">
-          <BarChart3 className="w-8 h-8 text-cyan-400" />
-        </div>
-        <h2 className="text-xl font-semibold text-slate-200 mb-3">
+    <div
+      style={{
+        background: "rgba(240,240,250,0.02)",
+        border: "1px solid rgba(240,240,250,0.06)",
+        borderRadius: "var(--radius-sharp)",
+        padding: "64px 24px",
+        textAlign: "center",
+      }}
+    >
+      <div style={{ maxWidth: "360px", margin: "0 auto" }}>
+        <BarChart3 size={40} style={{ opacity: 0.1, margin: "0 auto 20px" }} />
+        <h2 className="text-section-head" style={{ fontSize: "1.25rem", marginBottom: "12px" }}>
           No Insights Available Yet
         </h2>
-        <p className="text-slate-400 mb-6">
-          Sync your GitHub data to unlock comprehensive analytics and visualizations of your coding patterns.
+        <p className="text-body" style={{ opacity: 0.35, marginBottom: "28px", fontSize: "0.875rem" }}>
+          Sync your GitHub data to unlock comprehensive analytics and visualizations.
         </p>
-        <Link
-          href="/dashboard"
-          className="inline-flex items-center gap-2 px-6 py-3 bg-cyan-500/20 border border-cyan-500/30 rounded-lg text-cyan-400 hover:bg-cyan-500/30 hover:border-cyan-500/50 transition-all font-medium"
-        >
-          <RefreshCw className="w-5 h-5" />
+        <Link href="/dashboard" className="btn-ghost btn-ghost-sm" style={{ display: "inline-flex" }}>
+          <RefreshCw size={13} />
           Go to Dashboard to Sync
         </Link>
       </div>

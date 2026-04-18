@@ -40,25 +40,25 @@ export function CommitTimeline({ data, className = '' }: CommitTimelineProps) {
   const maxCommits = Math.max(...chartData.map(d => d.commits), 0);
 
   return (
-    <div className={`bg-slate-900/50 border border-slate-700/30 rounded-xl backdrop-blur-sm ${className}`}>
+    <div className={` border border-[rgba(240,240,250,0.15)]  backdrop-blur-sm ${className}`}>
       {/* Header */}
-      <div className="p-4 sm:p-6 border-b border-slate-700/30">
+      <div className="p-4 sm:p-6 border-b border-[rgba(240,240,250,0.15)]">
         <div className="flex items-center justify-between flex-wrap gap-4">
           <div>
-            <h3 className="text-lg font-semibold text-slate-200">Commit Activity</h3>
-            <p className="text-sm text-slate-500">Your coding activity over time</p>
+            <h3 className="text-lg font-semibold opacity-80">Commit Activity</h3>
+            <p className="text-sm opacity-80">Your coding activity over time</p>
           </div>
           
           {/* Time Range Selector */}
-          <div className="flex items-center gap-1 bg-slate-800/50 p-1 rounded-lg">
+          <div className="flex items-center gap-1 p-1">
             {(['30', '60', '90'] as TimeRange[]).map((range) => (
               <button
                 key={range}
                 onClick={() => setTimeRange(range)}
-                className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
+                className={`px-3 py-1.5 text-xs font-medium  transition-all ${
                   timeRange === range
-                    ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30'
-                    : 'text-slate-400 hover:text-slate-300 hover:bg-slate-700/50'
+                    ? 'bg-cyan-500/20 text-[#f0f0fa] border border-cyan-500/30'
+                    : 'opacity-80 hover:opacity-80 hover:'
                 }`}
               >
                 {range}d
@@ -70,16 +70,16 @@ export function CommitTimeline({ data, className = '' }: CommitTimelineProps) {
         {/* Summary Stats */}
         <div className="flex items-center gap-6 mt-4">
           <div>
-            <p className="text-2xl font-bold text-slate-200">{totalCommits}</p>
-            <p className="text-xs text-slate-500">Total Commits</p>
+            <p className="text-2xl font-bold opacity-80">{totalCommits}</p>
+            <p className="text-xs opacity-80">Total Commits</p>
           </div>
           <div>
-            <p className="text-2xl font-bold text-cyan-400">{avgPerDay}</p>
-            <p className="text-xs text-slate-500">Avg/Active Day</p>
+            <p className="text-2xl font-bold text-[#f0f0fa]">{avgPerDay}</p>
+            <p className="text-xs opacity-80">Avg/Active Day</p>
           </div>
           <div>
             <p className="text-2xl font-bold text-purple-400">{maxCommits}</p>
-            <p className="text-xs text-slate-500">Peak Day</p>
+            <p className="text-xs opacity-80">Peak Day</p>
           </div>
         </div>
       </div>
@@ -125,7 +125,7 @@ export function CommitTimeline({ data, className = '' }: CommitTimelineProps) {
             </ResponsiveContainer>
           </div>
         ) : (
-          <div className="h-64 flex items-center justify-center text-slate-500">
+          <div className="h-64 flex items-center justify-center opacity-80">
             <p>No commit data available</p>
           </div>
         )}
@@ -176,9 +176,9 @@ function CustomTooltip({ active, payload, label }: any) {
   });
   
   return (
-    <div className="bg-slate-800 border border-slate-700 rounded-lg p-3 shadow-xl">
-      <p className="text-xs text-slate-400 mb-1">{formattedDate}</p>
-      <p className="text-lg font-semibold text-cyan-400">
+    <div className="border border-[rgba(240,240,250,0.15)] p-3">
+      <p className="text-xs opacity-80 mb-1">{formattedDate}</p>
+      <p className="text-lg font-semibold text-[#f0f0fa]">
         {payload[0].value} commit{payload[0].value !== 1 ? 's' : ''}
       </p>
     </div>

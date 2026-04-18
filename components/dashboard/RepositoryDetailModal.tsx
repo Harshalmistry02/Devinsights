@@ -94,27 +94,27 @@ export function RepositoryDetailModal({ repoId, open, onClose }: RepositoryDetai
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm"
       onClick={onClose}
       role="dialog"
       aria-modal="true"
       aria-labelledby="repo-modal-title"
     >
       <div
-        className="bg-slate-900 border border-slate-700/50 rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col"
+        className="border border-[rgba(240,240,250,0.15)] -2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Header */}
-        <div className="flex items-center justify-between p-6 border-b border-slate-700/50">
-          <h2 id="repo-modal-title" className="text-xl font-semibold text-slate-200">
+        <div className="flex items-center justify-between p-6 border-b border-[rgba(240,240,250,0.15)]">
+          <h2 id="repo-modal-title" className="text-xl font-semibold opacity-80">
             {loading ? 'Loading...' : repoData?.fullName || 'Repository Details'}
           </h2>
           <button
             onClick={onClose}
-            className="p-2 rounded-lg hover:bg-slate-800/50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
+            className="p-2 hover: transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
             aria-label="Close modal"
           >
-            <X className="w-5 h-5 text-slate-400" />
+            <X className="w-5 h-5 opacity-80" />
           </button>
         </div>
 
@@ -122,15 +122,15 @@ export function RepositoryDetailModal({ repoId, open, onClose }: RepositoryDetai
         <div className="flex-1 overflow-y-auto">
           {loading ? (
             <div className="flex items-center justify-center p-12">
-              <Loader2 className="w-8 h-8 animate-spin text-cyan-400" />
-              <span className="ml-3 text-slate-400">Loading repository details...</span>
+              <Loader2 className="w-8 h-8 animate-spin text-[#f0f0fa]" />
+              <span className="ml-3 opacity-80">Loading repository details...</span>
             </div>
           ) : error ? (
             <div className="p-6 text-center">
               <p className="text-red-400 mb-4">{error}</p>
               <button
                 onClick={fetchRepositoryDetails}
-                className="px-4 py-2 bg-cyan-500/10 border border-cyan-500/30 rounded-lg text-cyan-400 hover:bg-cyan-500/20 transition-colors"
+                className="px-4 py-2 bg-cyan-500/10 border border-cyan-500/30 text-[#f0f0fa] hover:bg-cyan-500/20 transition-colors"
               >
                 Try Again
               </button>
@@ -138,7 +138,7 @@ export function RepositoryDetailModal({ repoId, open, onClose }: RepositoryDetai
           ) : repoData ? (
             <>
               {/* Tabs */}
-              <div className="border-b border-slate-700/50 px-6">
+              <div className="border-b border-[rgba(240,240,250,0.15)] px-6">
                 <div className="flex gap-6">
                   {(['overview', 'commits', 'activity'] as const).map((tab) => (
                     <button
@@ -148,8 +148,8 @@ export function RepositoryDetailModal({ repoId, open, onClose }: RepositoryDetai
                         "py-3 px-1 border-b-2 font-medium text-sm transition-colors capitalize",
                         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900",
                         activeTab === tab
-                          ? "border-cyan-400 text-cyan-400"
-                          : "border-transparent text-slate-400 hover:text-slate-300"
+                          ? "border-cyan-400 text-[#f0f0fa]"
+                          : "border-transparent opacity-80 hover:opacity-80"
                       )}
                     >
                       {tab}
@@ -185,8 +185,8 @@ function RepositoryOverview({ data }: { data: RepositoryData }) {
     <div className="space-y-6">
       {data.description && (
         <div>
-          <h3 className="text-sm font-medium text-slate-400 mb-2">Description</h3>
-          <p className="text-slate-300">{data.description}</p>
+          <h3 className="text-sm font-medium opacity-80 mb-2">Description</h3>
+          <p className="opacity-80">{data.description}</p>
         </div>
       )}
 
@@ -228,7 +228,7 @@ function RepositoryOverview({ data }: { data: RepositoryData }) {
           href={data.url}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 px-4 py-2 bg-cyan-500/10 border border-cyan-500/30 rounded-lg text-cyan-400 hover:bg-cyan-500/20 transition-colors"
+          className="inline-flex items-center gap-2 px-4 py-2 bg-cyan-500/10 border border-cyan-500/30 text-[#f0f0fa] hover:bg-cyan-500/20 transition-colors"
         >
           View on GitHub
           <span aria-hidden="true">→</span>
@@ -241,20 +241,20 @@ function RepositoryOverview({ data }: { data: RepositoryData }) {
 function CommitsList({ commits, totalCount }: { commits: RepositoryData['commits']; totalCount: number }) {
   return (
     <div className="space-y-4">
-      <p className="text-sm text-slate-400">
+      <p className="text-sm opacity-80">
         Showing {commits.length} of {totalCount} total commits
       </p>
       <div className="space-y-3">
         {commits.length === 0 ? (
-          <p className="text-slate-500 text-center py-8">No commits found</p>
+          <p className="opacity-80 text-center py-8">No commits found</p>
         ) : (
           commits.map((commit) => (
             <div
               key={commit.id}
-              className="bg-slate-800/30 border border-slate-700/30 rounded-lg p-4"
+              className="border border-[rgba(240,240,250,0.15)] p-4"
             >
-              <p className="text-sm text-slate-300 mb-1">{commit.message}</p>
-              <div className="flex items-center justify-between text-xs text-slate-500">
+              <p className="text-sm opacity-80 mb-1">{commit.message}</p>
+              <div className="flex items-center justify-between text-xs opacity-80">
                 <span>{commit.authorName}</span>
                 <span>{new Date(commit.authorDate).toLocaleDateString()}</span>
               </div>
@@ -269,22 +269,22 @@ function CommitsList({ commits, totalCount }: { commits: RepositoryData['commits
 function ActivityView({ data }: { data: RepositoryData }) {
   return (
     <div className="space-y-4">
-      <div className="bg-slate-800/30 border border-slate-700/30 rounded-lg p-4">
-        <h4 className="text-sm font-medium text-slate-300 mb-2">Repository Timeline</h4>
-        <div className="space-y-2 text-sm text-slate-400">
+      <div className="border border-[rgba(240,240,250,0.15)] p-4">
+        <h4 className="text-sm font-medium opacity-80 mb-2">Repository Timeline</h4>
+        <div className="space-y-2 text-sm opacity-80">
           <div className="flex justify-between">
             <span>Created</span>
-            <span className="text-slate-300">{new Date(data.createdAt).toLocaleDateString()}</span>
+            <span className="opacity-80">{new Date(data.createdAt).toLocaleDateString()}</span>
           </div>
           {data.lastPushedAt && (
             <div className="flex justify-between">
               <span>Last Push</span>
-              <span className="text-slate-300">{new Date(data.lastPushedAt).toLocaleDateString()}</span>
+              <span className="opacity-80">{new Date(data.lastPushedAt).toLocaleDateString()}</span>
             </div>
           )}
           <div className="flex justify-between">
             <span>Total Commits</span>
-            <span className="text-slate-300">{data._count.commits.toLocaleString()}</span>
+            <span className="opacity-80">{data._count.commits.toLocaleString()}</span>
           </div>
         </div>
       </div>
@@ -294,12 +294,12 @@ function ActivityView({ data }: { data: RepositoryData }) {
 
 function StatBox({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
-    <div className="bg-slate-800/30 border border-slate-700/30 rounded-lg p-4">
-      <div className="flex items-center gap-2 text-slate-400 mb-1">
+    <div className="border border-[rgba(240,240,250,0.15)] p-4">
+      <div className="flex items-center gap-2 opacity-80 mb-1">
         {icon}
         <span className="text-xs font-medium">{label}</span>
       </div>
-      <p className="text-lg font-semibold text-slate-200">{value}</p>
+      <p className="text-lg font-semibold opacity-80">{value}</p>
     </div>
   );
 }

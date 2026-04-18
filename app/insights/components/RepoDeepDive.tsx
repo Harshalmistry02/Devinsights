@@ -119,12 +119,12 @@ export function RepoDeepDive({
   if (!repoStats || repoStats.length === 0) {
     return (
       <div className={cn(
-        "bg-slate-900/50 border border-slate-700/30 rounded-xl p-8 text-center",
+        " border border-[rgba(240,240,250,0.15)]  p-8 text-center",
         className
       )}>
-        <GitBranch className="w-12 h-12 text-slate-600 mx-auto mb-4" />
-        <h3 className="text-lg font-medium text-slate-400 mb-2">No repository data</h3>
-        <p className="text-slate-500 text-sm">Sync your GitHub data to see repository breakdown</p>
+        <GitBranch className="w-12 h-12 opacity-80 mx-auto mb-4" />
+        <h3 className="text-lg font-medium opacity-80 mb-2">No repository data</h3>
+        <p className="opacity-80 text-sm">Sync your GitHub data to see repository breakdown</p>
       </div>
     );
   }
@@ -146,31 +146,31 @@ export function RepoDeepDive({
 
   return (
     <div className={cn(
-      "bg-slate-900/50 border border-slate-700/30 rounded-xl overflow-hidden backdrop-blur-sm",
+      " border border-[rgba(240,240,250,0.15)]  overflow-hidden backdrop-blur-sm",
       className
     )}>
       {/* Header */}
-      <div className="px-6 py-4 border-b border-slate-700/30">
+      <div className="px-6 py-4 border-b border-[rgba(240,240,250,0.15)]">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-slate-800/50 rounded-lg">
+            <div className="p-2">
               <GitBranch className="w-5 h-5 text-teal-400" />
             </div>
             <div>
-              <h3 className="font-medium text-slate-200">Repository Deep Dive</h3>
-              <p className="text-xs text-slate-500">{repoStats.length} repositories analyzed</p>
+              <h3 className="font-medium opacity-80">Repository Deep Dive</h3>
+              <p className="text-xs opacity-80">{repoStats.length} repositories analyzed</p>
             </div>
           </div>
           
           {/* View Toggle */}
-          <div className="flex items-center gap-2 bg-slate-800/50 border border-slate-700/30 rounded-lg p-1">
+          <div className="flex items-center gap-2 border border-[rgba(240,240,250,0.15)] p-1">
             <button
               onClick={() => setViewMode('treemap')}
               className={cn(
-                "p-2 rounded-md transition-all",
+                "p-2  transition-all",
                 viewMode === 'treemap' 
                   ? "bg-teal-500/20 text-teal-400 border border-teal-500/30"
-                  : "text-slate-400 hover:text-slate-200 hover:bg-slate-700/50"
+                  : "opacity-80 hover:opacity-80 hover:"
               )}
               title="Treemap View"
             >
@@ -179,10 +179,10 @@ export function RepoDeepDive({
             <button
               onClick={() => setViewMode('table')}
               className={cn(
-                "p-2 rounded-md transition-all",
+                "p-2  transition-all",
                 viewMode === 'table' 
                   ? "bg-teal-500/20 text-teal-400 border border-teal-500/30"
-                  : "text-slate-400 hover:text-slate-200 hover:bg-slate-700/50"
+                  : "opacity-80 hover:opacity-80 hover:"
               )}
               title="Table View"
             >
@@ -216,7 +216,7 @@ export function RepoDeepDive({
           <div className="mt-4 text-center">
             <button
               onClick={() => setShowAll(!showAll)}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-slate-800/50 border border-slate-700/30 rounded-lg text-sm text-slate-400 hover:text-slate-200 hover:border-slate-600 transition-all"
+              className="inline-flex items-center gap-2 px-4 py-2 border border-[rgba(240,240,250,0.15)] text-sm opacity-80 hover:opacity-80 hover:border-[rgba(240,240,250,0.15)] transition-all"
             >
               {showAll ? (
                 <>
@@ -279,11 +279,11 @@ function TreemapView({ repos, onRepoClick, selectedRepoId }: TreemapViewProps) {
           <div
             key={repo.id}
             className={cn(
-              "relative rounded-lg overflow-hidden cursor-pointer transition-all duration-300 group",
+              "relative  overflow-hidden cursor-pointer transition-all duration-300 group",
               "border-2",
               isSelected 
                 ? "border-teal-400 ring-2 ring-teal-400/30 scale-[1.02]" 
-                : "border-transparent hover:border-slate-600"
+                : "border-transparent hover:border-[rgba(240,240,250,0.15)]"
             )}
             style={{ 
               gridColumn: `span ${span}`,
@@ -301,7 +301,7 @@ function TreemapView({ repos, onRepoClick, selectedRepoId }: TreemapViewProps) {
             
             {/* Content */}
             <div className="p-2 h-full flex flex-col justify-between">
-              <div className="text-xs font-medium text-slate-200 truncate">
+              <div className="text-xs font-medium opacity-80 truncate">
                 {repo.name}
               </div>
               <div className="flex items-center justify-between mt-auto">
@@ -311,22 +311,22 @@ function TreemapView({ repos, onRepoClick, selectedRepoId }: TreemapViewProps) {
                 >
                   {repo.language || 'Unknown'}
                 </span>
-                <span className="text-xs text-slate-400 tabular-nums">
+                <span className="text-xs opacity-80 tabular-nums">
                   {repo.commits}
                 </span>
               </div>
             </div>
             
             {/* Hover overlay */}
-            <div className="absolute inset-0 bg-slate-950/80 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-2">
+            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-2">
               <div className="text-center">
-                <div className="text-sm font-medium text-slate-200 truncate">{repo.name}</div>
-                <div className="text-xs text-slate-400 mt-1">{repo.commits} commits</div>
+                <div className="text-sm font-medium opacity-80 truncate">{repo.name}</div>
+                <div className="text-xs opacity-80 mt-1">{repo.commits} commits</div>
                 <div className="flex items-center justify-center gap-3 mt-2 text-xs">
                   <span className="flex items-center gap-1 text-yellow-400">
                     <Star className="w-3 h-3" /> {repo.stars}
                   </span>
-                  <span className="flex items-center gap-1 text-slate-400">
+                  <span className="flex items-center gap-1 opacity-80">
                     <GitFork className="w-3 h-3" /> {repo.forks}
                   </span>
                 </div>
@@ -362,7 +362,7 @@ function TableView({
 }: TableViewProps) {
   const SortIcon = ({ field }: { field: SortField }) => {
     if (sortField !== field) {
-      return <ArrowUpDown className="w-3 h-3 text-slate-600" />;
+      return <ArrowUpDown className="w-3 h-3 opacity-80" />;
     }
     return sortDirection === 'desc' 
       ? <ChevronDown className="w-3 h-3 text-teal-400" />
@@ -373,9 +373,9 @@ function TableView({
     <div className="overflow-x-auto">
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b border-slate-700/30">
+          <tr className="border-b border-[rgba(240,240,250,0.15)]">
             <th 
-              className="text-left py-3 px-2 text-slate-400 font-medium cursor-pointer hover:text-slate-200 transition-colors"
+              className="text-left py-3 px-2 opacity-80 font-medium cursor-pointer hover:opacity-80 transition-colors"
               onClick={() => onSort('name')}
             >
               <div className="flex items-center gap-1">
@@ -383,7 +383,7 @@ function TableView({
               </div>
             </th>
             <th 
-              className="text-left py-3 px-2 text-slate-400 font-medium cursor-pointer hover:text-slate-200 transition-colors"
+              className="text-left py-3 px-2 opacity-80 font-medium cursor-pointer hover:opacity-80 transition-colors"
               onClick={() => onSort('language')}
             >
               <div className="flex items-center gap-1">
@@ -391,7 +391,7 @@ function TableView({
               </div>
             </th>
             <th 
-              className="text-right py-3 px-2 text-slate-400 font-medium cursor-pointer hover:text-slate-200 transition-colors"
+              className="text-right py-3 px-2 opacity-80 font-medium cursor-pointer hover:opacity-80 transition-colors"
               onClick={() => onSort('commits')}
             >
               <div className="flex items-center justify-end gap-1">
@@ -399,14 +399,14 @@ function TableView({
               </div>
             </th>
             <th 
-              className="text-right py-3 px-2 text-slate-400 font-medium cursor-pointer hover:text-slate-200 transition-colors"
+              className="text-right py-3 px-2 opacity-80 font-medium cursor-pointer hover:opacity-80 transition-colors"
               onClick={() => onSort('stars')}
             >
               <div className="flex items-center justify-end gap-1">
                 Stars <SortIcon field="stars" />
               </div>
             </th>
-            <th className="text-right py-3 px-2 text-slate-400 font-medium">
+            <th className="text-right py-3 px-2 opacity-80 font-medium">
               Action
             </th>
           </tr>
@@ -420,20 +420,20 @@ function TableView({
               <tr 
                 key={repo.id}
                 className={cn(
-                  "border-b border-slate-800/50 cursor-pointer transition-all",
+                  "border-b border-[rgba(240,240,250,0.15)] cursor-pointer transition-all",
                   isSelected 
                     ? "bg-teal-500/10" 
-                    : "hover:bg-slate-800/30"
+                    : "hover:"
                 )}
                 onClick={() => onRepoClick?.(repo.id)}
               >
                 <td className="py-3 px-2">
                   <div className="flex items-center gap-2">
                     <div 
-                      className="w-2 h-2 rounded-full"
+                      className="w-2 h-2 -full"
                       style={{ backgroundColor: languageColor }}
                     />
-                    <span className="text-slate-200 font-medium truncate max-w-[200px]">
+                    <span className="opacity-80 font-medium truncate max-w-[200px]">
                       {repo.name}
                     </span>
                   </div>
@@ -446,7 +446,7 @@ function TableView({
                     {repo.language || 'Unknown'}
                   </span>
                 </td>
-                <td className="py-3 px-2 text-right tabular-nums text-slate-300">
+                <td className="py-3 px-2 text-right tabular-nums opacity-80">
                   {repo.commits.toLocaleString()}
                 </td>
                 <td className="py-3 px-2 text-right">
@@ -461,7 +461,7 @@ function TableView({
                     target="_blank"
                     rel="noopener noreferrer"
                     onClick={(e) => e.stopPropagation()}
-                    className="inline-flex items-center gap-1 text-cyan-400 hover:text-cyan-300 transition-colors"
+                    className="inline-flex items-center gap-1 text-[#f0f0fa] hover:text-[#f0f0fa] transition-colors"
                   >
                     <ExternalLink className="w-3 h-3" />
                   </a>
@@ -496,11 +496,11 @@ export function RepoLanguageLegend({ repos }: { repos: RepoStat[] }) {
       {languageCounts.map(([language, count]) => (
         <div key={language} className="flex items-center gap-1.5 text-xs">
           <div 
-            className="w-2.5 h-2.5 rounded-full"
+            className="w-2.5 h-2.5 -full"
             style={{ backgroundColor: LANGUAGE_COLORS[language] || DEFAULT_LANGUAGE_COLOR }}
           />
-          <span className="text-slate-400">{language}</span>
-          <span className="text-slate-600">({count})</span>
+          <span className="opacity-80">{language}</span>
+          <span className="opacity-80">({count})</span>
         </div>
       ))}
     </div>

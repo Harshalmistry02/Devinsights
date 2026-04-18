@@ -14,9 +14,9 @@ export function LanguageSection({ analytics }: LanguageSectionProps) {
   if (topLanguages.length === 0) return null;
 
   return (
-    <div className="bg-slate-900/50 border border-slate-700/30 rounded-xl p-4 sm:p-6 backdrop-blur-sm mt-6">
-      <h3 className="text-base sm:text-lg font-semibold text-slate-200 mb-3 sm:mb-4 flex items-center gap-2">
-        <Code className="w-4 h-4 sm:w-5 sm:h-5 text-cyan-400" />
+    <div className="border border-[rgba(240,240,250,0.15)] p-4 sm:p-6 backdrop-blur-sm mt-6">
+      <h3 className="text-base sm:text-lg font-semibold opacity-80 mb-3 sm:mb-4 flex items-center gap-2">
+        <Code className="w-4 h-4 sm:w-5 sm:h-5 text-[#f0f0fa]" />
         Top Languages
       </h3>
       <div className="space-y-2 sm:space-y-3">
@@ -55,14 +55,14 @@ function LanguageBar({
       aria-label={`${language}: ${percentage}% of commits`}
     >
       <div className="flex items-center justify-between text-sm">
-        <span className="text-slate-300 font-medium">{language}</span>
-        <span className="text-slate-500">
+        <span className="opacity-80 font-medium">{language}</span>
+        <span className="opacity-80">
           <span className="sr-only">Percentage:</span> {percentage}% 
           <span className="mx-1" aria-hidden="true">•</span>
           <span className="sr-only">Count:</span> {count} commits
         </span>
       </div>
-      <div className="h-2 bg-slate-800/50 rounded-full overflow-hidden" aria-hidden="true">
+      <div className="h-2 -full overflow-hidden" aria-hidden="true">
         <div
           className="h-full bg-linear-to-r from-cyan-500 to-blue-500 transition-all duration-1000"
           style={{ width: `${percentage}%` }}

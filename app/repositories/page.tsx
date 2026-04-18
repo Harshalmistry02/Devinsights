@@ -56,16 +56,16 @@ export default async function RepositoriesPage() {
           <div className="flex items-center gap-4 mb-4">
             <Link
               href="/dashboard"
-              className="p-2 bg-slate-800/50 border border-slate-700/30 rounded-lg hover:bg-slate-800 hover:border-slate-600 transition-all text-slate-400 hover:text-slate-200"
+              className="p-2 border border-[rgba(240,240,250,0.15)] hover: hover:border-[rgba(240,240,250,0.15)] transition-all opacity-80 hover:opacity-80"
             >
               <ArrowLeft className="w-5 h-5" />
             </Link>
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-slate-200 flex items-center gap-3">
-                <Code className="w-8 h-8 text-cyan-400" />
+              <h1 className="text-2xl sm:text-3xl font-bold opacity-80 flex items-center gap-3">
+                <Code className="w-8 h-8 text-[#f0f0fa]" />
                 Repositories
               </h1>
-              <p className="text-slate-400 mt-1">
+              <p className="opacity-80 mt-1">
                 {totalRepos} repositories synced
               </p>
             </div>
@@ -113,17 +113,17 @@ export default async function RepositoriesPage() {
 
         {/* Language Distribution */}
         {Object.keys(languageCounts).length > 0 && (
-          <div className="mt-8 bg-slate-900/50 border border-slate-700/30 rounded-xl p-6 backdrop-blur-sm">
-            <h3 className="text-lg font-semibold text-slate-200 mb-4">Languages</h3>
+          <div className="mt-8 border border-[rgba(240,240,250,0.15)] p-6 backdrop-blur-sm">
+            <h3 className="text-lg font-semibold opacity-80 mb-4">Languages</h3>
             <div className="flex flex-wrap gap-2">
               {Object.entries(languageCounts)
                 .sort((a, b) => b[1] - a[1])
                 .map(([language, count]) => (
                   <span
                     key={language}
-                    className="px-3 py-1.5 bg-slate-800/50 border border-slate-700/30 rounded-full text-sm text-slate-300"
+                    className="px-3 py-1.5 border border-[rgba(240,240,250,0.15)] -full text-sm opacity-80"
                   >
-                    {language} <span className="text-slate-500">({count})</span>
+                    {language} <span className="opacity-80">({count})</span>
                   </span>
                 ))}
             </div>
@@ -150,21 +150,21 @@ function SummaryCard({
   color: 'cyan' | 'blue' | 'yellow' | 'purple';
 }) {
   const colorClasses = {
-    cyan: 'text-cyan-400 bg-cyan-500/10 border-cyan-500/20',
-    blue: 'text-blue-400 bg-blue-500/10 border-blue-500/20',
+    cyan: 'text-[#f0f0fa] bg-cyan-500/10 border-cyan-500/20',
+    blue: 'text-[#f0f0fa] bg-blue-500/10 border-blue-500/20',
     yellow: 'text-yellow-400 bg-yellow-500/10 border-yellow-500/20',
     purple: 'text-purple-400 bg-purple-500/10 border-purple-500/20',
   };
 
   return (
-    <div className="bg-slate-900/50 border border-slate-700/30 rounded-xl p-4 backdrop-blur-sm">
+    <div className="border border-[rgba(240,240,250,0.15)] p-4 backdrop-blur-sm">
       <div className="flex items-center gap-3">
-        <div className={`p-2 rounded-lg border ${colorClasses[color]}`}>
+        <div className={`p-2  border ${colorClasses[color]}`}>
           {icon}
         </div>
         <div>
-          <p className="text-xl font-bold text-slate-200">{value.toLocaleString()}</p>
-          <p className="text-xs text-slate-500">{label}</p>
+          <p className="text-xl font-bold opacity-80">{value.toLocaleString()}</p>
+          <p className="text-xs opacity-80">{label}</p>
         </div>
       </div>
     </div>
@@ -189,7 +189,7 @@ function RepositoryCard({
   commitCount: number;
 }) {
   return (
-    <div className="bg-slate-900/50 border border-slate-700/30 rounded-xl p-5 backdrop-blur-sm hover:border-cyan-500/30 transition-all group">
+    <div className="border border-[rgba(240,240,250,0.15)] p-5 backdrop-blur-sm hover:border-cyan-500/30 transition-all group">
       {/* Header */}
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-2 min-w-0">
@@ -198,7 +198,7 @@ function RepositoryCard({
           ) : (
             <Globe className="w-4 h-4 text-green-500 shrink-0" />
           )}
-          <h3 className="text-slate-200 font-semibold truncate group-hover:text-cyan-400 transition-colors">
+          <h3 className="opacity-80 font-semibold truncate group-hover:text-[#f0f0fa] transition-colors">
             {repo.name}
           </h3>
         </div>
@@ -206,7 +206,7 @@ function RepositoryCard({
           href={`https://github.com/${repo.fullName}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="p-1.5 text-slate-500 hover:text-cyan-400 hover:bg-slate-800 rounded transition-all"
+          className="p-1.5 opacity-80 hover:text-[#f0f0fa] hover: transition-all"
         >
           <ExternalLink className="w-4 h-4" />
         </a>
@@ -214,13 +214,13 @@ function RepositoryCard({
 
       {/* Description */}
       {repo.description && (
-        <p className="text-sm text-slate-400 mb-4 line-clamp-2">
+        <p className="text-sm opacity-80 mb-4 line-clamp-2">
           {repo.description}
         </p>
       )}
 
       {/* Stats */}
-      <div className="flex items-center gap-4 text-sm text-slate-500 mb-4">
+      <div className="flex items-center gap-4 text-sm opacity-80 mb-4">
         <div className="flex items-center gap-1">
           <GitCommit className="w-4 h-4" />
           <span>{commitCount}</span>
@@ -236,14 +236,14 @@ function RepositoryCard({
       </div>
 
       {/* Footer */}
-      <div className="flex items-center justify-between pt-3 border-t border-slate-700/30">
+      <div className="flex items-center justify-between pt-3 border-t border-[rgba(240,240,250,0.15)]">
         {repo.language && (
-          <span className="px-2 py-1 bg-slate-800/50 rounded text-xs text-slate-400">
+          <span className="px-2 py-1 text-xs opacity-80">
             {repo.language}
           </span>
         )}
         {repo.lastSyncedAt && (
-          <div className="flex items-center gap-1 text-xs text-slate-600">
+          <div className="flex items-center gap-1 text-xs opacity-80">
             <Clock className="w-3 h-3" />
             <span>
               {new Date(repo.lastSyncedAt).toLocaleDateString('en-US', {
@@ -260,20 +260,20 @@ function RepositoryCard({
 
 function EmptyState() {
   return (
-    <div className="bg-slate-900/50 border border-slate-700/30 rounded-xl p-12 backdrop-blur-sm text-center">
+    <div className="border border-[rgba(240,240,250,0.15)] p-12 backdrop-blur-sm text-center">
       <div className="max-w-md mx-auto">
-        <div className="w-16 h-16 bg-cyan-500/10 border border-cyan-500/30 rounded-full flex items-center justify-center mx-auto mb-6">
-          <Code className="w-8 h-8 text-cyan-400" />
+        <div className="w-16 h-16 bg-cyan-500/10 border border-cyan-500/30 -full flex items-center justify-center mx-auto mb-6">
+          <Code className="w-8 h-8 text-[#f0f0fa]" />
         </div>
-        <h2 className="text-xl font-semibold text-slate-200 mb-3">
+        <h2 className="text-xl font-semibold opacity-80 mb-3">
           No Repositories Synced
         </h2>
-        <p className="text-slate-400 mb-6">
+        <p className="opacity-80 mb-6">
           Sync your GitHub data to see your repositories here.
         </p>
         <Link
           href="/dashboard"
-          className="inline-flex items-center gap-2 px-6 py-3 bg-cyan-500/20 border border-cyan-500/30 rounded-lg text-cyan-400 hover:bg-cyan-500/30 hover:border-cyan-500/50 transition-all font-medium"
+          className="inline-flex items-center gap-2 px-6 py-3 bg-cyan-500/20 border border-cyan-500/30 text-[#f0f0fa] hover:bg-cyan-500/30 hover:border-cyan-500/50 transition-all font-medium"
         >
           <RefreshCw className="w-5 h-5" />
           Go to Dashboard

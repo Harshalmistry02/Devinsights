@@ -8,73 +8,93 @@ export function InsightsRow({ analytics }: InsightsRowProps) {
   if (!analytics) return null;
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mt-6">
-      <InsightCard
-        icon={<TrendingUp className="w-5 h-5" />}
-        title="Best Day"
-        value={analytics?.mostProductiveDay || "N/A"}
-        description="Most productive day"
-        color="purple"
-      />
-      <InsightCard
-        icon={<Clock className="w-5 h-5" />}
-        title="Peak Hour"
-        value={formatHour(analytics?.mostProductiveHour)}
-        description="Most active time"
-        color="blue"
-      />
-      <InsightCard
-        icon={<Zap className="w-5 h-5" />}
-        title="Longest Streak"
-        value={`${analytics?.longestStreak || 0} days`}
-        description="Personal record"
-        color="orange"
-      />
+    <div>
+      <p
+        className="text-micro"
+        style={{ letterSpacing: "1.5px", marginBottom: "16px" }}
+      >
+        Key Insights
+      </p>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(3, 1fr)",
+          gap: "1px",
+          background: "rgba(240,240,250,0.06)",
+          border: "1px solid rgba(240,240,250,0.06)",
+          borderRadius: "var(--radius-sharp)",
+          overflow: "hidden",
+        }}
+        className="insights-responsive"
+      >
+        <style>{`
+          @media (max-width: 600px) {
+            .insights-responsive {
+              grid-template-columns: 1fr !important;
+            }
+          }
+        `}</style>
+        <InsightCell
+          icon={<TrendingUp size={14} />}
+          label="Best Day"
+          value={analytics?.mostProductiveDay || "N/A"}
+          sublabel="Most productive day"
+        />
+        <InsightCell
+          icon={<Clock size={14} />}
+          label="Peak Hour"
+          value={formatHour(analytics?.mostProductiveHour)}
+          sublabel="Most active time"
+        />
+        <InsightCell
+          icon={<Zap size={14} />}
+          label="Longest Streak"
+          value={`${analytics?.longestStreak || 0} days`}
+          sublabel="Personal record"
+        />
+      </div>
     </div>
   );
 }
 
-function InsightCard({
+function InsightCell({
   icon,
-  title,
+  label,
   value,
-  description,
-  color,
+  sublabel,
 }: {
   icon: React.ReactNode;
-  title: string;
+  label: string;
   value: string;
-  description: string;
-  color: "cyan" | "blue" | "purple" | "orange";
+  sublabel: string;
 }) {
-  const colorClasses = {
-    cyan: "text-cyan-400 bg-cyan-500/10 border-cyan-500/20",
-    blue: "text-blue-400 bg-blue-500/10 border-blue-500/20",
-    purple: "text-purple-400 bg-purple-500/10 border-purple-500/20",
-    orange: "text-orange-400 bg-orange-500/10 border-orange-500/20",
-  };
-
   return (
-    <div 
+    <div
       role="article"
-      aria-label={`Insight: ${title}`}
-      className="bg-slate-900/50 border border-slate-700/30 rounded-xl p-3 sm:p-4 backdrop-blur-sm"
+      aria-label={`Insight: ${label}`}
+      style={{
+        background: "rgba(0,0,0,0.6)",
+        padding: "20px",
+        display: "flex",
+        flexDirection: "column",
+        gap: "6px",
+        transition: "background 0.2s ease",
+      }}
+      onMouseOver={(e) => (e.currentTarget.style.background = "rgba(240,240,250,0.03)")}
+      onMouseOut={(e) => (e.currentTarget.style.background = "rgba(0,0,0,0.6)")}
     >
-      <div className="flex items-center gap-2 sm:gap-3">
-        <div 
-          className={`p-1.5 sm:p-2 rounded-lg border ${colorClasses[color]} [&>svg]:w-4 [&>svg]:h-4 sm:[&>svg]:w-5 sm:[&>svg]:h-5`}
-          aria-hidden="true"
-        >
-          {icon}
-        </div>
-        <div className="min-w-0 flex-1">
-          <p className="text-[10px] sm:text-xs text-slate-500">{title}</p>
-          <p className="text-base sm:text-lg font-semibold text-slate-200 truncate" aria-live="polite">
-            {value}
-          </p>
-          <p className="text-[10px] sm:text-xs text-slate-400 truncate">{description}</p>
-        </div>
+      <div style={{ display: "flex", alignItems: "center", gap: "8px", opacity: 0.3 }} aria-hidden="true">
+        {icon}
+        <p className="text-micro" style={{ opacity: 1 }}>{label}</p>
       </div>
+      <p
+        className="text-section-head"
+        style={{ fontSize: "1.25rem" }}
+        aria-live="polite"
+      >
+        {value}
+      </p>
+      <p className="text-micro" style={{ opacity: 0.25 }}>{sublabel}</p>
     </div>
   );
 }

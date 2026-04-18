@@ -63,123 +63,173 @@ export default async function DashboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-slate-950 via-slate-900 to-slate-950 pt-20 sm:pt-24">
+    <div className="app-canvas">
       {/* Skip to main content link for keyboard users */}
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:absolute focus:top-24 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-cyan-500 focus:text-white focus:rounded-lg focus:outline-none"
+        className="skip-link"
       >
         Skip to main content
       </a>
-      
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          
+
+      <div
+        style={{
+          maxWidth: "1400px",
+          margin: "0 auto",
+          padding: "40px clamp(16px, 4vw, 48px)",
+        }}
+      >
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr",
+            gap: "32px",
+          }}
+          className="dashboard-grid"
+        >
+          {/* Responsive grid via style tag */}
+          <style>{`
+            @media (min-width: 1024px) {
+              .dashboard-grid {
+                grid-template-columns: 280px 1fr !important;
+              }
+            }
+          `}</style>
+
           {/* Step 1: User Profile Card */}
-          <UserProfileCard 
-            session={session} 
-            githubStatus={githubStatus} 
+          <UserProfileCard
+            session={session}
+            githubStatus={githubStatus}
             lastSync={lastSync}
             analytics={analytics}
           />
 
           {/* Main Content Area */}
-          <main 
+          <main
             id="main-content"
-            className="lg:col-span-8 xl:col-span-9 space-y-4 sm:space-y-6"
+            style={{ display: "flex", flexDirection: "column", gap: "24px" }}
             role="main"
             aria-label="Dashboard overview"
           >
             {/* Welcome Header */}
-            <div className="bg-linear-to-r from-cyan-500/10 via-blue-500/10 to-purple-500/10 border border-slate-700/30 rounded-xl p-4 sm:p-6 backdrop-blur-sm">
-              <div className="flex items-start justify-between">
+            <div style={{ paddingBottom: "16px", borderBottom: "1px solid rgba(240,240,250,0.06)" }}>
+              <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", flexWrap: "wrap", gap: "12px" }}>
                 <div>
-                  <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-200 mb-1 sm:mb-2">
-                    Welcome back, {user.name?.split(" ")[0] || user.username}!
-                    👋
+                  <p className="text-micro" style={{ marginBottom: "8px" }}>Dashboard</p>
+                  <h2
+                    className="text-section-head"
+                    style={{ fontSize: "clamp(1.25rem, 3vw, 1.75rem)" }}
+                  >
+                    Welcome back, {user.name?.split(" ")[0] || user.username}
                   </h2>
-                  <p className="text-sm sm:text-base text-slate-400">
+                  <p className="text-body" style={{ opacity: 0.45, marginTop: "6px", fontSize: "0.875rem" }}>
                     {hasSyncedData
-                      ? "Here's an overview of your GitHub activity and insights"
+                      ? "Overview of your GitHub activity and insights"
                       : "Sync your GitHub data to see your coding insights"}
                   </p>
                 </div>
-                <div className="hidden sm:block">
-                  <div className="flex items-center gap-2 text-slate-400 text-sm">
-                    <Calendar className="w-4 h-4" />
-                    <span>
-                      {new Date().toLocaleDateString("en-US", {
-                        month: "short",
-                        day: "numeric",
-                        year: "numeric",
-                      })}
-                    </span>
-                  </div>
+                <div className="hidden sm:flex items-center" style={{ gap: "8px", opacity: 0.35 }}>
+                  <Calendar size={14} />
+                  <span className="text-caption">
+                    {new Date().toLocaleDateString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric",
+                    })}
+                  </span>
                 </div>
               </div>
             </div>
 
             {/* SYNC STATUS BANNERS */}
             {isSyncFailed && lastSync?.errorMessage && (
-              <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 backdrop-blur-sm animate-in slide-in-from-top-2 duration-300">
-                <div className="flex items-start gap-3">
-                  <AlertCircle className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
-                  <div className="flex-1">
-                    <h4 className="text-sm font-medium text-red-400 mb-1">Sync Failed</h4>
-                    <p className="text-sm text-red-300/80">{lastSync.errorMessage}</p>
-                    <p className="text-xs text-slate-500 mt-2">
-                      {hasSyncedData 
-                        ? "Showing last successful sync data. Try syncing again to update."
-                        : "Use the Sync button in the sidebar to retry."}
-                    </p>
-                  </div>
+              <div
+                role="alert"
+                aria-live="assertive"
+                style={{
+                  padding: "16px 20px",
+                  background: "rgba(252,165,165,0.05)",
+                  border: "1px solid rgba(252,165,165,0.15)",
+                  borderRadius: "var(--radius-sharp)",
+                  display: "flex",
+                  gap: "12px",
+                  alignItems: "flex-start",
+                }}
+              >
+                <AlertCircle size={16} style={{ color: "rgba(252,165,165,0.7)", flexShrink: 0, marginTop: "2px" }} />
+                <div>
+                  <p className="text-caption-bold" style={{ color: "rgba(252,165,165,0.8)", marginBottom: "4px" }}>Sync Failed</p>
+                  <p className="text-caption" style={{ color: "rgba(252,165,165,0.6)" }}>{lastSync.errorMessage}</p>
+                  <p className="text-micro" style={{ marginTop: "8px" }}>
+                    {hasSyncedData
+                      ? "Showing last successful sync data. Try syncing again to update."
+                      : "Use the Sync button in the sidebar to retry."}
+                  </p>
                 </div>
               </div>
             )}
 
             {isSyncInProgress && (
-              <div className="bg-cyan-500/10 border border-cyan-500/30 rounded-xl p-4 backdrop-blur-sm animate-in fade-in duration-300">
-                <div className="flex items-center gap-3">
-                  <Loader2 className="w-5 h-5 text-cyan-400 animate-spin" />
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between mb-2">
-                      <p className="text-sm text-cyan-400 font-medium">Syncing GitHub data...</p>
-                      {lastSync?.processedRepos !== undefined && lastSync?.totalRepos !== undefined && lastSync.totalRepos > 0 && (
-                        <span className="text-xs text-cyan-400/70">
-                          {lastSync.processedRepos}/{lastSync.totalRepos} repos
-                        </span>
-                      )}
-                    </div>
-                    <div className="h-1.5 bg-slate-800/80 rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-linear-to-r from-cyan-500 via-blue-500 to-cyan-500 rounded-full animate-pulse"
-                        style={{ 
-                          width: lastSync?.totalRepos && lastSync.totalRepos > 0
-                            ? `${Math.round((lastSync.processedRepos || 0) / lastSync.totalRepos * 100)}%`
-                            : '50%' 
-                        }}
-                      />
-                    </div>
+              <div
+                role="status"
+                aria-live="polite"
+                style={{
+                  padding: "16px 20px",
+                  background: "rgba(240,240,250,0.03)",
+                  border: "1px solid rgba(240,240,250,0.08)",
+                  borderRadius: "var(--radius-sharp)",
+                  display: "flex",
+                  gap: "12px",
+                  alignItems: "center",
+                }}
+              >
+                <Loader2 size={16} style={{ color: "var(--spectral-white)", opacity: 0.5, animation: "spin 1s linear infinite", flexShrink: 0 }} />
+                <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
+                <div style={{ flex: 1 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+                    <p className="text-caption-bold" style={{ opacity: 0.7 }}>Syncing GitHub data...</p>
+                    {lastSync?.processedRepos !== undefined && lastSync?.totalRepos !== undefined && lastSync.totalRepos > 0 && (
+                      <span className="text-micro">{lastSync.processedRepos}/{lastSync.totalRepos} repos</span>
+                    )}
+                  </div>
+                  <div className="progress-bar-track">
+                    <div
+                      className="progress-bar-fill"
+                      style={{
+                        width: lastSync?.totalRepos && lastSync.totalRepos > 0
+                          ? `${Math.round((lastSync.processedRepos || 0) / lastSync.totalRepos * 100)}%`
+                          : '50%'
+                      }}
+                    />
                   </div>
                 </div>
               </div>
             )}
 
             {isPartialSync && isSyncCompleted && (
-              <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 backdrop-blur-sm animate-in slide-in-from-top-2 duration-300">
-                <div className="flex items-start gap-3">
-                  <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <h4 className="text-sm font-medium text-amber-400">Partial Sync</h4>
-                      <span className="px-2 py-0.5 text-xs bg-amber-500/20 border border-amber-500/30 rounded-full text-amber-400">
-                        {lastSync.processedRepos}/{lastSync.totalRepos} repos
-                      </span>
-                    </div>
-                    <p className="text-sm text-amber-300/80">
-                      Some repositories couldn't be synced. Showing available data.
-                    </p>
+              <div
+                role="status"
+                style={{
+                  padding: "16px 20px",
+                  background: "rgba(251,191,36,0.04)",
+                  border: "1px solid rgba(251,191,36,0.12)",
+                  borderRadius: "var(--radius-sharp)",
+                  display: "flex",
+                  gap: "12px",
+                  alignItems: "flex-start",
+                }}
+              >
+                <AlertTriangle size={16} style={{ color: "rgba(251,191,36,0.6)", flexShrink: 0, marginTop: "2px" }} />
+                <div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
+                    <p className="text-caption-bold" style={{ color: "rgba(251,191,36,0.7)" }}>Partial Sync</p>
+                    <span className="text-micro" style={{ color: "rgba(251,191,36,0.5)" }}>
+                      {lastSync.processedRepos}/{lastSync.totalRepos} repos
+                    </span>
                   </div>
+                  <p className="text-caption" style={{ color: "rgba(251,191,36,0.5)" }}>
+                    Some repositories couldn&apos;t be synced. Showing available data.
+                  </p>
                 </div>
               </div>
             )}
@@ -190,7 +240,7 @@ export default async function DashboardPage() {
 
             {/* Weekly Summary Widget - At-a-glance view */}
             {hasSyncedData && (
-              <WeeklySummary 
+              <WeeklySummary
                 analytics={{
                   dailyCommits: analytics?.dailyCommits as Record<string, number> | undefined,
                   hourlyStats: analytics?.hourlyStats as Record<string, number> | undefined,
@@ -209,9 +259,9 @@ export default async function DashboardPage() {
 
             {/* Commit Quality Analysis Card */}
             {hasSyncedData && (
-              <CommitQualityCard 
+              <CommitQualityCard
                 metrics={
-                  (analytics as Record<string, unknown> | null)?.commitQualityMetrics as 
+                  (analytics as Record<string, unknown> | null)?.commitQualityMetrics as
                   Parameters<typeof CommitQualityCard>[0]['metrics'] | null
                 }
               />

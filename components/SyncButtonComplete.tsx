@@ -208,51 +208,58 @@ export function SyncButtonComplete() {
         onClick={() => handleSync(false)}
         disabled={status.status === 'syncing'}
         aria-label={
-          status.status === 'syncing' 
-            ? 'Syncing GitHub data, please wait' 
+          status.status === 'syncing'
+            ? 'Syncing GitHub data, please wait'
             : 'Sync GitHub repositories and commits'
         }
         aria-describedby="sync-status"
-        className={`
-          w-full flex items-center justify-center gap-3 px-5 py-3.5 rounded-xl
-          font-medium text-sm transition-all duration-300 cursor-pointer
-          focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2 focus:ring-offset-slate-900
-          ${
-            status.status === 'syncing'
-              ? 'bg-slate-800/50 border border-slate-700/30 text-slate-400 cursor-not-allowed'
-              : 'bg-linear-to-r from-cyan-500/20 via-blue-500/20 to-cyan-500/20 border border-cyan-500/30 text-cyan-400 hover:from-cyan-500/30 hover:via-blue-500/30 hover:to-cyan-500/30 hover:border-cyan-500/50 hover:text-cyan-300 hover:scale-[1.02] active:scale-[0.98]'
-          }
-          backdrop-blur-sm group
-        `}
+        className={`btn-ghost ${status.status === 'syncing' ? 'btn-ghost-sm' : ''}`}
+        style={{
+          width: "100%",
+          justifyContent: "center",
+          opacity: status.status === 'syncing' ? 0.5 : 1,
+          cursor: status.status === 'syncing' ? 'not-allowed' : 'pointer',
+        }}
       >
         {status.status === 'syncing' ? (
           <>
-            <Loader2 className="w-5 h-5 animate-spin" aria-hidden="true" />
-            <span>Syncing GitHub Data...</span>
+            <Loader2 size={14} style={{ animation: "spin 1s linear infinite" }} aria-hidden="true" />
+            <span>Syncing...</span>
           </>
         ) : (
           <>
-            <RefreshCw className="w-5 h-5 group-hover:rotate-180 transition-transform duration-500" aria-hidden="true" />
+            <RefreshCw size={14} aria-hidden="true" />
             <span>Sync GitHub Data</span>
-            <Github className="w-4 h-4 opacity-50" aria-hidden="true" />
+            <Github size={12} style={{ opacity: 0.5 }} aria-hidden="true" />
           </>
         )}
       </button>
 
-      {/* Force Full Sync Button - for when normal sync shows 0 commits */}
+      {/* Force Full Sync Button */}
       {status.status !== 'syncing' && (
         <button
           onClick={() => handleSync(true)}
           aria-label="Force full re-sync of all GitHub data"
-          className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg cursor-pointer
-            text-xs text-slate-500 hover:text-slate-400 
-            bg-slate-800/30 border border-slate-700/20 
-            hover:bg-slate-800/50 hover:border-slate-600/30 
-            transition-all duration-200
-            focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2 focus:ring-offset-slate-900"
           title="Use this if sync shows 0 commits but you have repos with commits"
+          style={{
+            width: "100%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "6px",
+            padding: "8px",
+            background: "none",
+            border: "none",
+            cursor: "pointer",
+            color: "var(--spectral-white)",
+            opacity: 0.3,
+            transition: "opacity 0.2s ease",
+          }}
+          className="text-micro"
+          onMouseOver={(e) => (e.currentTarget.style.opacity = "0.6")}
+          onMouseOut={(e) => (e.currentTarget.style.opacity = "0.3")}
         >
-          <RefreshCw className="w-3 h-3" aria-hidden="true" />
+          <RefreshCw size={10} aria-hidden="true" />
           <span>Force Full Re-sync</span>
         </button>
       )}
@@ -263,94 +270,89 @@ export function SyncButtonComplete() {
           id="sync-status"
           role="status"
           aria-live="polite"
-          className={`
-            rounded-xl p-4 backdrop-blur-sm space-y-3 animate-in fade-in slide-in-from-top-2 duration-300
-            ${
-              status.status === 'success'
-                ? 'bg-green-500/10 border border-green-500/30'
-                : status.status === 'error'
-                  ? 'bg-red-500/10 border border-red-500/30'
-                  : status.status === 'warning'
-                    ? 'bg-amber-500/10 border border-amber-500/30'
-                    : 'bg-slate-900/50 border border-slate-700/30'
-            }
-          `}
+          style={{
+            padding: "14px 16px",
+            background: status.status === 'success' ? "rgba(134,239,172,0.04)"
+              : status.status === 'error' ? "rgba(252,165,165,0.04)"
+              : status.status === 'warning' ? "rgba(251,191,36,0.04)"
+              : "rgba(240,240,250,0.03)",
+            border: `1px solid ${status.status === 'success' ? "rgba(134,239,172,0.12)"
+              : status.status === 'error' ? "rgba(252,165,165,0.12)"
+              : status.status === 'warning' ? "rgba(251,191,36,0.12)"
+              : "rgba(240,240,250,0.06)"}`,
+            borderRadius: "var(--radius-sharp)",
+          }}
         >
           {/* Progress Bar */}
-          <div className="relative h-2 bg-slate-800/80 rounded-full overflow-hidden">
+          <div className="progress-bar-track" style={{ marginBottom: "10px" }}>
             <div
-              className={`
-                absolute inset-y-0 left-0 rounded-full transition-all duration-500 ease-out
-                ${
-                  status.status === 'success'
-                    ? 'bg-linear-to-r from-green-500 to-emerald-400'
-                    : status.status === 'error'
-                      ? 'bg-linear-to-r from-red-500 to-rose-400'
-                      : status.status === 'warning'
-                        ? 'bg-linear-to-r from-amber-500 to-orange-400'
-                        : 'bg-linear-to-r from-cyan-500 via-blue-500 to-cyan-500'
-                }
-              `}
-              style={{ width: `${status.progress}%` }}
+              className="progress-bar-fill"
+              style={{
+                width: `${status.progress}%`,
+                background: status.status === 'success' ? "rgba(134,239,172,0.6)"
+                  : status.status === 'error' ? "rgba(252,165,165,0.5)"
+                  : status.status === 'warning' ? "rgba(251,191,36,0.6)"
+                  : "var(--spectral-white)",
+              }}
             />
-            {status.status === 'syncing' && (
-              <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/20 to-transparent animate-shimmer" />
-            )}
           </div>
 
           {/* Status Message */}
-          <div className="flex items-start gap-2">
+          <div style={{ display: "flex", alignItems: "flex-start", gap: "8px" }}>
             {status.status === 'success' && (
-              <CheckCircle className="w-4 h-4 text-green-400 shrink-0 mt-0.5" />
+              <CheckCircle size={12} style={{ color: "rgba(134,239,172,0.7)", flexShrink: 0, marginTop: "2px" }} />
             )}
             {status.status === 'error' && (
-              <XCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
+              <XCircle size={12} style={{ color: "rgba(252,165,165,0.6)", flexShrink: 0, marginTop: "2px" }} />
             )}
             {status.status === 'warning' && (
-              <AlertCircle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+              <AlertCircle size={12} style={{ color: "rgba(251,191,36,0.6)", flexShrink: 0, marginTop: "2px" }} />
             )}
             {status.status === 'syncing' && (
-              <Loader2 className="w-4 h-4 text-cyan-400 animate-spin shrink-0 mt-0.5" />
+              <Loader2 size={12} style={{ animation: "spin 1s linear infinite", opacity: 0.5, flexShrink: 0, marginTop: "2px" }} />
             )}
 
-            <div className="flex-1">
+            <div style={{ flex: 1 }}>
               <p
-                className={`
-                  text-sm
-                  ${
-                    status.status === 'success'
-                      ? 'text-green-400'
-                      : status.status === 'error'
-                        ? 'text-red-400'
-                        : status.status === 'warning'
-                          ? 'text-amber-400'
-                          : 'text-slate-400'
-                  }
-                `}
+                className="text-micro"
+                style={{
+                  opacity: status.status === 'success' ? 0.6
+                    : status.status === 'error' ? 0.55
+                    : status.status === 'warning' ? 0.55
+                    : 0.4,
+                  color: status.status === 'success' ? "rgba(134,239,172,0.8)"
+                    : status.status === 'error' ? "rgba(252,165,165,0.8)"
+                    : status.status === 'warning' ? "rgba(251,191,36,0.8)"
+                    : "var(--spectral-white)",
+                }}
               >
                 {status.message}
               </p>
 
               {/* Detailed Stats */}
               {status.details && (status.status === 'success' || status.status === 'warning') && (
-                <div className="mt-2 grid grid-cols-3 gap-2 text-xs">
-                  <div className="bg-slate-800/30 rounded p-2">
-                    <div className="text-slate-500">Repos</div>
-                    <div className="font-semibold text-slate-200">
-                      {status.details.totalRepos}
-                    </div>
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(3, 1fr)",
+                    gap: "1px",
+                    marginTop: "10px",
+                    background: "rgba(240,240,250,0.05)",
+                    borderRadius: "2px",
+                    overflow: "hidden",
+                  }}
+                >
+                  <div style={{ background: "#000", padding: "8px 10px" }}>
+                    <p className="text-micro" style={{ opacity: 0.25, marginBottom: "2px" }}>Repos</p>
+                    <p className="stat-value" style={{ fontSize: "0.875rem" }}>{status.details.totalRepos}</p>
                   </div>
-                  <div className="bg-slate-800/30 rounded p-2">
-                    <div className="text-slate-500">Commits</div>
-                    <div className="font-semibold text-slate-200">
-                      {status.details.totalCommits?.toLocaleString()}
-                    </div>
+                  <div style={{ background: "#000", padding: "8px 10px" }}>
+                    <p className="text-micro" style={{ opacity: 0.25, marginBottom: "2px" }}>Commits</p>
+                    <p className="stat-value" style={{ fontSize: "0.875rem" }}>{status.details.totalCommits?.toLocaleString()}</p>
                   </div>
-                  <div className="bg-slate-800/30 rounded p-2">
-                    <div className="text-slate-500">Duration</div>
-                    <div className="font-semibold text-slate-200">
-                      {status.details.syncDurationMin?.toFixed(1)}m
-                    </div>
+                  <div style={{ background: "#000", padding: "8px 10px" }}>
+                    <p className="text-micro" style={{ opacity: 0.25, marginBottom: "2px" }}>Duration</p>
+                    <p className="stat-value" style={{ fontSize: "0.875rem" }}>{status.details.syncDurationMin?.toFixed(1)}m</p>
                   </div>
                 </div>
               )}
@@ -359,7 +361,7 @@ export function SyncButtonComplete() {
 
           {/* Progress Percentage */}
           {status.status === 'syncing' && (
-            <p className="text-xs text-slate-500 text-right">
+            <p className="text-micro" style={{ textAlign: "right", marginTop: "6px", opacity: 0.25 }}>
               {status.progress}% complete
             </p>
           )}

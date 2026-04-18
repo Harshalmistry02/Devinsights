@@ -54,7 +54,7 @@ export class SectionErrorBoundary extends Component<Props, State> {
       // Default error UI
       return (
         <div 
-          className="bg-red-500/10 border border-red-500/30 rounded-xl p-6 backdrop-blur-sm animate-in fade-in duration-300"
+          className="bg-red-500/10 border border-red-500/30 p-6 backdrop-blur-sm animate-in fade-in duration-300"
           role="alert"
           aria-live="assertive"
         >
@@ -74,7 +74,7 @@ export class SectionErrorBoundary extends Component<Props, State> {
               </p>
               <button
                 onClick={this.handleReset}
-                className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-red-400 bg-red-500/10 border border-red-500/30 rounded-lg hover:bg-red-500/20 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
+                className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-red-400 bg-red-500/10 border border-red-500/30 hover:bg-red-500/20 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
                 aria-label="Retry loading section"
               >
                 <RefreshCw className="w-3 h-3" aria-hidden="true" />

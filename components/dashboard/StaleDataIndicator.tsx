@@ -49,10 +49,10 @@ export function StaleDataIndicator({ lastUpdated, onRefresh }: StaleDataIndicato
 
   return (
     <div className={cn(
-      "flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs",
+      "flex items-center gap-2 px-3 py-1.5  text-xs",
       isStale
         ? "bg-amber-500/10 border border-amber-500/30 text-amber-400"
-        : "bg-slate-800/50 border border-slate-700/30 text-slate-400"
+        : " border border-[rgba(240,240,250,0.15)] opacity-80"
     )}>
       {isStale ? (
         <AlertCircle className="w-3 h-3" />
@@ -63,7 +63,7 @@ export function StaleDataIndicator({ lastUpdated, onRefresh }: StaleDataIndicato
       {isStale && (
         <button
           onClick={onRefresh}
-          className="ml-2 px-2 py-0.5 bg-amber-500/20 rounded hover:bg-amber-500/30 transition-colors"
+          className="ml-2 px-2 py-0.5 bg-amber-500/20 hover:bg-amber-500/30 transition-colors"
         >
           Refresh
         </button>

@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { X, Keyboard } from 'lucide-react';
-import { cn } from '@/lib/utils';
 
 /**
  * Keyboard Shortcuts Handler
@@ -110,11 +109,12 @@ export function KeyboardShortcuts() {
   // Visual indicator when waiting for second key
   if (pressedKey === 'g') {
     return (
-      <div className="fixed bottom-4 left-4 z-50 bg-slate-900 border border-cyan-500/50 rounded-lg px-3 py-2 shadow-xl animate-in slide-in-from-bottom-2 duration-200">
-        <p className="text-sm text-cyan-400 font-medium">
-          Press <kbd className="px-1.5 py-0.5 bg-slate-800 border border-slate-700 rounded text-xs">d</kbd> for Dashboard,{' '}
-          <kbd className="px-1.5 py-0.5 bg-slate-800 border border-slate-700 rounded text-xs">i</kbd> for Insights,{' '}
-          <kbd className="px-1.5 py-0.5 bg-slate-800 border border-slate-700 rounded text-xs">p</kbd> for Profile
+      <div 
+        className="fixed bottom-8 left-8 z-50 px-6 py-4 border border-[rgba(240,240,250,0.35)] bg-[rgba(0,0,0,0.85)] backdrop-blur animate-in slide-in-from-bottom-2 duration-200" 
+        style={{ borderRadius: 0 }}
+      >
+        <p className="text-micro" style={{ opacity: 0.8, display: "flex", alignItems: "center", gap: "8px", margin: 0 }}>
+          PRESS D FOR DASHBOARD, I FOR INSIGHTS, P FOR PROFILE
         </p>
       </div>
     );
@@ -150,79 +150,106 @@ export function KeyboardShortcutsHelp() {
   }, [isOpen]);
 
   const shortcuts = [
-    { keys: ['g', 'd'], description: 'Go to Dashboard' },
-    { keys: ['g', 'i'], description: 'Go to Insights' },
-{ keys: ['g', 'p'], description: 'Go to Profile' },
-    { keys: ['g', 'r'], description: 'Go to Repositories' },
-    { keys: ['g', 's'], description: 'Go to Settings' },
-    { keys: ['Ctrl/⌘', 'S'], description: 'Trigger Sync' },
-    { keys: ['Ctrl/⌘', 'K'], description: 'Search (coming soon)' },
-    { keys: ['?'], description: 'Show this help' },
-    { keys: ['Esc'], description: 'Close modals' },
+    { keys: ['G', 'D'], description: 'GO TO DASHBOARD' },
+    { keys: ['G', 'I'], description: 'GO TO INSIGHTS' },
+    { keys: ['G', 'P'], description: 'GO TO PROFILE' },
+    { keys: ['G', 'R'], description: 'GO TO REPOSITORIES' },
+    { keys: ['G', 'S'], description: 'GO TO SETTINGS' },
+    { keys: ['CMD/CTRL', 'S'], description: 'TRIGGER SYNC' },
+    { keys: ['CMD/CTRL', 'K'], description: 'SEARCH (COMING SOON)' },
+    { keys: ['?'], description: 'SHOW THIS HELP' },
+    { keys: ['ESC'], description: 'CLOSE MODALS' },
   ];
 
   return (
     <>
-      {/* Help Button */}
+      {/* Help Button - Ghost Floating Button */}
       <button
         id="shortcuts-help-button"
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-4 right-4 z-40 p-3 bg-slate-900 border border-slate-700/50 rounded-lg text-slate-400 hover:text-slate-300 hover:border-slate-600 transition-colors shadow-lg group"
+        className="fixed bottom-8 right-8 z-40 group transition-all"
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          width: "48px",
+          height: "48px",
+          background: "rgba(240, 240, 250, 0.1)",
+          border: "1px solid rgba(240, 240, 250, 0.35)",
+          borderRadius: "50%",
+          color: "#f0f0fa",
+          backdropFilter: "blur(4px)"
+        }}
         title="Keyboard shortcuts (press ?)"
         aria-label="Show keyboard shortcuts"
+        onMouseOver={(e) => {
+            e.currentTarget.style.background = 'rgba(240, 240, 250, 0.2)';
+        }}
+        onMouseOut={(e) => {
+            e.currentTarget.style.background = 'rgba(240, 240, 250, 0.1)';
+        }}
       >
-        <Keyboard className="w-5 h-5" />
-        <span className="absolute right-full mr-2 px-2 py-1 bg-slate-800 border border-slate-700 rounded text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-          Press <kbd className="px-1 py-0.5 bg-slate-900 border border-slate-600 rounded">?</kbd>
-        </span>
+        <Keyboard size={20} />
       </button>
 
       {/* Help Modal */}
       {isOpen && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm"
           onClick={() => setIsOpen(false)}
           role="dialog"
           aria-modal="true"
           aria-labelledby="shortcuts-modal-title"
         >
           <div
-            className="bg-slate-900 border border-slate-700/50 rounded-xl shadow-2xl max-w-lg w-full"
+            style={{
+              background: "#000",
+              border: "1px solid rgba(240, 240, 250, 0.35)",
+              borderRadius: "0",
+            }}
+            className="max-w-lg w-full relative pt-8 pb-4"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
-            <div className="flex items-center justify-between p-6 border-b border-slate-700/50">
-              <div className="flex items-center gap-3">
-                <Keyboard className="w-6 h-6 text-cyan-400" />
-                <h2 id="shortcuts-modal-title" className="text-xl font-semibold text-slate-200">
-                  Keyboard Shortcuts
-                </h2>
-              </div>
+            <div className="flex items-center justify-between px-8 pb-4 border-b border-[rgba(240,240,250,0.1)]">
+              <h2 id="shortcuts-modal-title" className="text-section-head" style={{ fontSize: "1.25rem", margin: 0 }}>
+                KEYBOARD SHORTCUTS
+              </h2>
               <button
                 onClick={() => setIsOpen(false)}
-                className="p-2 rounded-lg hover:bg-slate-800/50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
+                className="transition-opacity opacity-50 hover:opacity-100"
+                style={{ color: "#f0f0fa", background: "transparent", border: "none" }}
                 aria-label="Close shortcuts help"
               >
-                <X className="w-5 h-5 text-slate-400" />
+                <X size={20} />
               </button>
             </div>
 
             {/* Shortcuts List */}
-            <div className="p-6 space-y-3 max-h-[60vh] overflow-y-auto">
+            <div className="px-8 py-6 space-y-4 max-h-[60vh] overflow-y-auto">
               {shortcuts.map((shortcut, index) => (
                 <div
                   key={index}
-                  className="flex items-center justify-between py-2 border-b border-slate-800/50 last:border-0"
+                  className="flex items-center justify-between py-2 border-b border-[rgba(240,240,250,0.05)] last:border-0"
                 >
-                  <span className="text-sm text-slate-300">{shortcut.description}</span>
+                  <span className="text-body text-dim" style={{ fontSize: "0.875rem" }}>
+                    {shortcut.description}
+                  </span>
                   <div className="flex items-center gap-1">
                     {shortcut.keys.map((key, keyIndex) => (
                       <span key={keyIndex} className="flex items-center gap-1">
-                        <kbd className="px-2 py-1 bg-slate-800 border border-slate-700 rounded text-xs font-mono text-slate-300">
+                        <kbd 
+                          className="text-caption"
+                          style={{
+                            padding: "4px 8px",
+                            background: "rgba(240, 240, 250, 0.05)",
+                            border: "1px solid rgba(240, 240, 250, 0.35)",
+                          }}
+                        >
                           {key}
                         </kbd>
                         {keyIndex < shortcut.keys.length - 1 && (
-                          <span className="text-slate-500 text-xs">then</span>
+                          <span className="text-micro text-dim mx-1">THEN</span>
                         )}
                       </span>
                     ))}
@@ -232,9 +259,9 @@ export function KeyboardShortcutsHelp() {
             </div>
 
             {/* Footer */}
-            <div className="p-4 bg-slate-800/30 border-t border-slate-700/50 rounded-b-xl">
-              <p className="text-xs text-slate-500 text-center">
-                Press <kbd className="px-1.5 py-0.5 bg-slate-900 border border-slate-700 rounded">Esc</kbd> to close
+            <div className="px-8 pt-4 pb-2 text-center border-t border-[rgba(240,240,250,0.1)]">
+              <p className="text-micro text-dim">
+                PRESS ESC TO CLOSE
               </p>
             </div>
           </div>
@@ -243,3 +270,4 @@ export function KeyboardShortcutsHelp() {
     </>
   );
 }
+

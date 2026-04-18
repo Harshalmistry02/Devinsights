@@ -37,21 +37,21 @@ export function CodeImpactCard({ metrics, className }: CodeImpactCardProps) {
   if (!metrics) {
     return (
       <div className={cn(
-        "bg-slate-900/50 border border-slate-700/30 rounded-xl p-6 backdrop-blur-sm",
+        " border border-[rgba(240,240,250,0.15)]  p-6 backdrop-blur-sm",
         className
       )}>
         <div className="flex items-center gap-3 mb-4">
-          <div className="p-2 bg-slate-800/50 rounded-lg">
-            <Gauge className="w-5 h-5 text-slate-400" />
+          <div className="p-2">
+            <Gauge className="w-5 h-5 opacity-80" />
           </div>
-          <h3 className="text-lg font-semibold text-slate-200">Code Impact</h3>
+          <h3 className="text-lg font-semibold opacity-80">Code Impact</h3>
         </div>
         <div className="flex flex-col items-center justify-center py-8 text-center">
-          <div className="w-12 h-12 bg-slate-800/50 rounded-full flex items-center justify-center mb-3">
-            <Info className="w-6 h-6 text-slate-500" />
+          <div className="w-12 h-12 -full flex items-center justify-center mb-3">
+            <Info className="w-6 h-6 opacity-80" />
           </div>
-          <p className="text-slate-400 text-sm">No commit data available</p>
-          <p className="text-slate-500 text-xs mt-1">Sync your repositories to see impact metrics</p>
+          <p className="opacity-80 text-sm">No commit data available</p>
+          <p className="opacity-80 text-xs mt-1">Sync your repositories to see impact metrics</p>
         </div>
       </div>
     );
@@ -62,18 +62,18 @@ export function CodeImpactCard({ metrics, className }: CodeImpactCardProps) {
 
   return (
     <div className={cn(
-      "bg-slate-900/50 border border-slate-700/30 rounded-xl overflow-hidden backdrop-blur-sm",
+      " border border-[rgba(240,240,250,0.15)]  overflow-hidden backdrop-blur-sm",
       className
     )}>
       {/* Header */}
-      <div className="px-6 py-4 border-b border-slate-700/30">
+      <div className="px-6 py-4 border-b border-[rgba(240,240,250,0.15)]">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-slate-800/50 rounded-lg">
-            <Gauge className="w-5 h-5 text-cyan-400" />
+          <div className="p-2">
+            <Gauge className="w-5 h-5 text-[#f0f0fa]" />
           </div>
           <div>
-            <h3 className="font-medium text-slate-200">Code Impact</h3>
-            <p className="text-xs text-slate-500">Measuring meaningful work vs churn</p>
+            <h3 className="font-medium opacity-80">Code Impact</h3>
+            <p className="text-xs opacity-80">Measuring meaningful work vs churn</p>
           </div>
         </div>
       </div>
@@ -84,17 +84,17 @@ export function CodeImpactCard({ metrics, className }: CodeImpactCardProps) {
         <div className="grid grid-cols-2 gap-6 mb-6">
           {/* Impact Score */}
           <div className="flex flex-col items-center">
-            <div className="text-5xl font-bold text-slate-200 mb-2">
+            <div className="text-5xl font-bold opacity-80 mb-2">
               {metrics.impactScore}
             </div>
             <div className={cn(
-              "px-3 py-1 rounded-full text-sm font-medium border",
+              "px-3 py-1 -full text-sm font-medium border",
               impactRating.bgColor,
               impactRating.color
             )}>
               {impactRating.label}
             </div>
-            <div className="text-xs text-slate-500 mt-2">Impact Score</div>
+            <div className="text-xs opacity-80 mt-2">Impact Score</div>
           </div>
           
           {/* Churn Gauge */}
@@ -118,7 +118,7 @@ export function CodeImpactCard({ metrics, className }: CodeImpactCardProps) {
           <StatBlock
             label="Refactoring"
             value={`${metrics.churnGauge.refactoring}%`}
-            icon={<RefreshCw className="w-4 h-4 text-blue-400" />}
+            icon={<RefreshCw className="w-4 h-4 text-[#f0f0fa]" />}
             color="blue"
           />
           <StatBlock
@@ -136,7 +136,7 @@ export function CodeImpactCard({ metrics, className }: CodeImpactCardProps) {
             {metrics.insights.slice(0, expanded ? undefined : 2).map((insight, index) => (
               <div 
                 key={index}
-                className="flex items-start gap-2 text-sm text-slate-300"
+                className="flex items-start gap-2 text-sm opacity-80"
               >
                 <span className="shrink-0">{insight.slice(0, 2)}</span>
                 <span>{insight.slice(2)}</span>
@@ -146,7 +146,7 @@ export function CodeImpactCard({ metrics, className }: CodeImpactCardProps) {
             {metrics.insights.length > 2 && (
               <button
                 onClick={() => setExpanded(!expanded)}
-                className="flex items-center gap-1 text-xs text-cyan-400 hover:text-cyan-300 transition-colors mt-2"
+                className="flex items-center gap-1 text-xs text-[#f0f0fa] hover:text-[#f0f0fa] transition-colors mt-2"
               >
                 {expanded ? (
                   <>
@@ -207,7 +207,7 @@ function ChurnGauge({ productive, refactoring, churn }: ChurnGaugeProps) {
           fill="none"
           stroke="currentColor"
           strokeWidth={strokeWidth}
-          className="text-slate-800"
+          className="opacity-80"
         />
         
         {/* Productive segment (green) */}
@@ -261,7 +261,7 @@ function ChurnGauge({ productive, refactoring, churn }: ChurnGaugeProps) {
       
       {/* Center label */}
       <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1 text-center">
-        <div className="text-xs text-slate-500">Churn Rate</div>
+        <div className="text-xs opacity-80">Churn Rate</div>
       </div>
     </div>
   );
@@ -291,16 +291,16 @@ function StatBlock({ label, value, icon, color, tooltip }: StatBlockProps) {
   return (
     <div 
       className={cn(
-        "rounded-lg border p-3 text-center",
+        " border p-3 text-center",
         colorClasses[color]
       )}
       title={tooltip}
     >
       <div className="flex items-center justify-center gap-1 mb-1">
         {icon}
-        <span className="text-lg font-bold text-slate-200">{value}</span>
+        <span className="text-lg font-bold opacity-80">{value}</span>
       </div>
-      <div className="text-xs text-slate-500">{label}</div>
+      <div className="text-xs opacity-80">{label}</div>
     </div>
   );
 }
@@ -313,14 +313,14 @@ export function CodeImpactCardCompact({ metrics, className }: CodeImpactCardProp
   if (!metrics) {
     return (
       <div className={cn(
-        "bg-slate-900/50 border border-slate-700/30 rounded-xl p-4",
+        " border border-[rgba(240,240,250,0.15)]  p-4",
         className
       )}>
         <div className="flex items-center gap-2 mb-2">
-          <Gauge className="w-4 h-4 text-slate-400" />
-          <span className="text-sm font-medium text-slate-300">Code Impact</span>
+          <Gauge className="w-4 h-4 opacity-80" />
+          <span className="text-sm font-medium opacity-80">Code Impact</span>
         </div>
-        <p className="text-xs text-slate-500">No data</p>
+        <p className="text-xs opacity-80">No data</p>
       </div>
     );
   }
@@ -329,16 +329,16 @@ export function CodeImpactCardCompact({ metrics, className }: CodeImpactCardProp
 
   return (
     <div className={cn(
-      "bg-slate-900/50 border border-slate-700/30 rounded-xl p-4",
+      " border border-[rgba(240,240,250,0.15)]  p-4",
       className
     )}>
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
-          <Gauge className="w-4 h-4 text-cyan-400" />
-          <span className="text-sm font-medium text-slate-300">Code Impact</span>
+          <Gauge className="w-4 h-4 text-[#f0f0fa]" />
+          <span className="text-sm font-medium opacity-80">Code Impact</span>
         </div>
         <div className={cn(
-          "px-2 py-1 rounded-lg border font-bold text-lg",
+          "px-2 py-1  border font-bold text-lg",
           impactRating.bgColor,
           impactRating.color
         )}>
@@ -348,7 +348,7 @@ export function CodeImpactCardCompact({ metrics, className }: CodeImpactCardProp
       
       <div className="flex items-center gap-3 text-xs">
         <span className="text-emerald-400">{metrics.productiveRate}% productive</span>
-        <span className="text-slate-600">•</span>
+        <span className="opacity-80">•</span>
         <span className="text-orange-400">{metrics.churnRate}% churn</span>
       </div>
     </div>

@@ -5,8 +5,7 @@ import { LogOut } from "lucide-react";
 import { useState } from "react";
 
 /**
- * Logout Button Component
- * Handles user sign out with loading state
+ * Logout Button Component — SpaceX ghost button style
  */
 interface LogoutButtonProps {
   className?: string;
@@ -24,10 +23,7 @@ export function LogoutButton({
   const handleLogout = async () => {
     setIsLoading(true);
     try {
-      await signOut({
-        callbackUrl: redirectTo,
-        redirect: true,
-      });
+      await signOut({ callbackUrl: redirectTo, redirect: true });
     } catch (error) {
       console.error("Logout error:", error);
       setIsLoading(false);
@@ -39,14 +35,23 @@ export function LogoutButton({
       <button
         onClick={handleLogout}
         disabled={isLoading}
-        className={`p-2 rounded-lg bg-slate-900/50 border border-slate-700/30 hover:bg-red-500/10 hover:border-red-500/30 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
+        style={{
+          background: "none",
+          border: "none",
+          color: "var(--spectral-white)",
+          opacity: isLoading ? 0.3 : 0.45,
+          cursor: isLoading ? "not-allowed" : "pointer",
+          padding: "6px",
+          display: "flex",
+          alignItems: "center",
+          transition: "opacity 0.2s ease",
+        }}
+        className={className}
         aria-label="Sign out"
+        onMouseOver={(e) => !isLoading && (e.currentTarget.style.opacity = "0.8")}
+        onMouseOut={(e) => !isLoading && (e.currentTarget.style.opacity = "0.45")}
       >
-        <LogOut
-          className={`w-5 h-5 text-slate-400 hover:text-red-400 transition-colors ${
-            isLoading ? "animate-pulse" : ""
-          }`}
-        />
+        <LogOut size={18} />
       </button>
     );
   }
@@ -56,10 +61,12 @@ export function LogoutButton({
       <button
         onClick={handleLogout}
         disabled={isLoading}
-        className={`flex items-center gap-2 text-slate-400 hover:text-red-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
+        className={`btn-ghost btn-ghost-sm ${className}`}
+        style={{ opacity: isLoading ? 0.5 : 1 }}
+        aria-label="Sign out"
       >
-        <LogOut className="w-4 h-4" />
-        <span className="text-sm">{isLoading ? "Signing out..." : "Sign out"}</span>
+        <LogOut size={13} />
+        {isLoading ? "Signing out..." : "Sign out"}
       </button>
     );
   }
@@ -68,12 +75,12 @@ export function LogoutButton({
     <button
       onClick={handleLogout}
       disabled={isLoading}
-      className={`flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-900/50 border border-slate-700/30 hover:bg-red-500/10 hover:border-red-500/30 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
+      className={`btn-ghost btn-ghost-sm ${className}`}
+      style={{ opacity: isLoading ? 0.5 : 1 }}
+      aria-label="Sign out of your account"
     >
-      <LogOut className="w-4 h-4 text-slate-400" />
-      <span className="text-sm text-slate-300">
-        {isLoading ? "Signing out..." : "Sign out"}
-      </span>
+      <LogOut size={13} />
+      {isLoading ? "Signing out..." : "Sign out"}
     </button>
   );
 }

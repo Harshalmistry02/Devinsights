@@ -119,20 +119,20 @@ export function AIInsightsHero({ analytics }: AIInsightsHeroProps) {
   }, []);
 
   return (
-    <div className="bg-slate-900/50 border border-slate-700/30 rounded-xl overflow-hidden backdrop-blur-sm">
+    <div className="border border-[rgba(240,240,250,0.15)] overflow-hidden backdrop-blur-sm">
       {/* Header Section */}
-      <div className="p-6 border-b border-slate-700/30">
+      <div className="p-6 border-b border-[rgba(240,240,250,0.15)]">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           {/* Title & Meta */}
           <div className="flex items-center gap-4">
-            <div className="p-3 bg-linear-to-br from-purple-500/20 to-cyan-500/20 rounded-xl border border-purple-500/30">
+            <div className="p-3 bg-linear-to-br from-purple-500/20 to-cyan-500/20 border border-purple-500/30">
               <Wand2 className="w-6 h-6 text-purple-400" />
             </div>
             <div>
-              <h2 className="text-xl font-semibold text-slate-100">
+              <h2 className="text-xl font-semibold opacity-80">
                 AI-Powered Analysis
               </h2>
-              <p className="text-slate-400 text-sm">
+              <p className="opacity-80 text-sm">
                 Deep insights into your development patterns
               </p>
             </div>
@@ -143,11 +143,11 @@ export function AIInsightsHero({ analytics }: AIInsightsHeroProps) {
             onClick={generateInsights}
             disabled={loading}
             className={cn(
-              "group relative flex items-center gap-2.5 px-6 py-3 rounded-xl font-medium text-sm",
+              "group relative flex items-center gap-2.5 px-6 py-3  font-medium text-sm",
               "transition-all duration-300",
               loading 
-                ? "bg-slate-800/50 border border-slate-700/30 text-slate-400 cursor-not-allowed"
-                : "bg-linear-to-r from-purple-500 to-pink-500 text-white shadow-lg shadow-purple-500/20 hover:shadow-purple-500/30 hover:scale-[1.02]"
+                ? " border border-[rgba(240,240,250,0.15)] opacity-80 cursor-not-allowed"
+                : "bg-linear-to-r from-purple-500 to-pink-500 text-white  -500/20 hover:-500/30 hover:scale-[1.02]"
             )}
           >
             {loading ? (
@@ -167,7 +167,7 @@ export function AIInsightsHero({ analytics }: AIInsightsHeroProps) {
         {/* Status row */}
         <div className="flex flex-wrap items-center gap-4 mt-4">
           {generatedAt && (
-            <div className="flex items-center gap-2 text-xs text-slate-500">
+            <div className="flex items-center gap-2 text-xs opacity-80">
               <Clock className="w-3.5 h-3.5" />
               <span>
                 {isCached ? 'Cached' : 'Generated'}: {generatedAt.toLocaleDateString('en-US', {
@@ -190,14 +190,14 @@ export function AIInsightsHero({ analytics }: AIInsightsHeroProps) {
 
       {/* Loading Progress */}
       {loading && (
-        <div className="p-6 border-b border-slate-700/30">
+        <div className="p-6 border-b border-[rgba(240,240,250,0.15)]">
           <AIAnalysisProgress isAnalyzing={loading} currentStep={analysisStep} />
         </div>
       )}
 
       {/* Error State */}
       {error && (
-        <div className="m-6 bg-rose-500/10 border border-rose-500/30 rounded-xl p-4 flex items-start gap-3">
+        <div className="m-6 bg-rose-500/10 border border-rose-500/30 p-4 flex items-start gap-3">
           <AlertTriangle className="w-5 h-5 text-rose-400 mt-0.5 shrink-0" />
           <div>
             <p className="text-rose-400 font-medium">Unable to generate insights</p>
@@ -211,8 +211,8 @@ export function AIInsightsHero({ analytics }: AIInsightsHeroProps) {
         <div className="p-6 space-y-6">
           {/* Milestone Banner */}
           {meta?.daysToMilestone && (
-            <div className="flex items-center gap-4 p-4 bg-linear-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/20 rounded-xl">
-              <div className="p-2.5 bg-amber-500/20 rounded-lg">
+            <div className="flex items-center gap-4 p-4 bg-linear-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/20">
+              <div className="p-2.5 bg-amber-500/20">
                 <Target className="w-5 h-5 text-amber-400" />
               </div>
               <div className="flex-1">
@@ -250,14 +250,14 @@ export function AIInsightsHero({ analytics }: AIInsightsHeroProps) {
       {/* Empty State */}
       {!insights && !loading && !error && (
         <div className="p-6">
-          <div className="bg-slate-800/30 border border-slate-700/30 rounded-xl p-8 text-center">
-            <div className="w-16 h-16 bg-linear-to-br from-purple-500/20 to-cyan-500/20 border border-purple-500/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
+          <div className="border border-[rgba(240,240,250,0.15)] p-8 text-center">
+            <div className="w-16 h-16 bg-linear-to-br from-purple-500/20 to-cyan-500/20 border border-purple-500/30 flex items-center justify-center mx-auto mb-4">
               <Sparkles className="w-8 h-8 text-purple-400" />
             </div>
-            <h3 className="text-lg font-semibold text-slate-200 mb-2">
+            <h3 className="text-lg font-semibold opacity-80 mb-2">
               Unlock AI Insights
             </h3>
-            <p className="text-slate-400 text-sm max-w-md mx-auto mb-6">
+            <p className="opacity-80 text-sm max-w-md mx-auto mb-6">
               Get personalized analysis of your coding patterns, strengths, and actionable suggestions powered by advanced AI.
             </p>
             <div className="flex flex-wrap justify-center gap-3">
@@ -291,9 +291,9 @@ function InsightPanel({
     cyan: {
       border: 'border-cyan-500/20 hover:border-cyan-500/40',
       iconBg: 'bg-cyan-500/10',
-      iconText: 'text-cyan-400',
+      iconText: 'text-[#f0f0fa]',
       dot: 'bg-cyan-400',
-      title: 'text-cyan-300',
+      title: 'text-[#f0f0fa]',
     },
     purple: {
       border: 'border-purple-500/20 hover:border-purple-500/40',
@@ -315,19 +315,19 @@ function InsightPanel({
 
   return (
     <div className={cn(
-      "bg-slate-800/40 border rounded-xl p-5 transition-all duration-300",
+      " border  p-5 transition-all duration-300",
       c.border
     )}>
       <div className="flex items-center gap-3 mb-4">
-        <div className={cn("p-2 rounded-lg", c.iconBg)}>
+        <div className={cn("p-2 ", c.iconBg)}>
           <span className={c.iconText}>{icon}</span>
         </div>
         <h3 className={cn("text-base font-semibold", c.title)}>{title}</h3>
       </div>
       <ul className="space-y-3">
         {items.map((item, index) => (
-          <li key={index} className="flex items-start gap-2.5 text-sm text-slate-300 leading-relaxed">
-            <span className={cn("w-1.5 h-1.5 rounded-full mt-2 shrink-0", c.dot)} />
+          <li key={index} className="flex items-start gap-2.5 text-sm opacity-80 leading-relaxed">
+            <span className={cn("w-1.5 h-1.5 -full mt-2 shrink-0", c.dot)} />
             <span>{item}</span>
           </li>
         ))}
@@ -338,7 +338,7 @@ function InsightPanel({
 
 function FeatureTag({ icon, text }: { icon: string; text: string }) {
   return (
-    <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-800/50 border border-slate-700/30 rounded-full text-sm text-slate-400">
+    <div className="flex items-center gap-2 px-3 py-1.5 border border-[rgba(240,240,250,0.15)] -full text-sm opacity-80">
       <span>{icon}</span>
       <span>{text}</span>
     </div>

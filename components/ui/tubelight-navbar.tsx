@@ -1,11 +1,9 @@
 "use client"
 
 import React, { useEffect, useState } from "react"
-import { motion } from "framer-motion"
 import Link from "next/link"
 import { useSession } from "next-auth/react"
-import { LucideIcon, Github, Home, User, LogOut } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { LucideIcon, Github, User, LogOut, Menu, X } from "lucide-react"
 import { signOut } from "next-auth/react"
 
 interface NavItem {
@@ -24,27 +22,24 @@ export function NavBar({ items, className }: NavBarProps) {
   const { data: session, status } = useSession();
   const [activeTab, setActiveTab] = useState(items[0]?.name || "")
   const [isLoggingOut, setIsLoggingOut] = useState(false)
+  const [isScrolled, setIsScrolled] = useState(false)
+  const [mobileOpen, setMobileOpen] = useState(false)
 
-  useEffect(() => {
-    const handleResize = () => {
-      // Handle responsive behavior
-    }
-
-    handleResize()
-    window.addEventListener("resize", handleResize)
-    return () => window.removeEventListener("resize", handleResize)
-  }, [])
-
-  // Update active tab based on current URL
+  // Synchronize active tab with URL
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const currentPath = window.location.pathname
       const currentItem = items.find(item => item.url === currentPath)
-      if (currentItem) {
-        setActiveTab(currentItem.name)
-      }
+      if (currentItem) setActiveTab(currentItem.name)
     }
   }, [items])
+
+  // Detect scroll to adjust nav appearance
+  useEffect(() => {
+    const handleScroll = () => setIsScrolled(window.scrollY > 30)
+    window.addEventListener("scroll", handleScroll, { passive: true })
+    return () => window.removeEventListener("scroll", handleScroll)
+  }, [])
 
   const handleLogout = async () => {
     setIsLoggingOut(true)
@@ -60,126 +55,188 @@ export function NavBar({ items, className }: NavBarProps) {
   const isLoading = status === "loading"
 
   return (
-    <div
-      className={cn(
-        "fixed bottom-0 sm:top-0 left-1/2 -translate-x-1/2 z-50 mb-6 sm:pt-6",
-        className,
-      )}
+    <nav
+      className={`nav-overlay ${isScrolled ? "scrolled" : ""} ${className ?? ""}`}
+      role="navigation"
+      aria-label="Main navigation"
     >
-      <div className="flex items-center gap-2 bg-slate-950/60 border border-slate-700/30 backdrop-blur-xl py-1.5 px-2 rounded-full shadow-2xl shadow-cyan-500/10">
-        {items.map((item) => {
-          const Icon = item.icon
-          const isActive = activeTab === item.name
+      {/* WORDMARK */}
+      <Link
+        href="/"
+        className="text-nav"
+        style={{ letterSpacing: "3px", fontSize: "0.875rem" }}
+        aria-label="DevInsight — Home"
+      >
+        DEVINSIGHT
+      </Link>
 
-          // Skip auth-required items if not authenticated
-          if (item.authRequired && !isAuthenticated) {
-            return null
-          }
+      {/* DESKTOP NAV LINKS */}
+      <div
+        className="hidden md:flex items-center"
+        style={{ gap: "36px" }}
+      >
+        {items.map((item) => {
+          const isActive = activeTab === item.name
+          if (item.authRequired && !isAuthenticated) return null
 
           return (
             <Link
               key={item.name}
               href={item.url}
               onClick={() => setActiveTab(item.name)}
-              className={cn(
-                "relative cursor-pointer text-sm font-semibold px-6 py-2.5 rounded-full transition-all duration-300",
-                "text-slate-400 hover:text-slate-200",
-                isActive && "text-slate-100",
-              )}
+              className="text-nav transition-opacity duration-200"
+              style={{
+                opacity: isActive ? 1 : 0.55,
+                borderBottom: isActive ? "1px solid rgba(240,240,250,0.6)" : "none",
+                paddingBottom: isActive ? "2px" : "3px",
+              }}
+              aria-current={isActive ? "page" : undefined}
             >
-              <span className="hidden md:inline relative z-10">{item.name}</span>
-              <span className="md:hidden relative z-10">
-                <Icon size={18} strokeWidth={2.5} />
-              </span>
-              {isActive && (
-                <motion.div
-                  layoutId="lamp"
-                  className="absolute inset-0 w-full bg-linear-to-br from-cyan-500/20 to-blue-500/20 rounded-full z-0 border border-cyan-500/30"
-                  initial={false}
-                  transition={{
-                    type: "spring",
-                    stiffness: 300,
-                    damping: 30,
-                  }}
-                >
-                  <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-8 h-1 bg-cyan-400 rounded-t-full shadow-[0_0_15px_rgba(34,211,238,0.6)]">
-                    <div className="absolute w-12 h-6 bg-cyan-400/30 rounded-full blur-md -top-2 -left-2" />
-                    <div className="absolute w-8 h-6 bg-cyan-400/30 rounded-full blur-md -top-1" />
-                    <div className="absolute w-4 h-4 bg-cyan-300/40 rounded-full blur-sm top-0 left-2" />
-                  </div>
-                </motion.div>
-              )}
+              {item.name}
             </Link>
           )
         })}
-        
-        {/* Divider */}
-        <div className="w-px h-8 bg-slate-700/50 mx-1" />
-        
-        {/* Authentication Section */}
+      </div>
+
+      {/* AUTH SECTION — DESKTOP */}
+      <div className="hidden md:flex items-center" style={{ gap: "20px" }}>
         {isLoading ? (
-          // Loading state
-          <div className="px-6 py-2.5">
-            <div className="w-20 h-5 bg-slate-800/50 rounded animate-pulse" />
-          </div>
+          <div
+            className="skeleton"
+            style={{ width: "80px", height: "16px" }}
+          />
         ) : isAuthenticated && session?.user ? (
-          // Authenticated: Show user menu
-          <div className="flex items-center gap-2">
+          <>
             <Link
               href="/profile"
-              className={cn(
-                "relative cursor-pointer text-sm font-semibold px-4 py-2.5 rounded-full transition-all duration-300",
-                "text-slate-400 hover:text-slate-200 hover:bg-slate-800/50",
-                "flex items-center gap-2 group"
-              )}
-              title={`View profile - ${session.user.name || session.user.username || 'User'}`}
+              className="flex items-center transition-opacity duration-200"
+              style={{ gap: "10px", opacity: 0.7 }}
+              title={`Profile — ${session.user.name || session.user.username || 'User'}`}
             >
               {session.user.image ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={session.user.image}
                   alt={session.user.name || "User"}
-                  className="w-6 h-6 rounded-full border border-cyan-500/30 group-hover:border-cyan-500/50 transition-colors"
+                  style={{
+                    width: "24px",
+                    height: "24px",
+                    borderRadius: "50%",
+                    border: "1px solid rgba(240,240,250,0.2)",
+                  }}
                 />
               ) : (
-                <div className="w-6 h-6 rounded-full bg-linear-to-br from-cyan-500/30 to-blue-500/30 border border-cyan-500/30 flex items-center justify-center">
-                  <User size={14} />
-                </div>
+                <User size={16} />
               )}
-              <span className="hidden lg:inline max-w-[100px] truncate">
-                {session.user.name?.split(' ')[0] || session.user.username || 'User'}
+              <span
+                className="text-nav"
+                style={{
+                  opacity: 0.7,
+                  fontSize: "0.75rem",
+                  maxWidth: "100px",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {session.user.name?.split(" ")[0] || session.user.username || "User"}
               </span>
             </Link>
-            
+
             <button
               onClick={handleLogout}
               disabled={isLoggingOut}
-              className={cn(
-                "relative cursor-pointer text-sm font-semibold p-2.5 rounded-full transition-all duration-300",
-                "text-slate-400 hover:text-red-400 hover:bg-red-500/10",
-                "disabled:opacity-50 disabled:cursor-not-allowed"
-              )}
+              className="transition-opacity duration-200"
+              style={{ opacity: 0.55, background: "none", border: "none", cursor: "pointer", color: "var(--spectral-white)" }}
               title="Sign out"
               aria-label="Sign out"
             >
-              <LogOut size={18} strokeWidth={2.5} className={isLoggingOut ? "animate-pulse" : ""} />
+              <LogOut size={16} style={{ opacity: isLoggingOut ? 0.3 : 1 }} />
             </button>
-          </div>
+          </>
         ) : (
-          // Not authenticated: Show login button
-          <Link
-            href="/login"
-            className={cn(
-              "relative cursor-pointer text-sm font-semibold px-6 py-2.5 rounded-full transition-all duration-300",
-              "text-slate-400 hover:text-slate-200 hover:bg-slate-800/50",
-              "flex items-center gap-2"
-            )}
-          >
-            <Github size={18} strokeWidth={2.5} />
-            <span className="hidden md:inline">Login</span>
+          <Link href="/login" className="btn-ghost btn-ghost-sm">
+            <Github size={14} />
+            Login
           </Link>
         )}
       </div>
-    </div>
+
+      {/* MOBILE HAMBURGER */}
+      <button
+        className="md:hidden"
+        style={{
+          background: "none",
+          border: "none",
+          color: "var(--spectral-white)",
+          cursor: "pointer",
+          padding: "8px",
+        }}
+        onClick={() => setMobileOpen(!mobileOpen)}
+        aria-label={mobileOpen ? "Close menu" : "Open menu"}
+        aria-expanded={mobileOpen}
+      >
+        {mobileOpen ? <X size={20} /> : <Menu size={20} />}
+      </button>
+
+      {/* MOBILE MENU */}
+      {mobileOpen && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            top: "64px",
+            background: "rgba(0,0,0,0.95)",
+            backdropFilter: "blur(8px)",
+            zIndex: 200,
+            display: "flex",
+            flexDirection: "column",
+            padding: "40px 30px",
+            gap: "32px",
+          }}
+          role="dialog"
+          aria-label="Mobile navigation menu"
+        >
+          {items.map((item) => {
+            if (item.authRequired && !isAuthenticated) return null
+            const isActive = activeTab === item.name
+            return (
+              <Link
+                key={item.name}
+                href={item.url}
+                onClick={() => { setActiveTab(item.name); setMobileOpen(false); }}
+                className="text-section-head"
+                style={{
+                  fontSize: "1.5rem",
+                  opacity: isActive ? 1 : 0.4,
+                  textDecoration: "none",
+                }}
+              >
+                {item.name}
+              </Link>
+            )
+          })}
+
+          <div style={{ marginTop: "auto", paddingTop: "32px", borderTop: "1px solid rgba(240,240,250,0.08)" }}>
+            {isAuthenticated && session?.user ? (
+              <button
+                onClick={handleLogout}
+                className="btn-ghost"
+                style={{ width: "100%", justifyContent: "center" }}
+                disabled={isLoggingOut}
+              >
+                <LogOut size={16} />
+                {isLoggingOut ? "Signing out..." : "Sign Out"}
+              </button>
+            ) : (
+              <Link href="/login" className="btn-ghost" style={{ width: "100%", justifyContent: "center" }}>
+                <Github size={16} />
+                Login with GitHub
+              </Link>
+            )}
+          </div>
+        </div>
+      )}
+    </nav>
   )
 }

@@ -1,57 +1,107 @@
 "use client";
-import Prism from "@/components/ui/Prism";
-import { motion } from "framer-motion";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { ArrowRight, BarChart3 } from "lucide-react";
 
 export default function Home() {
   const { data: session, status } = useSession();
   const isAuthenticated = status === "authenticated";
-  const isLoading = status === "loading";
 
   return (
-    <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-slate-950 w-full">
-      <div className="absolute inset-0 z-0" style={{ height: '100vh' }}>
-        <Prism
-          animationType="rotate"
-          timeScale={0.5}
-          height={3.5}
-          baseWidth={5.5}
-          scale={3.6}
-          hueShift={0}
-          colorFrequency={1}
-          noise={0.5}
-          glow={1}
+    <main
+      className="relative w-full overflow-hidden"
+      style={{ height: "100vh" }}
+    >
+      <section
+        className="relative w-full h-full flex flex-col justify-end"
+        aria-label="Hero: DevInsight analytics platform"
+      >
+        {/* Photography layer */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/space-hero.png"
+          alt="Earth from low orbit — the void of space"
+          className="section-photo"
         />
-      </div>
-      
-      <div className="relative z-10 flex flex-col items-center px-5 max-w-4xl mx-auto text-center">
-        <motion.h1
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{
-            delay: 0.3,
-            duration: 0.8,
-            ease: "easeInOut",
-          }}
-          className="mt-8 bg-linear-to-br from-slate-300 to-slate-500 py-4 bg-clip-text text-center text-4xl font-medium tracking-tight text-transparent md:text-7xl"
-        >
-          Understand your code. <br /> Grow as a developer.
-        </motion.h1>
-        <motion.p
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{
-            delay: 0.5,
-            duration: 0.8,
-            ease: "easeInOut",
-          }}
-          className="mt-6 text-center text-base text-slate-400 md:text-xl max-w-2xl"
-        >
-          AI-powered insights into your GitHub activity, productivity, and coding patterns.
-        </motion.p>
-      </div>
-    </div>
+
+        {/* Dark gradient overlay for legibility */}
+        <div className="section-overlay" aria-hidden="true" />
+
+        {/* Content Container */}
+        <div className="relative z-20 w-full px-[clamp(24px,6vw,80px)] pb-[8vh] flex flex-col justify-between h-full pt-[20vh]">
+          {/* Top Block: Hero Headline & CTA */}
+          <div>
+            {/* Mission label */}
+            <p
+              className="text-micro"
+              style={{ marginBottom: "20px", letterSpacing: "1.5px" }}
+            >
+              Developer Intelligence Platform
+            </p>
+
+            {/* Hero headline */}
+            <h1 className="text-display-hero" style={{ marginBottom: "24px", maxWidth: "640px" }}>
+              Understand your code.{" "}
+              <br />
+              Grow as a developer.
+            </h1>
+
+            {/* Body text */}
+            <p
+              className="text-body text-dim"
+              style={{ marginBottom: "36px", maxWidth: "480px" }}
+            >
+              AI-powered insights into your GitHub activity,
+              productivity, and coding patterns.
+            </p>
+
+            {/* CTA */}
+            {isAuthenticated ? (
+              <Link href="/dashboard" className="btn-ghost" aria-label="Go to your dashboard">
+                View Dashboard
+              </Link>
+            ) : (
+              <Link href="/login" className="btn-ghost" aria-label="Sign in to DevInsight">
+                Get Started
+              </Link>
+            )}
+          </div>
+
+          {/* Bottom Block: Three Capabilities */}
+          <div
+            className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-[60px] w-full"
+            style={{ marginTop: "auto" }}
+          >
+            <div>
+              <p className="text-micro" style={{ marginBottom: "12px" }}>Analytics</p>
+              <h2 className="text-section-head" style={{ fontSize: "1.25rem", marginBottom: "12px" }}>
+                Commit Intelligence
+              </h2>
+              <p className="text-body text-dim" style={{ fontSize: "0.875rem" }}>
+                Track every commit, repository, and coding session. Surface patterns you never knew existed.
+              </p>
+            </div>
+            <div>
+              <p className="text-micro" style={{ marginBottom: "12px" }}>AI Insights</p>
+              <h2 className="text-section-head" style={{ fontSize: "1.25rem", marginBottom: "12px" }}>
+                Developer Persona
+              </h2>
+              <p className="text-body text-dim" style={{ fontSize: "0.875rem" }}>
+                AI detects your coding archetype — Night Owl, Weekday Warrior, Sprint Specialist — based on real activity.
+              </p>
+            </div>
+            <div>
+              <p className="text-micro" style={{ marginBottom: "12px" }}>Productivity</p>
+              <h2 className="text-section-head" style={{ fontSize: "1.25rem", marginBottom: "12px" }}>
+                Streak & Growth
+              </h2>
+              <p className="text-body text-dim" style={{ fontSize: "0.875rem" }}>
+                Monitor your coding streak, measure week-over-week progress, and hit personal milestones.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
   );
 }
+

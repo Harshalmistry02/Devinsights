@@ -28,16 +28,16 @@ export function QuotaDisplay({ tokensUsed, requestsCount, resetAt, compact = fal
   const getTextColor = (percent: number) => {
     if (percent >= 90) return 'text-red-400';
     if (percent >= 70) return 'text-amber-400';
-    return 'text-cyan-400';
+    return 'text-[#f0f0fa]';
   };
 
   if (compact) {
     return (
-      <div className="flex items-center gap-2 text-xs text-gray-400">
+      <div className="flex items-center gap-2 text-xs opacity-80">
         <div className="flex items-center gap-1.5">
-          <div className="h-1.5 w-12 bg-gray-700 rounded-full overflow-hidden">
+          <div className="h-1.5 w-12 -full overflow-hidden">
             <div 
-              className={`h-full bg-linear-to-r ${getStatusColor(percentUsed)} rounded-full`}
+              className={`h-full bg-linear-to-r ${getStatusColor(percentUsed)} -full`}
               style={{ width: `${Math.min(percentUsed, 100)}%` }}
             />
           </div>
@@ -51,16 +51,16 @@ export function QuotaDisplay({ tokensUsed, requestsCount, resetAt, compact = fal
   }
 
   return (
-    <div className="rounded-lg border border-gray-700/50 bg-gray-800/50 p-4">
+    <div className="border border-[rgba(240,240,250,0.15)] p-4">
       <div className="flex items-center justify-between mb-3">
-        <h4 className="text-sm font-medium text-gray-300 flex items-center gap-2">
+        <h4 className="text-sm font-medium opacity-80 flex items-center gap-2">
           <svg className="h-4 w-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
           </svg>
           Daily AI Credits
         </h4>
         {resetAt && (
-          <span className="text-xs text-gray-500">
+          <span className="text-xs opacity-80">
             Resets at {resetAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
           </span>
         )}
@@ -70,14 +70,14 @@ export function QuotaDisplay({ tokensUsed, requestsCount, resetAt, compact = fal
         {/* Requests usage */}
         <div>
           <div className="flex justify-between text-xs mb-1">
-            <span className="text-gray-400">Requests</span>
+            <span className="opacity-80">Requests</span>
             <span className={getTextColor(requestsPercent)}>
               {requestsCount} / {QUOTA_LIMITS.maxRequestsPerDay}
             </span>
           </div>
-          <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
+          <div className="h-2 -full overflow-hidden">
             <div 
-              className={`h-full bg-linear-to-r ${getStatusColor(requestsPercent)} rounded-full transition-all duration-300`}
+              className={`h-full bg-linear-to-r ${getStatusColor(requestsPercent)} -full transition-all duration-300`}
               style={{ width: `${Math.min(requestsPercent, 100)}%` }}
             />
           </div>
@@ -86,14 +86,14 @@ export function QuotaDisplay({ tokensUsed, requestsCount, resetAt, compact = fal
         {/* Tokens usage */}
         <div>
           <div className="flex justify-between text-xs mb-1">
-            <span className="text-gray-400">Tokens</span>
+            <span className="opacity-80">Tokens</span>
             <span className={getTextColor(percentUsed)}>
               {tokensUsed.toLocaleString()} / {QUOTA_LIMITS.safeTokenBudget.toLocaleString()}
             </span>
           </div>
-          <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
+          <div className="h-2 -full overflow-hidden">
             <div 
-              className={`h-full bg-linear-to-r ${getStatusColor(percentUsed)} rounded-full transition-all duration-300`}
+              className={`h-full bg-linear-to-r ${getStatusColor(percentUsed)} -full transition-all duration-300`}
               style={{ width: `${Math.min(percentUsed, 100)}%` }}
             />
           </div>
@@ -101,7 +101,7 @@ export function QuotaDisplay({ tokensUsed, requestsCount, resetAt, compact = fal
       </div>
 
       {percentUsed >= 90 && (
-        <div className="mt-3 flex items-center gap-2 text-xs text-red-400 bg-red-500/10 rounded-lg px-3 py-2">
+        <div className="mt-3 flex items-center gap-2 text-xs text-red-400 bg-red-500/10 px-3 py-2">
           <svg className="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
           </svg>
