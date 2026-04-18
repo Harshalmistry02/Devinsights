@@ -177,9 +177,9 @@ export function AIInsightsHero({ analytics }: AIInsightsHeroProps) {
             </div>
           )}
           {insights && (
-            <div className="flex items-center gap-1.5 text-xs text-emerald-400">
+            <div className="flex items-center gap-1.5 text-micro uppercase tracking-widest opacity-40">
               <CheckCircle2 className="w-3.5 h-3.5" />
-              <span>Insights ready</span>
+              <span>LOGS READY</span>
             </div>
           )}
         </div>
@@ -208,13 +208,13 @@ export function AIInsightsHero({ analytics }: AIInsightsHeroProps) {
         <div className="py-6 space-y-6">
           {/* Milestone Banner */}
           {meta?.daysToMilestone && (
-            <div className="flex items-center gap-4 p-4 bg-linear-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/20">
-              <div className="p-2.5 bg-amber-500/20">
-                <Target className="w-5 h-5 text-amber-400" />
+            <div className="flex items-center gap-5 p-5 brutalist-glass border-l-2 border-l-white/20">
+              <div className="p-3 bg-white/5 opacity-40">
+                <Target className="w-6 h-6 text-[#f0f0fa]" />
               </div>
               <div className="flex-1">
-                <p className="text-amber-200 font-medium text-sm">
-                  {meta.daysToMilestone.daysRemaining} days to {meta.daysToMilestone.milestone}-day streak!
+                <p className="text-micro uppercase tracking-widest text-[#f0f0fa] opacity-60">
+                   {meta.daysToMilestone.daysRemaining} DEPLOYMENT CYCLES TO {meta.daysToMilestone.milestone}-DAY MILESTONE
                 </p>
               </div>
             </div>
@@ -223,22 +223,19 @@ export function AIInsightsHero({ analytics }: AIInsightsHeroProps) {
           {/* Insight Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <InsightPanel
-              icon={<Brain className="w-5 h-5" />}
-              title="Patterns"
+              icon={<Brain className="w-6 h-6" />}
+              title="COGNITIVE PATTERNS"
               items={insights.patterns}
-              color="cyan"
             />
             <InsightPanel
-              icon={<Zap className="w-5 h-5" />}
-              title="Strengths"
+              icon={<Zap className="w-6 h-6" />}
+              title="VELOCITY STRENGTHS"
               items={insights.strengths}
-              color="purple"
             />
             <InsightPanel
-              icon={<Lightbulb className="w-5 h-5" />}
-              title="Suggestions"
+              icon={<Lightbulb className="w-6 h-6" />}
+              title="SYSTEM OPTIMIZATIONS"
               items={insights.suggestions}
-              color="amber"
             />
           </div>
         </div>
@@ -277,54 +274,23 @@ function InsightPanel({
   icon, 
   title, 
   items, 
-  color 
 }: { 
   icon: React.ReactNode; 
   title: string; 
   items: string[]; 
-  color: 'cyan' | 'purple' | 'amber';
 }) {
-  const colorClasses = {
-    cyan: {
-      border: 'border-cyan-500/20 hover:border-cyan-500/40',
-      iconBg: 'bg-cyan-500/10',
-      iconText: 'text-[#f0f0fa]',
-      dot: 'bg-cyan-400',
-      title: 'text-[#f0f0fa]',
-    },
-    purple: {
-      border: 'border-purple-500/20 hover:border-purple-500/40',
-      iconBg: 'bg-purple-500/10',
-      iconText: 'text-purple-400',
-      dot: 'bg-purple-400',
-      title: 'text-purple-300',
-    },
-    amber: {
-      border: 'border-amber-500/20 hover:border-amber-500/40',
-      iconBg: 'bg-amber-500/10',
-      iconText: 'text-amber-400',
-      dot: 'bg-amber-400',
-      title: 'text-amber-300',
-    },
-  };
-
-  const c = colorClasses[color];
-
   return (
-    <div className={cn(
-      " bg-transparent p-0 transition-all duration-300",
-      c.border
-    )}>
-      <div className="flex items-center gap-3 mb-4">
-        <div className={cn("p-2 ", c.iconBg)}>
-          <span className={c.iconText}>{icon}</span>
+    <div className="brutalist-glass p-8 hover:bg-white/[0.02] transition-all group flex flex-col h-full border-l-2 border-l-white/5">
+      <div className="flex items-center gap-4 mb-6">
+        <div className="p-3 bg-white/5 opacity-50">
+          <span className="text-[#f0f0fa]">{icon}</span>
         </div>
-        <h3 className={cn("text-base font-semibold", c.title)}>{title}</h3>
+        <h3 className="text-caption-bold text-sm tracking-widest uppercase opacity-80">{title}</h3>
       </div>
-      <ul className="space-y-3">
+      <ul className="space-y-4">
         {items.map((item, index) => (
-          <li key={index} className="flex items-start gap-2.5 text-sm opacity-80 leading-relaxed">
-            <span className={cn("w-1.5 h-1.5 -full mt-2 shrink-0", c.dot)} />
+          <li key={index} className="flex items-start gap-3 text-micro uppercase tracking-widest leading-relaxed opacity-40 group-hover:opacity-100 transition-opacity">
+            <span className="w-1.5 h-[1px] bg-white/40 mt-2 shrink-0" />
             <span>{item}</span>
           </li>
         ))}

@@ -7,10 +7,7 @@ import {
   Clock,
   BarChart3,
   RefreshCw,
-  Calendar,
-  Code,
   GitCommit,
-  Flame,
   AlertTriangle,
   Trophy,
   Brain,
@@ -22,7 +19,6 @@ import { DataQualityIndicator } from "@/components/DataQualityIndicator";
 
 import { CodeImpactCard } from "./components/CodeImpactCard";
 import { RepoDeepDive } from "./components/RepoDeepDive";
-import { PersonaBadgeCompact } from "./components/PersonaBadge";
 
 import { detectPersona, type PersonaContext } from "@/lib/analytics/persona-detector";
 import type { CodeImpactMetrics } from "@/lib/analytics/code-impact-analyzer";
@@ -36,161 +32,113 @@ type RepoStat = { id: string; name: string; fullName: string; commits: number; s
 type TopLanguage = { language: string; count: number; percentage: number };
 
 /**
- * Insights Page
- * 
- * Comprehensive analytics dashboard with AI-powered insights and visualizations
+ * Insights Page - SpaceX Industrial Design
  */
 export default async function InsightsPage() {
   const session = await requireAuth();
   const { user } = session;
 
-  // Fetch analytics snapshot with all detailed data
+  // Fetch analytics snapshot
   const analytics = await prisma.analyticsSnapshot.findUnique({
     where: { userId: user.id },
   });
 
-  // Check if user has data
   const hasData = analytics !== null;
-
-  // Parse JSON fields for chart components
-  const dailyCommits = analytics?.dailyCommits as DailyCommits | null;
-  const dayOfWeekStats = analytics?.dayOfWeekStats as DayOfWeekStats | null;
-  const hourlyStats = analytics?.hourlyStats as HourlyStats | null;
-  const repoStats = analytics?.repoStats as RepoStat[] | null;
-  const topLanguages = analytics?.topLanguages as TopLanguage[] | null;
-
-  // Check data staleness
-  const lastSyncDate = analytics?.calculatedAt;
-  const isDataStale = lastSyncDate 
-    ? (Date.now() - new Date(lastSyncDate).getTime()) > (24 * 60 * 60 * 1000) // More than 24 hours old
+  const isDataStale = analytics?.calculatedAt 
+    ? (Date.now() - new Date(analytics.calculatedAt).getTime()) > (24 * 60 * 60 * 1000)
     : false;
 
-  // Get outlier counts for DataQualityIndicator
   const outlierCount = await prisma.commit.count({
     where: {
       repository: { userId: user.id },
-      metadata: {
-        path: ['isOutlier'],
-        equals: true,
-      },
+      metadata: { path: ['isOutlier'], equals: true },
     },
-  }).catch(() => 0); // Handle case where metadata field doesn't exist yet
+  }).catch(() => 0);
 
-
-
-  // Parse code impact metrics
+  const dailyCommits = analytics?.dailyCommits as DailyCommits | null;
+  const repoStats = analytics?.repoStats as RepoStat[] | null;
   const codeImpactMetrics = (analytics as any)?.codeImpactMetrics as CodeImpactMetrics | null;
   const commitQualityMetrics = (analytics as any)?.commitQualityMetrics as CommitQualityMetrics | null;
 
-  // Detect developer persona
   const personaContext: PersonaContext = {
-    hourlyStats: hourlyStats,
-    dayOfWeekStats: dayOfWeekStats as any,
-    topLanguages: topLanguages,
+    hourlyStats: analytics?.hourlyStats as HourlyStats | null,
+    dayOfWeekStats: analytics?.dayOfWeekStats as any,
+    topLanguages: analytics?.topLanguages as TopLanguage[] | null,
     currentStreak: analytics?.currentStreak,
     totalCommits: analytics?.totalCommits,
     totalRepos: analytics?.totalRepos,
-    avgCommitSize: analytics && analytics.totalCommits > 0 
-      ? Math.round((analytics.totalAdditions + analytics.totalDeletions) / analytics.totalCommits)
-      : undefined,
   };
   const persona = analytics ? detectPersona(personaContext) : null;
 
   return (
     <div className="section-cinematic bg-black">
       <div 
-        className="section-photo" 
+        className="section-photo grayscale opacity-40 transition-opacity duration-1000" 
         style={{ 
-          backgroundImage: "url('/space-hero.png')", 
+          backgroundImage: "url('/insights-hero.png')", 
           backgroundSize: "cover", 
           backgroundPosition: "center",
           position: "fixed"
         }} 
       />
       <div className="section-overlay" style={{ position: "fixed" }} />
+      
       <div className="section-content relative z-20 w-full" style={{ padding: "120px clamp(24px, 6vw, 80px) 40px" }}>
         {/* Header */}
-        <div style={{ marginBottom: "40px" }}>
+        <header className="mb-12">
           <Link
             href="/dashboard"
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "8px",
-              textDecoration: "none",
-              marginBottom: "20px",
-              opacity: 0.4,
-              transition: "opacity 0.2s ease",
-            }}
-            className="text-micro"
+            className="text-micro uppercase tracking-[4px] opacity-40 hover:opacity-100 transition-all inline-flex items-center gap-4 mb-10"
           >
             <ArrowLeft size={11} />
-            DASHBOARD
+            BACK TO MISSION CONTROL
           </Link>
 
-          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", flexWrap: "wrap", gap: "12px" }}>
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-8 border-b border-white/10 pb-10">
             <div>
-              <p className="text-micro uppercase tracking-widest" style={{ marginBottom: "8px", opacity: 0.4 }}>ANALYTICS</p>
-              <h1 className="text-section-head" style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                <TrendingUp size={20} style={{ opacity: 0.5 }} />
-                CODING INSIGHTS
-              </h1>
-              <p className="text-body uppercase tracking-widest" style={{ opacity: 0.35, marginTop: "6px", fontSize: "0.75rem" }}>
-                DEEP DIVE INTO YOUR DEVELOPMENT PATTERNS AND PRODUCTIVITY
+              <p className="text-micro uppercase tracking-[5px] opacity-20 mb-4 font-bold">ARCHIVE ANALYSIS</p>
+              <h1 className="text-display-hero text-6xl font-bold opacity-80 tracking-tighter">CODING INSIGHTS</h1>
+              <p className="text-micro uppercase tracking-[3px] opacity-20 mt-4 leading-relaxed">
+                DEEP SYSTEM ANALYTICS / COGNITIVE PATTERN RECOGNITION
               </p>
             </div>
 
-            {/* Last Updated & Stale Data Warning */}
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "4px" }}>
+            <div className="flex flex-col items-end gap-3">
               {analytics?.calculatedAt && (
-                <div style={{ display: "flex", alignItems: "center", gap: "6px", opacity: 0.3 }}>
+                <div className="flex items-center gap-3 opacity-20 text-micro uppercase tracking-widest font-mono">
                   <Clock size={11} />
-                  <span className="text-micro uppercase tracking-widest">
-                    UPDATED: {new Date(analytics.calculatedAt).toLocaleDateString('en-US', {
-                      month: 'short',
-                      day: 'numeric',
-                      year: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    }).toUpperCase()}
-                  </span>
+                  ARCHIVE_UPDATE: {new Date(analytics.calculatedAt).toLocaleString('en-US', {
+                    month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+                  }).toUpperCase()}
                 </div>
               )}
               {isDataStale && (
-                <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                  <AlertTriangle size={11} style={{ color: "rgba(251,191,36,0.6)" }} />
-                  <span className="text-micro uppercase tracking-widest" style={{ color: "rgba(251,191,36,0.5)" }}>
-                    DATA MAY BE OUTDATED. SYNC FROM DASHBOARD.
-                  </span>
+                <div className="flex items-center gap-3 opacity-40 text-micro uppercase tracking-widest bg-white/5 px-4 py-1 border border-white/10">
+                  <AlertTriangle size={11} />
+                  SYNC_REQUIRED: STALE_DATA
                 </div>
               )}
             </div>
           </div>
-        </div>
+        </header>
 
         {hasData ? (
-          <div style={{ display: "flex", flexDirection: "column", gap: "32px" }}>
-            {/* ============================================
-                AI-Powered Insights Hero (TOP - Most Important)
-                ============================================ */}
-            <div className="brutalist-glass p-1">
-              <AIInsightsHero 
-                analytics={{
-                  totalCommits: analytics.totalCommits,
-                  currentStreak: analytics.currentStreak,
-                  longestStreak: analytics.longestStreak,
-                  isActiveToday: analytics.isActiveToday,
-                  lastCommitDate: analytics.lastCommitDate,
-                }}
-              />
-            </div>
+          <div className="space-y-12">
+            {/* AI Insights Hero */}
+            <AIInsightsHero 
+              analytics={{
+                totalCommits: analytics.totalCommits,
+                currentStreak: analytics.currentStreak,
+                longestStreak: analytics.longestStreak,
+                isActiveToday: analytics.isActiveToday,
+                lastCommitDate: analytics.lastCommitDate,
+              }}
+            />
 
-            {/* AI Stats Banner with Developer Persona */}
-            <div className="brutalist-glass p-8">
-              <AIStatsBanner analytics={analytics} userId={user.id} persona={persona} />
-            </div>
+            {/* AI Stats Banner */}
+            <AIStatsBanner analytics={analytics} userId={user.id} persona={persona} />
 
-            {/* Data Quality Indicator - shows if there are outliers */}
+            {/* Data Quality Indicator */}
             {outlierCount > 0 && (
               <DataQualityIndicator
                 outlierCount={outlierCount}
@@ -199,233 +147,150 @@ export default async function InsightsPage() {
               />
             )}
 
-            {/* Repository Deep Dive - Full Width */}
+            {/* Repository Deep Dive */}
             {repoStats && repoStats.length > 0 && (
-              <div className="brutalist-glass p-8">
+              <div className="brutalist-glass p-1">
                 <RepoDeepDive repoStats={repoStats} />
               </div>
             )}
 
-            {/* Code Quality & Impact Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Code Impact Card */}
+            {/* Quality & Impact Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               <CodeImpactCard metrics={codeImpactMetrics} />
               
-              {/* Code Quality Summary Card */}
-              <div
-                className="brutalist-glass"
-                style={{
-                  padding: "32px",
-                  borderRadius: "2px"
-                }}
-              >
-                <div className="mb-10 border-l-2 border-[rgba(240,240,250,0.35)] pl-4">
-                  <h3 className="text-caption-bold text-sm tracking-widest uppercase">CODE QUALITY SUMMARY</h3>
-                  <p className="text-micro opacity-40 uppercase tracking-widest mt-1">COMMIT MESSAGE ANALYSIS</p>
+              <div className="brutalist-glass p-8 border-l-2 border-l-white/10">
+                <div className="mb-10 border-l-2 border-white/20 pl-6">
+                  <h3 className="text-caption-bold text-sm tracking-widest uppercase opacity-80">CODE QUALITY SUMMARY</h3>
+                  <p className="text-micro opacity-20 uppercase tracking-widest mt-2 font-bold">COMMIT LOG ANALYSIS</p>
                 </div>
 
                 {commitQualityMetrics ? (
-                  <div style={{ display: "flex", flexDirection: "column", gap: "12px", padding: "8px 0" }}>
-                    <div style={{ display: "flex", justifyContent: "center", alignItems: "center", marginBottom: "8px" }}>
-                      <div className="flex flex-col items-center">
-                          <span className="text-section-head text-5xl font-bold opacity-80 mb-2">
-                            {commitQualityMetrics.qualityGrade}
-                          </span>
-                           <div className={cn(
-                              "px-3 py-1 text-sm font-medium border border-[rgba(240,240,250,0.35)]",
-                              "uppercase tracking-widest text-shadow-glow",
-                            )}>
-                              GRADE
-                            </div>
+                  <div className="space-y-12">
+                    <div className="flex flex-col items-center justify-center">
+                       <span className="text-display-hero text-7xl font-bold opacity-80 mb-4 font-mono">
+                         {commitQualityMetrics.qualityGrade}
+                       </span>
+                        <div className="px-5 py-2 text-micro font-bold border border-white/10 uppercase tracking-[4px]">
+                          QUALITATIVE RANKing
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-8">
+                      <div className="brutalist-glass p-6 border-l-2 border-l-white/10">
+                        <p className="text-micro opacity-20 mb-3 tracking-[2px] uppercase">CONVENTIONAL</p>
+                        <p className="text-3xl font-bold opacity-80 tabular-nums font-mono">{commitQualityMetrics.conventionalCommitScore}%</p>
+                      </div>
+                      <div className="brutalist-glass p-6 border-l-2 border-l-white/10">
+                        <p className="text-micro opacity-20 mb-3 tracking-[2px] uppercase">ISSUE REFS</p>
+                        <p className="text-3xl font-bold opacity-80 tabular-nums font-mono">{commitQualityMetrics.hasTicketReferences}%</p>
                       </div>
                     </div>
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px" }}>
-                      <div className="border-l-2 border-[rgba(240,240,250,0.1)] pl-4">
-                        <p className="text-micro opacity-40 mb-2 tracking-[2px]">CONVENTIONAL</p>
-                        <p className="text-display-hero text-2xl opacity-90 tabular-nums">{commitQualityMetrics.conventionalCommitScore}%</p>
-                      </div>
-                      <div className="border-l-2 border-[rgba(240,240,250,0.1)] pl-4">
-                        <p className="text-micro opacity-40 mb-2 tracking-[2px]">TICKET REFS</p>
-                        <p className="text-display-hero text-2xl opacity-90 tabular-nums">{commitQualityMetrics.hasTicketReferences}%</p>
-                      </div>
-                    </div>
+                    
                     {commitQualityMetrics.insights.length > 0 && (
-                      <p className="text-micro opacity-80 tracking-widest uppercase mt-4">
-                        {commitQualityMetrics.insights[0].toUpperCase()}
-                      </p>
+                      <div className="space-y-4 pt-6 border-t border-white/5">
+                        <div className="text-micro opacity-20 uppercase tracking-[2px] mb-2">SYSTEM NOTES:</div>
+                        {commitQualityMetrics.insights.slice(0, 3).map((insight, index) => (
+                           <div key={index} className="flex items-start gap-4 text-micro opacity-40 hover:opacity-100 transition-opacity uppercase tracking-widest leading-relaxed">
+                            <span className="shrink-0 w-8 h-[1px] bg-white/20 mt-2" />
+                            <span>{insight.toUpperCase()}</span>
+                          </div>
+                        ))}
+                      </div>
                     )}
                   </div>
                 ) : (
-                  <div style={{ textAlign: "center", padding: "24px 0" }}>
-                    <BarChart3 size={24} style={{ opacity: 0.1, margin: "0 auto 8px" }} />
-                    <p className="text-micro" style={{ opacity: 0.25 }}>NO QUALITY DATA AVAILABLE</p>
+                  <div className="py-12 text-center opacity-20">
+                     <p className="text-micro uppercase tracking-[3px]">INSUFFICIENT DATA FOR QUALITY METRICS</p>
                   </div>
                 )}
               </div>
             </div>
 
-            {/* Charts Section */}
+            {/* Visual Analytics Section */}
             <InsightsChartsSection
-              dailyCommits={dailyCommits}
-              dayOfWeekStats={dayOfWeekStats}
-              hourlyStats={hourlyStats}
+              dailyCommits={analytics.dailyCommits as DailyCommits}
+              dayOfWeekStats={analytics.dayOfWeekStats as DayOfWeekStats}
+              hourlyStats={analytics.hourlyStats as HourlyStats}
               repoStats={repoStats}
-              topLanguages={topLanguages}
+              topLanguages={analytics.topLanguages as TopLanguage[]}
             />
           </div>
         ) : (
           <EmptyState />
         )}
-
-
       </div>
     </div>
   );
 }
 
-// ===========================================
-// AI Stats Banner Component
-// ===========================================
-
 async function AIStatsBanner({ analytics, userId, persona }: { 
   analytics: any; 
   userId: string;
-  persona: ReturnType<typeof detectPersona> | null;
+  persona: any;
 }) {
-  // Get count of AI insights generated
-  const insightCount = await prisma.insightCache.count({
-    where: { userId }
-  });
-
-  // Calculate active days percentage
-  const totalDays = analytics.totalRepos > 0 ? 
-    Math.ceil((Date.now() - new Date(analytics.calculatedAt).getTime()) / (1000 * 60 * 60 * 24)) || 1 : 1;
-  const activeDaysCount = Object.keys((analytics.dailyCommits as Record<string, number>) || {}).length;
-  const productivityPercentage = Math.round((activeDaysCount / Math.max(totalDays, 1)) * 100);
-
-  // Calculate average daily commits
-  const avgDailyCommits = analytics.totalCommits > 0 && activeDaysCount > 0 
-    ? (analytics.totalCommits / activeDaysCount).toFixed(1)
-    : '0';
-
+  const insightCount = await prisma.insightCache.count({ where: { userId } });
+  
   const stats = [
     {
-      label: 'AI INSIGHTS GENERATED',
+      label: 'SYSTEM INSIGHTS',
       value: insightCount.toLocaleString(),
-      icon: <Brain className="w-5 h-5 text-purple-400" />,
-      color: 'purple',
-      sublabel: insightCount > 0 ? 'POWRED BY AI' : 'GENERATE YOUR FIRST',
-      gradient: 'from-purple-500/20 to-purple-500/5',
-      borderColor: 'border-purple-500/30',
+      icon: <Brain className="w-5 h-5" />,
+      sublabel: 'ARCHIVE_INDEX_COUNT',
     },
     {
-      label: 'LONGEST STREAK',
-      value: `${analytics.longestStreak}d`,
-      icon: <Trophy className="w-5 h-5 text-amber-400" />,
-      color: 'amber',
-      sublabel: analytics.longestStreak > 0 ? 'PERSONAL BEST' : 'START TODAY!',
-      gradient: 'from-amber-500/20 to-amber-500/5',
-      borderColor: 'border-amber-500/30',
+      label: 'MAX_CYCLE_STREAK',
+      value: `${analytics.longestStreak}D`,
+      icon: <Trophy className="w-5 h-5" />,
+      sublabel: 'PERSONAL_RECORD',
     },
     {
-      label: 'PRODUCTIVITY RATE',
-      value: `${productivityPercentage}%`,
-      icon: <TrendingUp className="w-5 h-5 text-emerald-400" />,
-      color: 'emerald',
-      sublabel: productivityPercentage > 70 ? 'EXCELLENT' : 
-                productivityPercentage > 40 ? 'GOOD PACE' : 'KEEP GOING',
-      gradient: 'from-emerald-500/20 to-emerald-500/5',
-      borderColor: 'border-emerald-500/30',
+      label: 'SYSTEM_UPTIME',
+      value: 'NOMINAL',
+      icon: <TrendingUp className="w-5 h-5" />,
+      sublabel: 'CYCLE_VALIDATED',
     },
     {
-      label: 'AVG DAILY COMMITS',
-      value: avgDailyCommits,
-      icon: <GitCommit className="w-5 h-5 text-[#f0f0fa]" />,
-      color: 'cyan',
-      sublabel: `ACROSS ${activeDaysCount} ACTIVE DAYS`,
-      gradient: 'from-cyan-500/20 to-cyan-500/5',
-      borderColor: 'border-cyan-500/30',
+      label: 'DAILY_ACTIVITY',
+      value: 'ACTIVE',
+      icon: <GitCommit className="w-5 h-5" />,
+      sublabel: 'NOMINAL_VELOCITY',
     },
   ];
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+    <div className="space-y-10">
       {/* Developer Persona Badge */}
       {persona && (
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            padding: "16px 0",
-            background: "transparent",
-            border: "none",
-            borderRadius: "0",
-            flexWrap: "wrap",
-            gap: "12px",
-            borderBottom: "1px solid rgba(240, 240, 250, 0.1)"
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-            <div>
-              <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
-                <span className="text-caption-bold uppercase tracking-widest text-shadow-glow" style={{ fontSize: "0.813rem" }}>
-                  {persona.primary.name}
-                </span>
-                <span
-                  className="text-micro"
-                  style={{
-                    padding: "2px 6px",
-                    border: "1px solid rgba(240,240,250,0.1)",
-                    borderRadius: "2px",
-                    opacity: 0.5,
-                  }}
-                >
-                  {persona.primary.rarity}
-                </span>
-              </div>
-              <p className="text-micro tracking-widest uppercase" style={{ opacity: 0.3 }}>
-                {persona.primary.description}
-              </p>
+        <div className="flex flex-col sm:flex-row items-center sm:items-end justify-between gap-10 border-b border-white/5 pb-10">
+          <div>
+            <div className="flex items-center gap-4 mb-4">
+              <span className="text-display-hero text-3xl font-bold opacity-80 uppercase tracking-widest">
+                {persona.primary.name}
+              </span>
+              <span className="px-3 py-1 border border-white/10 text-micro uppercase tracking-[3px] opacity-40">
+                {persona.primary.rarity}
+              </span>
             </div>
+            <p className="text-micro uppercase tracking-[3px] opacity-20 leading-relaxed max-w-xl">
+              {persona.primary.description}
+            </p>
           </div>
-          <div style={{ textAlign: "right" }}>
-            <div className="stat-value" style={{ fontSize: "1.25rem" }}>
-              {persona.confidence}%
-            </div>
-            <div className="text-micro tracking-widest uppercase" style={{ opacity: 0.3 }}>MATCH</div>
+          <div className="text-center sm:text-right">
+            <div className="text-3xl font-bold opacity-80 tracking-widest font-mono">{persona.confidence}%</div>
+            <div className="text-micro uppercase tracking-[3px] opacity-20">COGNITIVE_MATCH</div>
           </div>
         </div>
       )}
 
       {/* Stats Grid */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(2, 1fr)",
-          gap: "24px",
-          background: "transparent",
-          border: "none",
-        }}
-        className="insights-stats-grid"
-      >
-        <style>{`.insights-stats-grid { grid-template-columns: repeat(2,1fr) !important; } @media(min-width:1024px){ .insights-stats-grid { grid-template-columns: repeat(4,1fr) !important; } }`}</style>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
         {stats.map((stat, index) => (
-          <div
-            key={index}
-            style={{
-              background: "transparent",
-              padding: "0",
-            }}
-          >
-            <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px", opacity: 0.3 }}>
-              <div className="opacity-30">{stat.icon}</div>
-              <p className="text-micro tracking-widest uppercase">{stat.label}</p>
+          <div key={index} className="space-y-4 group cursor-default">
+            <div className="flex items-center gap-3 opacity-20 group-hover:opacity-40 transition-opacity">
+              <div className="p-1.5 border border-white/10">{stat.icon}</div>
+              <p className="text-micro font-bold tracking-widest uppercase">{stat.label}</p>
             </div>
-            <p className="text-section-head text-5xl font-bold opacity-80">{stat.value}</p>
-            {stat.sublabel && (
-              <p className="text-micro tracking-widest uppercase" style={{ marginTop: "4px", opacity: 0.25 }}>{stat.sublabel}</p>
-            )}
+            <p className="text-display-hero text-4xl font-bold opacity-80 group-hover:opacity-100 transition-opacity font-mono">{stat.value}</p>
+            <p className="text-micro tracking-[3px] uppercase opacity-20 group-hover:opacity-40 transition-opacity">{stat.sublabel}</p>
           </div>
         ))}
       </div>
@@ -433,37 +298,22 @@ async function AIStatsBanner({ analytics, userId, persona }: {
   );
 }
 
-// ===========================================
-// Empty State Component
-// ===========================================
-
 function EmptyState() {
   return (
-    <div
-      style={{
-        background: "transparent",
-        border: "none",
-        padding: "64px 24px",
-        textAlign: "center",
-      }}
-    >
-      <div style={{ maxWidth: "360px", margin: "0 auto" }}>
-        <div className="flex justify-center mb-6">
-            <div className="p-4 border border-[rgba(240,240,250,0.35)] opacity-30">
-               <BarChart3 size={32} className="text-[#f0f0fa]" />
-            </div>
+    <div className="brutalist-glass p-32 text-center border-l-2 border-l-white/10">
+        <div className="w-24 h-24 border border-white/10 flex items-center justify-center mx-auto mb-10 opacity-20">
+           <BarChart3 size={40} className="text-[#f0f0fa]" />
         </div>
-        <h2 className="text-caption-bold text-sm tracking-widest uppercase mb-4">
-          NO INSIGHTS AVAILABLE YET
+        <h2 className="text-caption-bold text-lg tracking-[5px] uppercase mb-6 opacity-80">
+          ARCHIVE DATA NULL
         </h2>
-        <p className="text-micro opacity-50 uppercase tracking-widest mb-8">
-          SYNC YOUR GITHUB DATA TO UNLOCK COMPREHENSIVE ANALYTICS AND VISUALIZATIONS.
+        <p className="text-micro opacity-20 uppercase tracking-[3px] mb-12 max-w-sm mx-auto leading-loose">
+          PERFORM SYSTEM SYNC TO INITIALIZE ARCHIVE ANALYTICS AND COGNITIVE MAPPING.
         </p>
-        <Link href="/dashboard" className="btn-ghost" style={{ display: "inline-flex" }}>
-          <RefreshCw size={13} />
-          GO TO DASHBOARD TO SYNC
+        <Link href="/dashboard" className="btn-ghost px-12 py-4 text-micro uppercase tracking-[4px] inline-flex items-center gap-4">
+          <RefreshCw size={13} className="opacity-40" />
+          INITIALIZE SYNC
         </Link>
-      </div>
     </div>
   );
 }

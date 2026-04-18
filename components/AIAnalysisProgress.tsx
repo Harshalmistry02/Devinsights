@@ -29,61 +29,51 @@ export function AIAnalysisProgress({ isAnalyzing, currentStep = 0 }: AIAnalysisP
   }));
 
   return (
-    <div className="border border-cyan-500/20 bg-linear-to-br from-slate-900/80 to-slate-800/80 p-6 backdrop-blur-sm">
-      <div className="flex items-center gap-3 mb-6">
+    <div className="brutalist-glass p-8">
+      <div className="flex items-center gap-4 mb-8">
         <div className="relative">
-          <div className="h-10 w-10 -full bg-linear-to-r from-cyan-500 to-purple-500 flex items-center justify-center">
-            <svg className="h-5 w-5 text-white animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+          <div className="h-12 w-12 flex items-center justify-center border border-[rgba(240,240,250,0.15)] bg-white/5">
+            <svg className="h-6 w-6 text-[#f0f0fa] animate-pulse opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
             </svg>
           </div>
-          <span className="absolute -bottom-1 -right-1 flex h-4 w-4">
-            <span className="animate-ping absolute inline-flex h-full w-full -full bg-cyan-400 opacity-75"></span>
-            <span className="relative inline-flex -full h-4 w-4 bg-cyan-500"></span>
+          <span className="absolute -bottom-1 -right-1 flex h-3 w-3">
+            <span className="animate-ping absolute inline-flex h-full w-full -full bg-white opacity-20"></span>
+            <span className="relative inline-flex -full h-3 w-3 bg-white/40"></span>
           </span>
         </div>
         <div>
-          <h3 className="text-lg font-semibold text-white">AI is thinking...</h3>
-          <p className="text-sm opacity-80">Generating personalized insights</p>
+          <h3 className="text-caption-bold text-sm tracking-widest uppercase">AI IS THINKING</h3>
+          <p className="text-micro pt-1 opacity-40 uppercase tracking-widest">GENERATING ARCHIVE INSIGHTS</p>
         </div>
       </div>
 
-      <div className="space-y-3">
+      <div className="space-y-4">
         {steps.map((step, index) => (
-          <div key={step.id} className="flex items-center gap-3">
-            <div className={`shrink-0 h-6 w-6 -full flex items-center justify-center transition-all duration-300 ${
+          <div key={step.id} className="flex items-center gap-4">
+            <div className={`shrink-0 h-2 w-2 transition-all duration-300 ${
               step.status === 'complete' 
-                ? 'bg-green-500/20 text-green-400' 
+                ? 'bg-[#f0f0fa] opacity-60' 
                 : step.status === 'active'
-                ? 'bg-cyan-500/20 text-[#f0f0fa]'
-                : ' opacity-80'
-            }`}>
-              {step.status === 'complete' ? (
-                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-              ) : step.status === 'active' ? (
-                <div className="h-2 w-2 -full bg-cyan-400 animate-pulse" />
-              ) : (
-                <div className="h-2 w-2 -full" />
-              )}
-            </div>
-            <span className={`text-sm transition-colors duration-300 ${
+                ? 'bg-[#f0f0fa] animate-pulse'
+                : 'bg-white/10'
+            }`} />
+            <span className={`text-micro uppercase tracking-widest transition-colors duration-300 ${
               step.status === 'complete' 
-                ? 'text-green-400' 
+                ? 'text-[#f0f0fa] opacity-80' 
                 : step.status === 'active'
                 ? 'text-[#f0f0fa]'
-                : 'opacity-80'
+                : 'opacity-30'
             }`}>
-              {step.label}
+              {step.label.toUpperCase()}
             </span>
           </div>
         ))}
       </div>
 
-      <div className="mt-6 h-1.5 -full overflow-hidden">
+      <div className="mt-8 h-[1px] w-full bg-white/5 overflow-hidden">
         <div 
-          className="h-full bg-linear-to-r from-cyan-500 to-purple-500 -full transition-all duration-500"
+          className="h-full bg-[#f0f0fa] opacity-30 transition-all duration-1000 ease-out"
           style={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}
         />
       </div>

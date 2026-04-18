@@ -9,11 +9,8 @@ import {
   ChevronUp,
   ChevronDown,
   ArrowUpDown,
-  Code,
   Eye,
   EyeOff,
-  LayoutGrid,
-  List,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -44,32 +41,6 @@ interface RepoDeepDiveProps {
 type SortField = 'commits' | 'stars' | 'name' | 'language';
 type SortDirection = 'asc' | 'desc';
 type ViewMode = 'treemap' | 'table';
-
-// Language color mapping
-const LANGUAGE_COLORS: Record<string, string> = {
-  TypeScript: '#3178c6',
-  JavaScript: '#f7df1e',
-  Python: '#3572a5',
-  Java: '#b07219',
-  Go: '#00add8',
-  Rust: '#dea584',
-  Ruby: '#701516',
-  PHP: '#4f5d95',
-  'C++': '#f34b7d',
-  C: '#555555',
-  'C#': '#178600',
-  Swift: '#f05138',
-  Kotlin: '#a97bff',
-  Dart: '#00b4ab',
-  Scala: '#c22d40',
-  Shell: '#89e051',
-  HTML: '#e34c26',
-  CSS: '#563d7c',
-  Vue: '#41b883',
-  Svelte: '#ff3e00',
-};
-
-const DEFAULT_LANGUAGE_COLOR = '#6e7681';
 
 // ===========================================
 // Main Component
@@ -119,12 +90,12 @@ export function RepoDeepDive({
   if (!repoStats || repoStats.length === 0) {
     return (
       <div className={cn(
-        "brutalist-glass p-12 text-center",
+        "brutalist-glass p-16 text-center border-white/5",
         className
       )}>
-        <GitBranch className="w-12 h-12 opacity-20 mx-auto mb-6" />
-        <h3 className="text-display-hero text-xl opacity-80 mb-3 tracking-widest">NO REPOSITORY DATA</h3>
-        <p className="text-micro opacity-40 uppercase tracking-[2px]">SYNC YOUR GITHUB DATA TO SEE REPOSITORY BREAKDOWN</p>
+        <GitBranch className="w-16 h-16 opacity-10 mx-auto mb-8" />
+        <h3 className="text-caption-bold text-lg opacity-40 mb-4 tracking-widest uppercase">ARCHIVE EMPTY</h3>
+        <p className="text-micro opacity-20 uppercase tracking-[2px]">INITIALIZE GITHUB SYNC TO POPULATE REPOSITORY DATABASE</p>
       </div>
     );
   }
@@ -145,29 +116,28 @@ export function RepoDeepDive({
   };
 
   return (
-    <div className={cn(
-      " bg-transparent overflow-visible",
-      className
-    )}>
+    <div className={className}>
       {/* Header */}
-      <div className="py-4 border-b border-[rgba(240,240,250,0.05)]">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="border-l-2 border-[rgba(240,240,250,0.35)] pl-4">
-              <h3 className="text-caption-bold text-sm tracking-widest uppercase">REPOSITORY DEEP DIVE</h3>
-              <p className="text-micro opacity-40 uppercase tracking-widest mt-1">{repoStats.length} REPOSITORIES ANALYZED</p>
+      <div className="py-6 border-b border-white/5">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+          <div className="flex items-center gap-4">
+            <div className="border-l-2 border-white/20 pl-6">
+              <h3 className="text-caption-bold text-sm tracking-widest uppercase opacity-80">REPOSITORY DEEP DIVE</h3>
+              <p className="text-micro opacity-20 uppercase tracking-widest mt-2 font-mono">
+                {repoStats.length} ENTRIES ARCHIVED
+              </p>
             </div>
           </div>
           
           {/* View Toggle */}
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-2">
             <button
               onClick={() => setViewMode('treemap')}
               className={cn(
-                "px-3 py-1 text-micro tracking-widest transition-all uppercase",
+                "px-5 py-2 text-micro tracking-widest transition-all uppercase border border-white/10",
                 viewMode === 'treemap' 
-                  ? "bg-[#f0f0fa] text-[#000000]"
-                  : "opacity-40 hover:opacity-100"
+                  ? "bg-[#f0f0fa] text-[#000000] font-bold"
+                  : "opacity-30 hover:opacity-100"
               )}
             >
               TREEMAP
@@ -175,10 +145,10 @@ export function RepoDeepDive({
             <button
               onClick={() => setViewMode('table')}
               className={cn(
-                "px-3 py-1 text-micro tracking-widest transition-all uppercase",
+                "px-5 py-2 text-micro tracking-widest transition-all uppercase border border-white/10",
                 viewMode === 'table' 
-                  ? "bg-[#f0f0fa] text-[#000000]"
-                  : "opacity-40 hover:opacity-100"
+                  ? "bg-[#f0f0fa] text-[#000000] font-bold"
+                  : "opacity-30 hover:opacity-100"
               )}
             >
               TABLE
@@ -188,7 +158,7 @@ export function RepoDeepDive({
       </div>
       
       {/* Content */}
-      <div className="py-6">
+      <div className="py-8">
         {viewMode === 'treemap' ? (
           <TreemapView 
             repos={displayedRepos} 
@@ -208,20 +178,20 @@ export function RepoDeepDive({
         
         {/* Show More Button */}
         {hasMore && (
-          <div className="mt-4 text-center">
+          <div className="mt-8 text-center">
             <button
               onClick={() => setShowAll(!showAll)}
-              className="inline-flex items-center gap-2 px-4 py-2 border border-[rgba(240,240,250,0.15)] text-sm opacity-80 hover:opacity-80 hover:border-[rgba(240,240,250,0.15)] transition-all"
+              className="btn-ghost flex items-center gap-3 px-8 py-3 text-micro uppercase tracking-widest mx-auto"
             >
               {showAll ? (
                 <>
-                  <EyeOff className="w-4 h-4" />
-                  Show Less
+                  <EyeOff className="w-3.5 h-3.5 opacity-40" />
+                  DISPLAY COMPACT
                 </>
               ) : (
                 <>
-                  <Eye className="w-4 h-4" />
-                  Show All ({sortedRepos.length - 20} more)
+                  <Eye className="w-3.5 h-3.5 opacity-40" />
+                  ARCHIVE EXPANSION ({sortedRepos.length - 20} ADDITIONAL)
                 </>
               )}
             </button>
@@ -236,96 +206,67 @@ export function RepoDeepDive({
 // Treemap View
 // ===========================================
 
-interface TreemapViewProps {
+function TreemapView({ repos, onRepoClick, selectedRepoId }: {
   repos: RepoStat[];
   onRepoClick?: (repoId: string) => void;
   selectedRepoId?: string | null;
-}
-
-function TreemapView({ repos, onRepoClick, selectedRepoId }: TreemapViewProps) {
-  // Calculate total commits for sizing
+}) {
   const totalCommits = repos.reduce((sum, r) => sum + r.commits, 0);
   
-  // Create treemap layout
   const treemapData = useMemo(() => {
-    // Simple squarified layout approximation
     return repos.map(repo => {
       const percentage = totalCommits > 0 ? (repo.commits / totalCommits) * 100 : 0;
-      // Size based on percentage, min size for visibility
-      const size = Math.max(percentage, 3);
-      
-      return {
-        ...repo,
-        percentage,
-        size,
-        color: "#f0f0fa",
-      };
+      const size = Math.max(percentage, 4);
+      return { ...repo, percentage, size };
     });
   }, [repos, totalCommits]);
 
   return (
-    <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2 auto-rows-fr" style={{ minHeight: '240px' }}>
-      {treemapData.map((repo, index) => {
-        // Determine grid span based on size
-        const span = repo.size > 15 ? 2 : 1;
+    <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-12 gap-3 auto-rows-fr" style={{ minHeight: '320px' }}>
+      {treemapData.map((repo) => {
+        const span = repo.size > 20 ? 3 : repo.size > 10 ? 2 : 1;
         const isSelected = selectedRepoId === repo.id;
         
         return (
           <div
             key={repo.id}
             className={cn(
-              "relative  overflow-hidden cursor-pointer transition-all duration-300 group",
-              "border-2",
+              "brutalist-glass relative overflow-hidden cursor-pointer transition-all duration-500 group border border-white/5",
               isSelected 
-                ? "border-teal-400 ring-2 ring-teal-400/30 scale-[1.02]" 
-                : "border-transparent hover:border-[rgba(240,240,250,0.15)]"
+                ? "border-white/40 bg-white/5 ring-4 ring-white/5" 
+                : "hover:border-white/20 hover:bg-white/[0.02]"
             )}
             style={{ 
               gridColumn: `span ${span}`,
               gridRow: `span ${span}`,
-              backgroundColor: `${repo.color}20`,
             }}
             onClick={() => onRepoClick?.(repo.id)}
-            title={`${repo.fullName}: ${repo.commits} commits`}
           >
-            {/* Border accent */}
+            {/* Intensity gradient hint (achromatic) */}
             <div 
-              className="absolute top-0 left-0 right-0 h-[1px] opacity-20"
-              style={{ backgroundColor: repo.color }}
+              className="absolute inset-0 opacity-5 pointer-events-none"
+              style={{ background: `linear-gradient(to bottom right, white, transparent)` }}
             />
             
             {/* Content */}
-            <div className="p-4 h-full flex flex-col justify-between">
-              <div className="text-micro font-bold tracking-widest opacity-80 truncate">
+            <div className="p-5 h-full flex flex-col justify-between relative z-10">
+              <div className="text-micro font-bold tracking-widest opacity-60 group-hover:opacity-100 transition-opacity truncate">
                 {repo.name.toUpperCase()}
               </div>
-              <div className="flex items-center justify-between mt-auto">
-                <span 
-                  className="text-micro opacity-40 tracking-widest truncate"
-                >
-                  {repo.language?.toUpperCase() || 'UNKNOWN'}
-                </span>
-                <span className="text-micro opacity-90 tabular-nums font-bold">
-                  {repo.commits}
-                </span>
+              <div className="mt-auto space-y-1">
+                 <div className="flex items-center justify-between">
+                    <span className="text-micro opacity-20 uppercase tracking-widest truncate">{repo.language?.toUpperCase() || 'VOID'}</span>
+                    <span className="text-micro opacity-40 font-mono">{repo.commits}</span>
+                 </div>
               </div>
             </div>
-            
-            {/* Hover overlay */}
-            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-2">
-              <div className="text-center">
-                <div className="text-sm font-medium opacity-80 truncate">{repo.name}</div>
-                <div className="text-xs opacity-80 mt-1">{repo.commits} commits</div>
-                <div className="flex items-center justify-center gap-3 mt-2 text-xs">
-                  <span className="flex items-center gap-1 text-yellow-400">
-                    <Star className="w-3 h-3" /> {repo.stars}
-                  </span>
-                  <span className="flex items-center gap-1 opacity-80">
-                    <GitFork className="w-3 h-3" /> {repo.forks}
-                  </span>
-                </div>
+
+            {/* Selection indicator */}
+            {isSelected && (
+              <div className="absolute top-0 right-0 p-1">
+                 <div className="w-1.5 h-1.5 bg-white shadow-glow" />
               </div>
-            </div>
+            )}
           </div>
         );
       })}
@@ -337,15 +278,6 @@ function TreemapView({ repos, onRepoClick, selectedRepoId }: TreemapViewProps) {
 // Table View
 // ===========================================
 
-interface TableViewProps {
-  repos: RepoStat[];
-  sortField: SortField;
-  sortDirection: SortDirection;
-  onSort: (field: SortField) => void;
-  onRepoClick?: (repoId: string) => void;
-  selectedRepoId?: string | null;
-}
-
 function TableView({ 
   repos, 
   sortField, 
@@ -353,111 +285,79 @@ function TableView({
   onSort, 
   onRepoClick,
   selectedRepoId 
-}: TableViewProps) {
+}: {
+  repos: RepoStat[];
+  sortField: SortField;
+  sortDirection: SortDirection;
+  onSort: (field: SortField) => void;
+  onRepoClick?: (repoId: string) => void;
+  selectedRepoId?: string | null;
+}) {
   const SortIcon = ({ field }: { field: SortField }) => {
     if (sortField !== field) {
-      return <ArrowUpDown className="w-3 h-3 opacity-80" />;
+      return <ArrowUpDown className="w-3 h-3 opacity-20" />;
     }
     return sortDirection === 'desc' 
-      ? <ChevronDown className="w-3 h-3 text-teal-400" />
-      : <ChevronUp className="w-3 h-3 text-teal-400" />;
+      ? <ChevronDown className="w-3.5 h-3.5 opacity-80" />
+      : <ChevronUp className="w-3.5 h-3.5 opacity-80" />;
   };
 
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full text-sm">
+    <div className="overflow-x-auto brutalist-glass">
+      <table className="w-full text-left">
         <thead>
-          <tr className="border-b border-[rgba(240,240,250,0.15)]">
+          <tr className="border-b border-white/10">
             <th 
-              className="text-left py-3 px-2 opacity-80 font-medium cursor-pointer hover:opacity-80 transition-colors"
+              className="py-5 px-6 opacity-30 text-micro font-bold tracking-widest cursor-pointer hover:opacity-100 transition-all uppercase"
               onClick={() => onSort('name')}
             >
-              <div className="flex items-center gap-1">
-                Repository <SortIcon field="name" />
-              </div>
+              <div className="flex items-center gap-2">REPOSITORY <SortIcon field="name" /></div>
             </th>
             <th 
-              className="text-left py-3 px-2 opacity-80 font-medium cursor-pointer hover:opacity-80 transition-colors"
+              className="py-5 px-6 opacity-30 text-micro font-bold tracking-widest cursor-pointer hover:opacity-100 transition-all uppercase"
               onClick={() => onSort('language')}
             >
-              <div className="flex items-center gap-1">
-                Language <SortIcon field="language" />
-              </div>
+              <div className="flex items-center gap-2">LANGUAGE <SortIcon field="language" /></div>
             </th>
             <th 
-              className="text-right py-3 px-2 opacity-80 font-medium cursor-pointer hover:opacity-80 transition-colors"
+              className="py-5 px-6 opacity-30 text-micro font-bold tracking-widest text-right cursor-pointer hover:opacity-100 transition-all uppercase"
               onClick={() => onSort('commits')}
             >
-              <div className="flex items-center justify-end gap-1">
-                Commits <SortIcon field="commits" />
-              </div>
+              <div className="flex items-center justify-end gap-2">ACTIVITY <SortIcon field="commits" /></div>
             </th>
-            <th 
-              className="text-right py-3 px-2 opacity-80 font-medium cursor-pointer hover:opacity-80 transition-colors"
-              onClick={() => onSort('stars')}
-            >
-              <div className="flex items-center justify-end gap-1">
-                Stars <SortIcon field="stars" />
-              </div>
-            </th>
-            <th className="text-right py-3 px-2 opacity-80 font-medium">
-              Action
-            </th>
+            <th className="py-5 px-6 opacity-30 text-micro font-bold tracking-widest text-right uppercase">ACTION</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody className="divide-y divide-white/5">
           {repos.map((repo) => {
-            const languageColor = LANGUAGE_COLORS[repo.language || ''] || DEFAULT_LANGUAGE_COLOR;
             const isSelected = selectedRepoId === repo.id;
-            
             return (
               <tr 
                 key={repo.id}
                 className={cn(
-                  "border-b border-[rgba(240,240,250,0.15)] cursor-pointer transition-all",
-                  isSelected 
-                    ? "bg-teal-500/10" 
-                    : "hover:"
+                  "hover:bg-white/[0.02] transition-colors cursor-pointer group",
+                  isSelected && "bg-white/[0.05]"
                 )}
                 onClick={() => onRepoClick?.(repo.id)}
               >
-                <td className="py-3 px-2">
-                  <div className="flex items-center gap-2">
-                    <div 
-                      className="w-2 h-2 -full"
-                      style={{ backgroundColor: languageColor }}
-                    />
-                    <span className="opacity-80 font-medium truncate max-w-[200px]">
-                      {repo.name}
-                    </span>
-                  </div>
+                <td className="py-4 px-6">
+                  <span className="text-micro font-bold opacity-70 group-hover:opacity-100 transition-opacity uppercase tracking-widest">{repo.name}</span>
                 </td>
-                <td className="py-3 px-2">
-                  <span 
-                    className="text-sm"
-                    style={{ color: languageColor }}
-                  >
-                    {repo.language || 'Unknown'}
-                  </span>
+                <td className="py-4 px-6 text-micro opacity-40 uppercase tracking-widest">
+                  {repo.language || 'UNKNOWN'}
                 </td>
-                <td className="py-3 px-2 text-right tabular-nums opacity-80">
+                <td className="py-4 px-6 text-right font-mono text-micro opacity-40 group-hover:opacity-80 transition-opacity">
                   {repo.commits.toLocaleString()}
                 </td>
-                <td className="py-3 px-2 text-right">
-                  <div className="flex items-center justify-end gap-1 text-yellow-400/80">
-                    <Star className="w-3 h-3" />
-                    {repo.stars}
-                  </div>
-                </td>
-                <td className="py-3 px-2 text-right">
+                <td className="py-4 px-6 text-right">
                   <a
                     href={`https://github.com/${repo.fullName}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     onClick={(e) => e.stopPropagation()}
-                    className="inline-flex items-center gap-1 text-[#f0f0fa] hover:text-[#f0f0fa] transition-colors"
+                    className="inline-flex p-2 opacity-20 hover:opacity-100 transition-opacity border border-white/5"
                   >
-                    <ExternalLink className="w-3 h-3" />
+                    <ExternalLink className="w-3.5 h-3.5" />
                   </a>
                 </td>
               </tr>
@@ -465,38 +365,6 @@ function TableView({
           })}
         </tbody>
       </table>
-    </div>
-  );
-}
-
-// ===========================================
-// Legend Component
-// ===========================================
-
-export function RepoLanguageLegend({ repos }: { repos: RepoStat[] }) {
-  const languageCounts = useMemo(() => {
-    const counts: Record<string, number> = {};
-    for (const repo of repos) {
-      const lang = repo.language || 'Unknown';
-      counts[lang] = (counts[lang] || 0) + repo.commits;
-    }
-    return Object.entries(counts)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 8);
-  }, [repos]);
-
-  return (
-    <div className="flex flex-wrap gap-3">
-      {languageCounts.map(([language, count]) => (
-        <div key={language} className="flex items-center gap-1.5 text-xs">
-          <div 
-            className="w-2.5 h-2.5 -full"
-            style={{ backgroundColor: LANGUAGE_COLORS[language] || DEFAULT_LANGUAGE_COLOR }}
-          />
-          <span className="opacity-80">{language}</span>
-          <span className="opacity-80">({count})</span>
-        </div>
-      ))}
     </div>
   );
 }

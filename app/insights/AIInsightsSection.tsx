@@ -19,6 +19,7 @@ import {
 import { AIAnalysisProgress } from '@/components/AIAnalysisProgress';
 import { QuotaDisplay } from '@/components/QuotaDisplay';
 import { useQuota } from '@/lib/hooks/useQuota';
+import { cn } from '@/lib/utils';
 
 // Types for the insights API response
 interface InsightResponse {
@@ -124,51 +125,48 @@ export function AIInsightsSection({ analytics }: AIInsightsSectionProps) {
   }, [refreshQuota]);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Header with Generate Button */}
-      <div className="bg-linear-to-r from-purple-500/10 via-cyan-500/10 to-blue-500/10 border border-purple-500/20 p-6 backdrop-blur-sm">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div>
-            <h2 className="text-xl font-semibold opacity-80 mb-1 flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-purple-400" />
-              AI-Powered Analysis
+      <div className="brutalist-glass p-8">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+          <div className="max-w-xl">
+            <h2 className="text-caption-bold text-lg tracking-widest uppercase mb-2 flex items-center gap-3">
+              <Sparkles className="w-5 h-5 opacity-40 text-[#f0f0fa]" />
+              AI-POWERED ANALYSIS
             </h2>
-            <p className="opacity-80 text-sm">
-              Unlock deep insights into your coding patterns using advanced AI
+            <p className="text-micro opacity-40 uppercase tracking-widest leading-relaxed">
+              UNLOCK DEEP ARCHIVE INSIGHTS INTO YOUR DEVELOPMENT PATTERNS USING ADVANCED COGNITIVE MODELS.
             </p>
             {generatedAt && (
-              <p className="opacity-80 text-xs mt-1 flex items-center gap-1">
+              <p className="text-micro mt-3 opacity-25 uppercase tracking-widest flex items-center gap-2">
                 <Clock className="w-3 h-3" />
-                {isCached ? 'Cached' : 'Generated'}: {generatedAt.toLocaleString()}
+                {isCached ? 'CACHED' : 'GENERATED'}: {generatedAt.toLocaleString().toUpperCase()}
               </p>
             )}
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-col items-end gap-3 w-full sm:w-auto">
             {meta?.quotaRemaining !== undefined && (
-              <span className={`text-xs ${meta.quotaRemaining < 5 ? 'text-amber-400' : 'opacity-80'}`}>
-                {meta.quotaRemaining} requests left today
+              <span className="text-micro uppercase tracking-widest opacity-30">
+                {meta.quotaRemaining} REQUESTS REMAINING
               </span>
             )}
             <button
               onClick={generateInsights}
               disabled={loading}
-              className={`
-                flex items-center gap-3 px-6 py-3  font-medium text-sm
-                transition-all duration-300 min-w-[200px] justify-center
-                ${loading 
-                  ? " border border-[rgba(240,240,250,0.15)] opacity-80 cursor-not-allowed"
-                  : "bg-linear-to-r from-purple-500 to-cyan-500 text-white hover:from-purple-600 hover:to-cyan-600  -500/25 hover:-500/40"}
-              `}
+              className={cn(
+                "btn-ghost flex items-center gap-4 px-10 py-4 uppercase tracking-widest text-xs min-w-[240px] justify-center",
+                loading && "opacity-50 cursor-not-allowed"
+              )}
             >
               {loading ? (
                 <>
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                  <span>Analyzing...</span>
+                  <Loader2 className="w-4 h-4 animate-spin opacity-40 " />
+                  <span>ANALYZING...</span>
                 </>
               ) : (
                 <>
-                  {insights ? <RefreshCw className="w-5 h-5" /> : <Sparkles className="w-5 h-5" />}
-                  <span>{insights ? "Regenerate Insights" : "Generate Insights"}</span>
+                  {insights ? <RefreshCw className="w-4 h-4 opacity-40" /> : <Sparkles className="w-4 h-4 opacity-40" />}
+                  <span>{insights ? "REGENERATE ARCHIVE" : "GENERATE ARCHIVE"}</span>
                 </>
               )}
             </button>
@@ -183,43 +181,32 @@ export function AIInsightsSection({ analytics }: AIInsightsSectionProps) {
 
       {/* Error State */}
       {error && (
-        <div className="bg-red-500/10 border border-red-500/30 p-4 flex items-start gap-3">
-          <AlertTriangle className="w-5 h-5 text-red-400 mt-0.5" />
+        <div className="bg-rose-500/5 border border-rose-500/20 p-6 flex items-start gap-4">
+          <AlertTriangle className="w-5 h-5 text-rose-400 mt-0.5" />
           <div>
-            <p className="text-red-400 font-medium">Unable to generate insights</p>
-            <p className="text-red-400/70 text-sm">{error}</p>
+            <p className="text-micro font-bold uppercase tracking-widest text-rose-400 mb-1">UNABLE TO GENERATE INSIGHTS</p>
+            <p className="text-micro opacity-60 uppercase tracking-widest">{error}</p>
           </div>
         </div>
-      )}
-
-      {/* Quota Display */}
-      {quota && (
-        <QuotaDisplay 
-          tokensUsed={quota.tokensUsed} 
-          requestsCount={quota.requestsToday}
-          resetAt={new Date(quota.resetAt)}
-        />
       )}
 
       {/* Data Quality Indicators */}
       {meta?.dataQuality && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <DataQualityCard
-            title="Consistency Score"
+            title="CONSISTENCY SCORE"
             value={meta.dataQuality.consistencyScore}
-            icon={<TrendingUp className="w-5 h-5 text-[#f0f0fa]" />}
+            icon={<TrendingUp className="w-5 h-5 opacity-40 text-[#f0f0fa]" />}
             suffix="/100"
-            description="How regular your coding habits are"
-            color="cyan"
+            description="HABITUAL REGULARITY"
           />
           <DataQualityCard
-            title="Language Diversity"
+            title="LANGUAGE DIVERSITY"
             value={meta.dataQuality.languageDiversity}
-            icon={<Brain className="w-5 h-5 text-purple-400" />}
+            icon={<Brain className="w-5 h-5 opacity-40 text-[#f0f0fa]" />}
             suffix="/100"
-            description={meta.dataQuality.languageDiversity > 70 ? 'Polyglot developer' : 
-                        meta.dataQuality.languageDiversity > 40 ? 'Versatile skillset' : 'Specialized focus'}
-            color="purple"
+            description={meta.dataQuality.languageDiversity > 70 ? 'POLYGLOT DEVELOPER' : 
+                        meta.dataQuality.languageDiversity > 40 ? 'VERSATILE SKILLSET' : 'SPECIALIZED FOCUS'}
           />
           <StreakHealthCard
             health={meta.dataQuality.streakHealth}
@@ -229,60 +216,65 @@ export function AIInsightsSection({ analytics }: AIInsightsSectionProps) {
         </div>
       )}
 
-      {/* Milestone Tracker */}
+      {/* Milestone Tracker - using standard industrial banner */}
       {meta?.daysToMilestone && (
-        <div className="bg-linear-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/20 p-4 flex items-center gap-4">
-          <div className="p-3 bg-amber-500/20">
-            <Target className="w-6 h-6 text-amber-400" />
+        <div className="flex items-center gap-6 p-6 brutalist-glass border-l-2 border-l-white/20">
+          <div className="p-4 bg-white/5 opacity-40">
+            <Target className="w-7 h-7 text-[#f0f0fa]" />
           </div>
           <div className="flex-1">
-            <h4 className="text-amber-200 font-medium">Next Milestone</h4>
-            <p className="text-amber-400/70 text-sm uppercase tracking-widest">
-              ONLY <span className="font-bold text-amber-300">{meta.daysToMilestone.daysRemaining} DAYS</span> UNTIL YOUR{' '}
-              <span className="font-bold text-amber-300">{meta.daysToMilestone.milestone}-DAY</span> STREAK
-            </p>
+             <p className="text-micro uppercase tracking-widest text-[#f0f0fa] opacity-60 leading-relaxed">
+               ONLY <span className="opacity-100 font-bold">{meta.daysToMilestone.daysRemaining} DEPLOYMENT CYCLES</span> UNTIL THE <span className="opacity-100 font-bold">{meta.daysToMilestone.milestone}-DAY MILESTONE</span> ACHIEVEMENT.
+             </p>
           </div>
-          <div className="text-right">
-            <div className="text-2xl font-bold text-amber-300">{meta.daysToMilestone.daysRemaining}d</div>
-            <div className="text-xs text-amber-400/60">remaining</div>
+          <div className="text-right hidden sm:block">
+            <div className="text-3xl font-bold opacity-80 tracking-widest">{meta.daysToMilestone.daysRemaining}D</div>
+            <div className="text-micro opacity-30 uppercase tracking-widest">REMAINING</div>
           </div>
         </div>
       )}
 
       {/* Insight Cards */}
       {insights && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <InsightCard
-            icon={<Brain className="w-5 h-5 text-[#f0f0fa]" />}
-            title="Patterns"
+            icon={<Brain className="w-6 h-6 opacity-40 text-[#f0f0fa]" />}
+            title="COGNITIVE PATTERNS"
             items={insights.patterns}
-            color="cyan"
           />
           <InsightCard
-            icon={<Zap className="w-5 h-5 text-purple-400" />}
-            title="Strengths"
+            icon={<Zap className="w-6 h-6 opacity-40 text-[#f0f0fa]" />}
+            title="VELOCITY STRENGTHS"
             items={insights.strengths}
-            color="purple"
           />
           <InsightCard
-            icon={<Lightbulb className="w-5 h-5 text-amber-400" />}
-            title="Suggestions"
+            icon={<Lightbulb className="w-6 h-6 opacity-40 text-[#f0f0fa]" />}
+            title="SYSTEM OPTIMIZATIONS"
             items={insights.suggestions}
-            color="amber"
           />
+        </div>
+      )}
+
+      {/* Quota Display */}
+      {quota && (
+        <div className="pt-4 border-t border-white/5">
+             <QuotaDisplay 
+              tokensUsed={quota.tokensUsed} 
+              requestsCount={quota.requestsToday}
+              resetAt={new Date(quota.resetAt)}
+            />
         </div>
       )}
 
       {/* Empty State */}
       {!insights && !loading && !error && (
-        <div className="border border-[rgba(240,240,250,0.15)] p-8 text-center">
-          <div className="w-16 h-16 bg-purple-500/10 border border-purple-500/30 -full flex items-center justify-center mx-auto mb-4">
-            <Sparkles className="w-8 h-8 text-purple-400" />
+        <div className="brutalist-glass p-16 text-center">
+          <div className="w-20 h-20 border border-white/10 flex items-center justify-center mx-auto mb-6 opacity-30">
+            <Sparkles className="w-10 h-10 text-[#f0f0fa]" />
           </div>
-          <h3 className="text-lg font-medium opacity-80 mb-2">No insights yet</h3>
-          <p className="opacity-80 text-sm max-w-md mx-auto">
-            Click "Generate Insights" to get AI-powered analysis of your coding patterns, 
-            strengths, and personalized suggestions to level up your development skills.
+          <h3 className="text-caption-bold text-sm tracking-widest uppercase mb-4">NO ARCHIVE INSIGHTS DETECTED</h3>
+          <p className="text-micro opacity-40 uppercase tracking-widest max-w-md mx-auto leading-relaxed">
+            INITIALIZE A NEW ANALYSIS TO RETRIEVE PERSONALIZED METRICS AND ARCHIVE ACTIONABLE SUGGESTIONS.
           </p>
         </div>
       )}
@@ -298,36 +290,24 @@ function InsightCard({
   icon, 
   title, 
   items, 
-  color 
 }: { 
   icon: React.ReactNode; 
   title: string; 
   items: string[]; 
-  color: string;
 }) {
-  const colorClasses = {
-    cyan: 'border-cyan-500/30 hover:border-cyan-500/50',
-    purple: 'border-purple-500/30 hover:border-purple-500/50',
-    amber: 'border-amber-500/30 hover:border-amber-500/50',
-  };
-
-  const dotColors = {
-    cyan: 'bg-cyan-400',
-    purple: 'bg-purple-400',
-    amber: 'bg-amber-400',
-  };
-
   return (
-    <div className={` border ${colorClasses[color as keyof typeof colorClasses] || colorClasses.cyan}  p-6 backdrop-blur-sm transition-all duration-300 hover:`}>
-      <div className="flex items-center gap-3 mb-4">
-        <div className="p-2">{icon}</div>
-        <h3 className="text-lg font-semibold opacity-80">{title}</h3>
+    <div className="brutalist-glass p-8 hover:bg-white/[0.02] transition-all group flex flex-col h-full border-l-2 border-l-white/5">
+      <div className="flex items-center gap-4 mb-6">
+        <div className="p-3 bg-white/5 opacity-50">
+          <span className="text-[#f0f0fa]">{icon}</span>
+        </div>
+        <h3 className="text-caption-bold text-sm tracking-widest uppercase opacity-80">{title}</h3>
       </div>
-      <ul className="space-y-3">
+      <ul className="space-y-4">
         {items.map((item, index) => (
-          <li key={index} className="flex items-start gap-2 text-sm opacity-80">
-            <span className={`w-1.5 h-1.5 -full ${dotColors[color as keyof typeof dotColors] || dotColors.cyan} mt-1.5 shrink-0`} />
-            {item}
+          <li key={index} className="flex items-start gap-3 text-micro uppercase tracking-widest leading-relaxed opacity-40 group-hover:opacity-100 transition-opacity">
+            <span className="w-1.5 h-[1px] bg-white/40 mt-2 shrink-0" />
+            <span>{item}</span>
           </li>
         ))}
       </ul>
@@ -341,32 +321,24 @@ function DataQualityCard({
   icon,
   suffix,
   description,
-  color,
 }: {
   title: string;
   value: number;
   icon: React.ReactNode;
   suffix?: string;
   description: string;
-  color: string;
 }) {
-  const colorClasses = {
-    cyan: 'from-cyan-500/20 to-cyan-500/5 border-cyan-500/30',
-    purple: 'from-purple-500/20 to-purple-500/5 border-purple-500/30',
-    amber: 'from-amber-500/20 to-amber-500/5 border-amber-500/30',
-  };
-
   return (
-    <div className={`bg-linear-to-br ${colorClasses[color as keyof typeof colorClasses]} border  p-4 backdrop-blur-sm`}>
-      <div className="flex items-center gap-2 mb-2">
+    <div className="brutalist-glass p-6 border-l-2 border-l-white/10">
+      <div className="flex items-center gap-3 mb-4 opacity-40">
         {icon}
-        <span className="text-sm opacity-80">{title}</span>
+        <span className="text-micro uppercase tracking-widest">{title}</span>
       </div>
-      <div className="flex items-baseline gap-1">
-        <span className="text-2xl font-bold opacity-80">{value}</span>
-        {suffix && <span className="opacity-80 text-sm">{suffix}</span>}
+      <div className="flex items-baseline gap-2 mb-2">
+        <span className="text-3xl font-bold opacity-80 tracking-widest">{value}</span>
+        {suffix && <span className="opacity-30 text-micro uppercase tracking-widest">{suffix}</span>}
       </div>
-      <p className="text-xs opacity-80 mt-1">{description}</p>
+      <p className="text-micro opacity-30 uppercase tracking-widest">{description}</p>
     </div>
   );
 }
@@ -382,52 +354,47 @@ function StreakHealthCard({
 }) {
   const config = {
     excellent: {
-      icon: <Trophy className="w-5 h-5 text-emerald-400" />,
-      label: 'Excellent',
-      color: 'from-emerald-500/20 to-emerald-500/5 border-emerald-500/30',
-      text: 'text-emerald-400',
+      icon: <Trophy className="w-5 h-5" />,
+      label: 'EXCELLENT',
+      opacity: 'opacity-100',
     },
     good: {
-      icon: <Flame className="w-5 h-5 text-[#f0f0fa]" />,
-      label: 'Good',
-      color: 'from-cyan-500/20 to-cyan-500/5 border-cyan-500/30',
-      text: 'text-[#f0f0fa]',
+      icon: <Flame className="w-5 h-5" />,
+      label: 'NOMINAL',
+      opacity: 'opacity-80',
     },
     warning: {
-      icon: <AlertTriangle className="w-5 h-5 text-amber-400" />,
-      label: 'At Risk',
-      color: 'from-amber-500/20 to-amber-500/5 border-amber-500/30',
-      text: 'text-amber-400',
+      icon: <AlertTriangle className="w-5 h-5" />,
+      label: 'AT RISK',
+      opacity: 'opacity-60',
     },
     danger: {
-      icon: <AlertTriangle className="w-5 h-5 text-red-400" />,
-      label: 'Danger',
-      color: 'from-red-500/20 to-red-500/5 border-red-500/30',
-      text: 'text-red-400',
+      icon: <AlertTriangle className="w-5 h-5" />,
+      label: 'CRITICAL',
+      opacity: 'opacity-40',
     },
     inactive: {
-      icon: <CheckCircle2 className="w-5 h-5 opacity-80" />,
-      label: 'Start Fresh',
-      color: 'from-slate-500/20 to-slate-500/5 border-[rgba(240,240,250,0.15)]',
-      text: 'opacity-80',
+      icon: <CheckCircle2 className="w-5 h-5" />,
+      label: 'IDLE',
+      opacity: 'opacity-20',
     },
   };
 
-  const { icon, label, color, text } = config[health];
+  const { icon, label, opacity } = config[health];
 
   return (
-    <div className={`bg-linear-to-br ${color} border  p-4 backdrop-blur-sm`}>
-      <div className="flex items-center gap-2 mb-2">
+    <div className="brutalist-glass p-6 border-l-2 border-l-white/10">
+      <div className="flex items-center gap-3 mb-4 opacity-40">
         {icon}
-        <span className="text-sm opacity-80">Streak Health</span>
+        <span className="text-micro uppercase tracking-widest">SYSTEM VITALITY</span>
       </div>
-      <div className="flex items-baseline gap-2">
-        <span className={`text-2xl font-bold ${text}`}>{label}</span>
+      <div className="flex items-baseline gap-2 mb-2">
+        <span className={cn("text-2xl font-bold tracking-widest", opacity)}>{label}</span>
       </div>
-      <p className="text-xs opacity-80 mt-1 uppercase tracking-widest">
+      <p className="text-micro opacity-30 uppercase tracking-widest">
         {currentStreak > 0 
-          ? `${currentStreak} DAY STREAK ${isActiveToday ? 'ACTIVE' : 'INCOMPLETE'}`
-          : 'START YOUR STREAK TODAY'}
+          ? `${currentStreak} DAY CYCLE ${isActiveToday ? 'NOMINAL' : 'INCOMPLETE'}`
+          : 'START ACTIVE CYCLE TODAY'}
       </p>
     </div>
   );

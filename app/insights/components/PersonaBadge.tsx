@@ -47,74 +47,50 @@ export function PersonaBadge({
   const [isHovered, setIsHovered] = useState(false);
   
   const sizeClasses = {
-    sm: 'px-2 py-1 text-xs gap-1',
-    md: 'px-3 py-1.5 text-sm gap-1.5',
-    lg: 'px-4 py-2 text-base gap-2',
-  };
-  
-  const iconSizes = {
-    sm: 'text-sm',
-    md: 'text-base',
-    lg: 'text-lg',
+    sm: 'px-2 py-1 gap-1',
+    md: 'px-3 py-1.5 gap-2',
+    lg: 'px-6 py-2 gap-3',
   };
   
   const rarityStyles = {
-    common: 'border-[rgba(240,240,250,0.15)] ',
-    uncommon: 'border-cyan-500/30 bg-cyan-500/10',
-    rare: 'border-purple-500/30 bg-purple-500/10',
-    legendary: 'border-amber-500/30 bg-amber-500/10 animate-pulse',
-  };
-  
-  const rarityGlow = {
-    common: '',
-    uncommon: 'hover:-[0_0_15px_rgba(6,182,212,0.3)]',
-    rare: 'hover:-[0_0_20px_rgba(168,85,247,0.4)]',
-    legendary: '-[0_0_25px_rgba(251,191,36,0.3)] hover:-[0_0_30px_rgba(251,191,36,0.5)]',
+    common: 'border-white/5 opacity-40',
+    uncommon: 'border-white/10 opacity-60',
+    rare: 'border-white/20 opacity-80',
+    legendary: 'border-white/40 opacity-100 bg-white/5',
   };
 
   return (
     <div className="relative inline-block">
       <div
         className={cn(
-          "inline-flex items-center -full border transition-all duration-300",
+          "inline-flex items-center border transition-all duration-300",
+          "text-micro uppercase tracking-widest",
           sizeClasses[size],
           rarityStyles[persona.rarity],
-          interactive && rarityGlow[persona.rarity],
-          interactive && "cursor-pointer hover:scale-105",
+          interactive && "cursor-pointer hover:bg-white/10 hover:skew-x-[-2deg]",
           className
         )}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
-        <span className={cn("font-medium", persona.color)}>{persona.name}</span>
+        <span className="opacity-80 font-bold">{persona.name}</span>
       </div>
       
       {/* Tooltip */}
       {showTooltip && isHovered && (
-        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-50 animate-in fade-in slide-in-from-bottom-2 duration-200">
-          <div className="border border-[rgba(240,240,250,0.15)] p-3 min-w-[200px]">
-            <div className="text-sm opacity-80 font-medium mb-1 uppercase tracking-widest text-shadow-glow">
+        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-4 z-50 animate-in fade-in slide-in-from-bottom-2 duration-300">
+          <div className="brutalist-glass p-5 min-w-[240px] border-t-2 border-t-white/20 shadow-2xl">
+            <div className="text-caption-bold text-sm opacity-100 font-bold mb-2 uppercase tracking-widest">
               {persona.name}
             </div>
-            <div className="text-xs opacity-80 mb-2">
+            <div className="text-micro opacity-40 mb-4 uppercase tracking-widest leading-relaxed">
               {persona.description}
             </div>
-            <div className="text-xs opacity-80 border-t border-[rgba(240,240,250,0.15)] pt-2">
-              <span className="opacity-80">Criteria:</span> {persona.criteria}
-            </div>
-            <div className="flex items-center gap-2 mt-2">
-              <span className={cn(
-                "text-xs px-2 py-0.5 -full capitalize",
-                persona.rarity === 'common' && " opacity-80",
-                persona.rarity === 'uncommon' && "bg-cyan-500/20 text-[#f0f0fa]",
-                persona.rarity === 'rare' && "bg-purple-500/20 text-purple-400",
-                persona.rarity === 'legendary' && "bg-amber-500/20 text-amber-400"
-              )}>
-                {persona.rarity}
-              </span>
+            <div className="text-micro opacity-20 border-t border-white/5 pt-3 uppercase tracking-widest">
+              STATUS: {persona.rarity}
             </div>
             {/* Arrow */}
-            <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 border-r border-b border-[rgba(240,240,250,0.15)] rotate-45" />
+            <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 brutalist-glass border-r border-b border-white/10 rotate-45" />
           </div>
         </div>
       )}
@@ -137,32 +113,32 @@ export function PersonaDisplay({
 
   return (
     <div className={cn(
-      "bg-linear-to-r  p-4 border backdrop-blur-sm transition-all duration-300",
-      personaResult.primary.gradient,
-      "border-[rgba(240,240,250,0.15)] hover:border-[rgba(240,240,250,0.15)]",
+      "brutalist-glass p-8 transition-all duration-500 border-l-2 border-l-white/20",
       className
     )}>
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          {/* Main persona emoji */}
-          <div className="text-3xl">{personaResult.primary.emoji}</div>
+      <div className="flex items-center justify-between gap-8 flex-wrap">
+        <div className="flex items-center gap-6">
+          {/* Main persona icon substitute - using industrial symbol */}
+          <div className="w-16 h-16 border border-white/10 flex items-center justify-center bg-white/5">
+             <span className="text-2xl grayscale opacity-50">{personaResult.primary.emoji}</span>
+          </div>
           
           <div>
-            <div className="flex items-center gap-2">
-              <span className={cn("font-semibold", personaResult.primary.color)}>
+            <div className="flex items-center gap-3 mb-2">
+              <span className="text-section-head text-2xl font-bold opacity-80 uppercase tracking-widest">
                 {personaResult.primary.name}
               </span>
               <span className={cn(
-                "text-xs px-2 py-0.5 -full capitalize",
-                personaResult.primary.rarity === 'common' && " opacity-80",
-                personaResult.primary.rarity === 'uncommon' && "bg-cyan-500/20 text-[#f0f0fa]",
-                personaResult.primary.rarity === 'rare' && "bg-purple-500/20 text-purple-400",
-                personaResult.primary.rarity === 'legendary' && "bg-amber-500/20 text-amber-400"
+                "text-micro px-3 py-1 border border-white/10 uppercase tracking-widest",
+                personaResult.primary.rarity === 'legendary' && "bg-white/10 opacity-100",
+                personaResult.primary.rarity === 'rare' && "bg-white/5 opacity-80",
+                personaResult.primary.rarity === 'uncommon' && "opacity-60",
+                personaResult.primary.rarity === 'common' && "opacity-30"
               )}>
                 {personaResult.primary.rarity}
               </span>
             </div>
-            <p className="text-xs opacity-80 mt-0.5">
+            <p className="text-micro opacity-40 uppercase tracking-widest leading-relaxed max-w-lg">
               {personaResult.primary.description}
             </p>
           </div>
@@ -170,29 +146,29 @@ export function PersonaDisplay({
         
         {/* Confidence indicator */}
         <div className="text-right">
-          <div className="text-lg font-bold opacity-80 tabular-nums">
+          <div className="text-3xl font-bold opacity-80 tracking-widest">
             {personaResult.confidence}%
           </div>
-          <div className="text-xs opacity-80">match</div>
+          <div className="text-micro opacity-30 uppercase tracking-widest">MATCH CONFIDENCE</div>
         </div>
       </div>
       
       {/* Secondary persona hint */}
       {personaResult.secondary && (
-        <div className="mt-3 pt-3 border-t border-[rgba(240,240,250,0.15)] flex items-center gap-2 text-xs opacity-80">
-          <span>Also:</span>
+        <div className="mt-8 pt-6 border-t border-white/5 flex items-center gap-4">
+          <span className="text-micro opacity-20 uppercase tracking-widest">COGNITIVE VARIANT:</span>
           <PersonaBadge persona={personaResult.secondary} size="sm" showTooltip={false} />
         </div>
       )}
       
       {/* Additional earned badges */}
       {earnedBadges && earnedBadges.length > 0 && (
-        <div className="mt-3 pt-3 border-t border-[rgba(240,240,250,0.15)]">
-          <div className="flex items-center gap-2 text-xs opacity-80 mb-2">
+        <div className="mt-6 pt-6 border-t border-white/5">
+          <div className="flex items-center gap-3 text-micro opacity-20 uppercase tracking-widest mb-4">
             <Award className="w-3 h-3" />
-            <span>Earned Badges</span>
+            <span>ARCHIVED CLASSIFICATIONS</span>
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-3">
             {earnedBadges.map(badge => (
               <PersonaBadge 
                 key={badge.id} 
@@ -224,32 +200,30 @@ export function PersonaBadgeCompact({
     <div className="relative inline-block">
       <div 
         className={cn(
-          "inline-flex items-center gap-1.5 px-3 py-1.5 -full",
-          "bg-linear-to-r border cursor-pointer",
-          "transition-all duration-300 hover:scale-105",
-          persona.gradient,
-          persona.rarity === 'legendary' && "animate-pulse",
-          persona.rarity === 'rare' && "border-purple-500/40",
-          persona.rarity === 'uncommon' && "border-cyan-500/40",
-          "border-[rgba(240,240,250,0.15)]",
+          "inline-flex items-center gap-3 px-4 py-2 brutalist-glass border cursor-pointer",
+          "transition-all duration-300 hover:skew-x-[-1deg]",
+          persona.rarity === 'legendary' && "border-white/40 bg-white/5",
+          persona.rarity === 'rare' && "border-white/20",
+          persona.rarity === 'uncommon' && "border-white/10 opacity-70",
+          persona.rarity === 'common' && "border-white/5 opacity-50",
           className
         )}
         onMouseEnter={() => setShowTooltip(true)}
         onMouseLeave={() => setShowTooltip(false)}
       >
-        <span className={cn("text-sm font-medium", persona.color)}>
+        <span className="text-micro font-bold uppercase tracking-widest opacity-80">
           {persona.name}
         </span>
       </div>
       
       {/* Tooltip */}
       {showTooltip && (
-        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-50 animate-in fade-in slide-in-from-bottom-2 duration-200">
-          <div className="border border-[rgba(240,240,250,0.15)] px-3 py-2 whitespace-nowrap">
-            <div className="text-xs opacity-80">
+        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 z-50 animate-in fade-in slide-in-from-bottom-2 duration-300">
+          <div className="brutalist-glass px-4 py-2 border border-white/10 whitespace-nowrap">
+            <div className="text-micro opacity-40 uppercase tracking-widest">
               {persona.criteria}
             </div>
-            <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 border-r border-b border-[rgba(240,240,250,0.15)] rotate-45" />
+            <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 brutalist-glass border-r border-b border-white/10 rotate-45" />
           </div>
         </div>
       )}
@@ -277,25 +251,24 @@ export function PersonaShowcase({ context, className }: PersonaShowcaseProps) {
 
   return (
     <div className={cn(
-      "bg-linear-to-r from-purple-500/10 via-cyan-500/10 to-blue-500/10",
-      "border border-purple-500/20  overflow-hidden backdrop-blur-sm",
+      "brutalist-glass border-l-2 border-l-white/20 overflow-hidden",
       className
     )}>
       {/* Header */}
-      <div className="px-6 py-4 border-b border-[rgba(240,240,250,0.15)] flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-purple-500/20">
-            <Sparkles className="w-5 h-5 text-purple-400" />
+      <div className="px-8 py-6 border-b border-white/5 flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <div className="p-3 bg-white/5 opacity-40">
+            <Sparkles className="w-5 h-5 text-[#f0f0fa]" />
           </div>
           <div>
-            <h3 className="font-medium opacity-80">Your Developer Persona</h3>
-            <p className="text-xs opacity-80">Based on your coding patterns</p>
+            <h3 className="text-caption-bold text-sm tracking-widest uppercase opacity-80">DEVELOPER CLASSIFICATION</h3>
+            <p className="text-micro opacity-20 uppercase tracking-widest">COGNITIVE PATTERN ANALYSIS</p>
           </div>
         </div>
         
         <button
           onClick={() => setExpanded(!expanded)}
-          className="p-2 opacity-80 hover:opacity-80 transition-colors"
+          className="p-3 opacity-30 hover:opacity-100 transition-all border border-white/5"
         >
           <ChevronRight 
             className={cn(
@@ -307,58 +280,56 @@ export function PersonaShowcase({ context, className }: PersonaShowcaseProps) {
       </div>
       
       {/* Primary Persona */}
-      <div className="p-6">
-        <div className="flex items-center gap-4">
+      <div className="p-8">
+        <div className="flex items-center gap-8 flex-wrap sm:flex-nowrap">
           <div 
             className={cn(
-              "w-20 h-20  flex items-center justify-center text-4xl",
-              "bg-linear-to-br border",
-              personaResult.primary.gradient,
-              "border-[rgba(240,240,250,0.15)]"
+              "w-24 h-24 border border-white/10 flex items-center justify-center text-4xl bg-white/2",
+              "grayscale opacity-40"
             )}
           >
             {personaResult.primary.emoji}
           </div>
           
           <div className="flex-1">
-            <div className="flex items-center gap-2 mb-1">
-              <span className={cn("text-xl font-bold", personaResult.primary.color)}>
+            <div className="flex items-center gap-3 mb-2">
+              <span className="text-section-head text-2xl font-bold opacity-80 uppercase tracking-widest">
                 {personaResult.primary.name}
               </span>
               <span className={cn(
-                "text-xs px-2 py-0.5 -full capitalize",
-                personaResult.primary.rarity === 'legendary' && "bg-amber-500/20 text-amber-400",
-                personaResult.primary.rarity === 'rare' && "bg-purple-500/20 text-purple-400",
-                personaResult.primary.rarity === 'uncommon' && "bg-cyan-500/20 text-[#f0f0fa]",
-                personaResult.primary.rarity === 'common' && " opacity-80"
+                "text-micro px-3 py-1 border border-white/10 uppercase tracking-widest",
+                personaResult.primary.rarity === 'legendary' && "bg-white/10 opacity-100",
+                personaResult.primary.rarity === 'rare' && "bg-white/5 opacity-80",
+                personaResult.primary.rarity === 'uncommon' && "opacity-60",
+                personaResult.primary.rarity === 'common' && "opacity-30"
               )}>
                 {personaResult.primary.rarity}
               </span>
             </div>
-            <p className="text-sm opacity-80">
+            <p className="text-micro opacity-40 uppercase tracking-widest leading-relaxed mb-4">
               {personaResult.primary.description}
             </p>
-            <p className="text-xs opacity-80 mt-1">
-              {personaResult.primary.criteria}
+            <p className="text-micro opacity-20 uppercase tracking-widest italic">
+              CRITERIA: {personaResult.primary.criteria}
             </p>
           </div>
           
-          <div className="text-center">
-            <div className="text-3xl font-bold opacity-80 tabular-nums">
+          <div className="text-right min-w-[120px]">
+            <div className="text-4xl font-bold opacity-80 tracking-widest tabular-nums font-mono">
               {personaResult.confidence}%
             </div>
-            <div className="text-xs opacity-80">confidence</div>
+            <div className="text-micro opacity-20 uppercase tracking-widest">CONFIDENCE LEVEL</div>
           </div>
         </div>
         
         {/* Earned Badges Section */}
         {expanded && additionalBadges.length > 0 && (
-          <div className="mt-6 pt-6 border-t border-[rgba(240,240,250,0.15)]">
-            <h4 className="text-sm font-medium opacity-80 mb-3 flex items-center gap-2">
-              <Award className="w-4 h-4 text-amber-400" />
-              All Earned Badges ({additionalBadges.length + 1})
+          <div className="mt-10 pt-8 border-t border-white/5">
+            <h4 className="text-micro opacity-20 uppercase tracking-widest mb-6 flex items-center gap-3 font-bold">
+              <Award className="w-4 h-4" />
+              SECONDARY ARCHIVE CLASSIFICATIONS ({additionalBadges.length + 1})
             </h4>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-3">
               <PersonaBadge persona={personaResult.primary} size="md" />
               {additionalBadges.map(badge => (
                 <PersonaBadge key={badge.id} persona={badge} size="md" />

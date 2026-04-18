@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import type { Session } from "next-auth";
+import { cn } from "@/lib/utils";
 
 /**
  * Profile Content Component — SpaceX-inspired industrial aesthetic
@@ -85,168 +86,129 @@ export function ProfileContent({ session }: ProfileContentProps) {
   return (
     <div className="section-cinematic bg-black">
       <div 
-        className="section-photo" 
+        className="section-photo grayscale opacity-40 transition-opacity duration-1000" 
         style={{ 
-          backgroundImage: "url('/space-hero.png')", 
+          backgroundImage: "url('/profile-hero.png')", 
           backgroundSize: "cover", 
           backgroundPosition: "center",
           position: "fixed"
         }} 
       />
       <div className="section-overlay" style={{ position: "fixed" }} />
-      <div className="section-content relative z-20 w-full" style={{ padding: "120px clamp(24px, 6vw, 80px) 40px", maxWidth: "800px", margin: "0 auto" }}>
+      
+      <div className="section-content relative z-20 w-full" style={{ padding: "120px clamp(24px, 6vw, 80px) 40px", maxWidth: "900px", margin: "0 auto" }}>
         {/* Header */}
-        <header style={{ marginBottom: "40px" }}>
+        <header className="mb-12">
           <Link
             href="/dashboard"
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "8px",
-              textDecoration: "none",
-              marginBottom: "20px",
-              opacity: 0.4,
-              transition: "opacity 0.2s ease",
-            }}
-            className="text-micro uppercase tracking-widest"
+            className="text-micro uppercase tracking-[4px] opacity-40 hover:opacity-100 transition-all inline-flex items-center gap-4 mb-10"
           >
             <ArrowLeft size={11} />
-            DASHBOARD
+            BACK TO MISSION CONTROL
           </Link>
 
-          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", flexWrap: "wrap", gap: "16px" }}>
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-8 border-b border-white/10 pb-10">
             <div>
-              <p className="text-micro uppercase tracking-widest" style={{ marginBottom: "8px", opacity: 0.4 }}>ACCOUNT</p>
-              <h1 className="text-section-head">PROFILE</h1>
+              <p className="text-micro uppercase tracking-[5px] opacity-20 mb-4 font-bold">PERSONNEL ARCHIVE</p>
+              <h1 className="text-display-hero text-6xl font-bold opacity-80 tracking-tighter">PROFILE</h1>
             </div>
             <LogoutButton />
           </div>
         </header>
 
         {/* Profile identity & Information */}
-        <div className="brutalist-glass p-8 space-y-12">
-          {/* Hero row */}
-          <div
-            style={{
-              paddingBottom: "28px",
-              borderBottom: "1px solid rgba(240,240,250,0.05)",
-              display: "flex",
-              alignItems: "center",
-              gap: "24px",
-              flexWrap: "wrap",
-            }}
-          >
-            {/* Avatar */}
-            {user.image ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={user.image}
-                alt={user.name || "User avatar"}
-                style={{
-                  width: "80px",
-                  height: "80px",
-                  borderRadius: "50%",
-                  border: "1px solid rgba(240,240,250,0.15)",
-                }}
-                loading="lazy"
-              />
-            ) : (
-              <div
-                style={{
-                  width: "80px",
-                  height: "80px",
-                  borderRadius: "50%",
-                  background: "rgba(240,240,250,0.05)",
-                  border: "1px solid rgba(240,240,250,0.1)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <User size={38} style={{ opacity: 0.3 }} />
-              </div>
-            )}
+        <div className="brutalist-glass p-10 space-y-16">
+          {/* Identity row */}
+          <div className="flex items-center gap-10 flex-wrap sm:flex-nowrap border-b border-white/5 pb-12">
+            {/* Avatar block */}
+            <div className="relative group">
+              {user.image ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={user.image}
+                  alt={user.name || "User avatar"}
+                  className="w-24 h-24  grayscale border border-white/20 group-hover:grayscale-0 transition-all duration-500"
+                  loading="lazy"
+                />
+              ) : (
+                <div className="w-24 h-24 border border-white/10 bg-white/5 flex items-center justify-center">
+                  <User size={40} className="opacity-20" />
+                </div>
+              )}
+               <div className="absolute -bottom-2 -right-2 w-6 h-6 bg-white flex items-center justify-center">
+                  <div className="w-1.5 h-1.5 bg-black" />
+               </div>
+            </div>
 
-            {/* Name + GH link */}
-            <div>
-              <h2
-                className="text-section-head"
-                style={{ fontSize: "clamp(1.5rem, 4vw, 2.25rem)", marginBottom: "8px" }}
-              >
-                {user.name || user.username || "ANONYMOUS USER"}
+            <div className="flex-1">
+              <h2 className="text-section-head text-3xl font-bold opacity-80 tracking-widest uppercase mb-4">
+                {user.name || user.username || "STATION_USER_00"}
               </h2>
               {user.username && (
                 <a
                   href={`https://github.com/${user.username}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: "8px",
-                    textDecoration: "none",
-                    opacity: 0.4,
-                  }}
-                  className="text-micro uppercase tracking-widest"
+                  className="text-micro uppercase tracking-[3px] opacity-30 hover:opacity-100 transition-all inline-flex items-center gap-3"
                 >
                   <Github size={12} />
-                  GH/{user.username.toUpperCase()}
+                  GITHUB_REF: {user.username.toUpperCase()}
                 </a>
               )}
             </div>
           </div>
 
-          {/* Info grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-            <section aria-labelledby="account-info-heading">
-              <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "20px", opacity: 0.4 }}>
+          {/* Detailed Info Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-16">
+            <section>
+              <div className="flex items-center gap-3 mb-8 opacity-20 group">
                 <Shield size={12} />
-                <h3 id="account-info-heading" className="text-micro uppercase tracking-widest">ACCOUNT DATA</h3>
+                <h3 className="text-micro uppercase tracking-[4px] font-bold">CORE CREDENTIALS</h3>
               </div>
-              <div className="space-y-4">
+              <div className="space-y-6">
                 <InfoRow
                   icon={<Mail size={12} />}
-                  label="EMAIL"
-                  value={user.email || "NOT PROVIDED"}
+                  label="REGISTRATION"
+                  value={user.email || "UNSPECIFIED"}
                 />
                 <InfoRow
                   icon={<Github size={12} />}
-                  label="GITHUB ID"
-                  value={user.username || "N/A"}
+                  label="EXTERNAL_ID"
+                  value={user.username || "NULL"}
                 />
                 <InfoRow
                   icon={<Calendar size={12} />}
-                  label="JOINED"
+                  label="COMMISSIONED"
                   value={joinedDate.toUpperCase()}
                 />
               </div>
             </section>
 
-            <section aria-labelledby="github-status-heading">
-              <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "20px", opacity: 0.4 }}>
+            <section>
+              <div className="flex items-center gap-3 mb-8 opacity-20">
                 <Github size={12} />
-                <h3 id="github-status-heading" className="text-micro uppercase tracking-widest">CONNECTION STATUS</h3>
+                <h3 className="text-micro uppercase tracking-[4px] font-bold">OPERATIONAL STATUS</h3>
               </div>
               {isLoading ? (
-                <div className="animate-pulse space-y-4 pt-4">
-                  <div className="h-4 bg-white/5 w-3/4" />
-                  <div className="h-4 bg-white/5 w-1/2" />
+                <div className="space-y-6 animate-pulse pt-4">
+                  <div className="h-4 bg-white/5 w-full" />
+                  <div className="h-4 bg-white/5 w-2/3" />
                 </div>
               ) : (
-                <div className="space-y-4">
+                <div className="space-y-6">
                   <InfoRow
                     icon={githubData?.isConnected
-                      ? <CheckCircle2 size={12} style={{ color: "rgba(134,239,172,0.7)" }} />
-                      : <AlertCircle size={12} style={{ color: "rgba(251,191,36,0.7)" }} />
+                      ? <CheckCircle2 size={12} className="opacity-60" />
+                      : <AlertCircle size={12} className="opacity-40" />
                     }
-                    label="STATUS"
-                    value={githubData?.isConnected ? "VERIFIED" : "DISCONNECTED"}
-                    valueColor={githubData?.isConnected ? "rgba(134,239,172,0.7)" : "rgba(251,191,36,0.7)"}
+                    label="NETWORK_SYNC"
+                    value={githubData?.isConnected ? "LINKED / ACTIVE" : "LINK_TERMINATED"}
+                    isStatus
                   />
                   {githubData?.lastSync && (
                     <InfoRow
                       icon={<Clock size={12} />}
-                      label="LAST SYNCED"
+                      label="ARCHIVE_UPDATE"
                       value={new Date(githubData.lastSync).toLocaleString("en-US", {
                         month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
                       }).toUpperCase()}
@@ -257,57 +219,44 @@ export function ProfileContent({ session }: ProfileContentProps) {
             </section>
           </div>
           
-          {/* Account Status Badge */}
-          <section>
-            <h3 className="text-micro uppercase tracking-widest opacity-40 mb-4">SYSTEM STATUS</h3>
-            <div className="flex flex-wrap gap-4">
-                <span
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: "8px",
-                    padding: "6px 14px",
-                    background: "rgba(134,239,172,0.04)",
-                    border: "1px solid rgba(134,239,172,0.14)",
-                  }}
-                  className="text-micro uppercase tracking-widest"
-                >
-                  <span
-                    style={{
-                      width: "6px",
-                      height: "6px",
-                      borderRadius: "50%",
-                      background: "rgba(134,239,172,0.7)",
-                      boxShadow: "0 0 8px rgba(134,239,172,0.5)"
-                    }}
-                  />
-                  ACTIVE & AUTHENTICATED
-                </span>
-            </div>
+          {/* Hardware/System Status */}
+          <section className="pt-8 border-t border-white/5">
+             <div className="flex items-center gap-4 text-micro uppercase tracking-[3px] opacity-20 mb-6 font-bold">
+               SYSTEM VALIDATION
+             </div>
+             <div className="flex flex-wrap gap-6">
+                <div className="px-6 py-2 border border-white/10 bg-white/5 text-micro uppercase tracking-[4px] opacity-60 flex items-center gap-3">
+                   <div className="w-1.5 h-1.5 bg-white shadow-[0_0_10px_white]" />
+                   SESSION_VERIFIED_NOMINAL
+                </div>
+                <div className="px-6 py-2 border border-white/5 text-micro uppercase tracking-[4px] opacity-30 flex items-center gap-3">
+                   V6/ENCRYPTION_ACTIVE
+                </div>
+             </div>
           </section>
         </div>
 
-        {/* Actions Section */}
-        <div style={{ marginTop: "32px", display: "flex", gap: "12px", flexWrap: "wrap" }}>
+        {/* Action Controls */}
+        <div className="mt-12 flex gap-4 flex-wrap">
           <Link
             href="/settings"
-            className="btn-ghost btn-ghost-sm"
+            className="btn-ghost flex items-center gap-4 px-8 py-3 text-micro uppercase tracking-[3px]"
           >
-            <Settings size={13} />
-            MANAGE SETTINGS
+            <Settings size={13} className="opacity-40" />
+            PROTOCOL_SETTINGS
           </Link>
 
           {!githubData?.isConnected && !isLoading && (
             <button
               onClick={handleReconnectGitHub}
               disabled={isReconnecting}
-              className="btn-ghost btn-ghost-sm"
+              className="btn-ghost flex items-center gap-4 px-8 py-3 text-micro uppercase tracking-[3px]"
             >
               <RefreshCw
                 size={13}
-                className={isReconnecting ? "animate-spin" : ""}
+                className={cn("opacity-40", isReconnecting && "animate-spin")}
               />
-              {isReconnecting ? "RECONNECTING..." : "RECONNECT GITHUB"}
+              {isReconnecting ? "ESTABLISHING..." : "INITIALIZE_LINK"}
             </button>
           )}
         </div>
@@ -321,26 +270,22 @@ function InfoRow({
   icon,
   label,
   value,
-  valueColor,
+  isStatus = false,
 }: {
   icon: React.ReactNode;
   label: string;
   value: string;
-  valueColor?: string;
+  isStatus?: boolean;
 }) {
   return (
-    <div style={{ display: "flex", alignItems: "flex-start", gap: "12px" }}>
-      <span style={{ opacity: 0.3, flexShrink: 0, marginTop: "2px" }}>{icon}</span>
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <p className="text-micro uppercase tracking-widest" style={{ opacity: 0.3, marginBottom: "4px" }}>{label}</p>
-        <p
-          className="text-caption uppercase tracking-widest"
-          style={{
-            color: valueColor || "var(--spectral-white)",
-            opacity: valueColor ? 1 : 0.65,
-            overflowWrap: "break-word",
-          }}
-        >
+    <div className="flex items-start gap-5 group">
+      <div className="mt-1 opacity-20 group-hover:opacity-60 transition-opacity shrink-0">{icon}</div>
+      <div className="flex-1 min-w-0">
+        <p className="text-micro uppercase tracking-[3px] opacity-20 font-bold mb-1">{label}</p>
+        <p className={cn(
+          "text-caption-bold text-sm uppercase tracking-widest break-words",
+          isStatus ? "opacity-100" : "opacity-60 group-hover:opacity-80 transition-opacity"
+        )}>
           {value}
         </p>
       </div>
