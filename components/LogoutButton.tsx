@@ -48,8 +48,8 @@ export function LogoutButton({
         }}
         className={className}
         aria-label="Sign out"
-        onMouseOver={(e) => !isLoading && (e.currentTarget.style.opacity = "0.8")}
-        onMouseOut={(e) => !isLoading && (e.currentTarget.style.opacity = "0.45")}
+        
+        
       >
         <LogOut size={18} />
       </button>

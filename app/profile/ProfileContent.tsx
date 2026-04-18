@@ -106,8 +106,8 @@ export function ProfileContent({ session }: ProfileContentProps) {
             }}
             className="text-micro"
             aria-label="Back to Dashboard"
-            onMouseOver={(e) => (e.currentTarget.style.opacity = "0.8")}
-            onMouseOut={(e) => (e.currentTarget.style.opacity = "0.4")}
+            
+            
           >
             <ArrowLeft size={11} />
             Dashboard
@@ -196,8 +196,8 @@ export function ProfileContent({ session }: ProfileContentProps) {
                   }}
                   className="text-caption"
                   aria-label={`View ${user.username}'s GitHub profile`}
-                  onMouseOver={(e) => (e.currentTarget.style.opacity = "0.8")}
-                  onMouseOut={(e) => (e.currentTarget.style.opacity = "0.4")}
+                  
+                  
                 >
                   <Github size={12} />
                   @{user.username}
@@ -438,8 +438,8 @@ function InfoRow({
         background: "rgba(0,0,0,0.5)",
         transition: "background 0.2s ease",
       }}
-      onMouseOver={(e) => (e.currentTarget.style.background = "rgba(240,240,250,0.02)")}
-      onMouseOut={(e) => (e.currentTarget.style.background = "rgba(0,0,0,0.5)")}
+      
+      
     >
       <span style={{ opacity: 0.3, flexShrink: 0, marginTop: "2px" }}>{icon}</span>
       <div style={{ flex: 1, minWidth: 0 }}>

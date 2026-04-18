@@ -33,8 +33,8 @@ export default async function SettingsPage() {
               transition: "opacity 0.2s ease",
             }}
             className="text-micro"
-            onMouseOver={(e) => (e.currentTarget.style.opacity = "0.8")}
-            onMouseOut={(e) => (e.currentTarget.style.opacity = "0.4")}
+            
+            
           >
             <ArrowLeft size={11} />
             Dashboard

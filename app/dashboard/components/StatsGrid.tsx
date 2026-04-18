@@ -72,8 +72,8 @@ export function StatsGrid({ analytics: initialAnalytics, previousAnalytics }: St
           }}
           title="Refresh statistics"
           aria-label="Refresh statistics"
-          onMouseOver={(e) => !isRefreshing && (e.currentTarget.style.opacity = "0.8")}
-          onMouseOut={(e) => !isRefreshing && (e.currentTarget.style.opacity = "0.4")}
+          
+          
         >
           <RefreshCw
             size={14}
@@ -184,8 +184,8 @@ function StatCard({
         position: "relative",
         transition: "background 0.2s ease",
       }}
-      onMouseOver={(e) => (e.currentTarget.style.background = "rgba(240,240,250,0.03)")}
-      onMouseOut={(e) => (e.currentTarget.style.background = "rgba(0,0,0,0.6)")}
+      
+      
     >
       {/* Active pulse indicator */}
       {highlight && (

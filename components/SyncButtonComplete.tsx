@@ -256,8 +256,8 @@ export function SyncButtonComplete() {
             transition: "opacity 0.2s ease",
           }}
           className="text-micro"
-          onMouseOver={(e) => (e.currentTarget.style.opacity = "0.6")}
-          onMouseOut={(e) => (e.currentTarget.style.opacity = "0.3")}
+          
+          
         >
           <RefreshCw size={10} aria-hidden="true" />
           <span>Force Full Re-sync</span>

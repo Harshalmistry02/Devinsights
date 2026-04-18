@@ -72,8 +72,8 @@ function LoginForm() {
         }}
         className="text-nav"
         aria-label="Back to home"
-        onMouseOver={(e) => (e.currentTarget.style.opacity = "1")}
-        onMouseOut={(e) => (e.currentTarget.style.opacity = "0.6")}
+        
+        
       >
         <Home size={14} />
         Home

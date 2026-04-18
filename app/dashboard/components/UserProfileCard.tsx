@@ -106,8 +106,8 @@ export function UserProfileCard({ session, githubStatus, lastSync, analytics }: 
                 transition: "opacity 0.2s ease",
               }}
               aria-label={`Visit @${user.username} on GitHub (opens in new tab)`}
-              onMouseOver={(e) => (e.currentTarget.style.opacity = "0.7")}
-              onMouseOut={(e) => (e.currentTarget.style.opacity = "0.45")}
+              
+              
             >
               <Github size={11} />
               @{user.username}

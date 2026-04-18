@@ -182,12 +182,6 @@ export function KeyboardShortcutsHelp() {
         }}
         title="Keyboard shortcuts (press ?)"
         aria-label="Show keyboard shortcuts"
-        onMouseOver={(e) => {
-            e.currentTarget.style.background = 'rgba(240, 240, 250, 0.2)';
-        }}
-        onMouseOut={(e) => {
-            e.currentTarget.style.background = 'rgba(240, 240, 250, 0.1)';
-        }}
       >
         <Keyboard size={20} />
       </button>

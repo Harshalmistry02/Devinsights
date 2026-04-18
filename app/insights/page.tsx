@@ -406,8 +406,8 @@ async function AIStatsBanner({ analytics, userId, persona }: {
               padding: "20px",
               transition: "background 0.2s ease",
             }}
-            onMouseOver={(e) => (e.currentTarget.style.background = "rgba(240,240,250,0.03)")}
-            onMouseOut={(e) => (e.currentTarget.style.background = "rgba(0,0,0,0.6)")}
+            
+            
           >
             <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px", opacity: 0.3 }}>
               {stat.icon}
