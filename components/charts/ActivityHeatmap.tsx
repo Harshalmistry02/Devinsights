@@ -23,32 +23,30 @@ export function ActivityHeatmap({ data, className = '' }: ActivityHeatmapProps) 
   }, [data]);
 
   return (
-    <div className={` border border-[rgba(240,240,250,0.15)]  backdrop-blur-sm ${className}`}>
-      {/* Header */}
-      <div className="p-4 sm:p-6 border-b border-[rgba(240,240,250,0.15)]">
-        <div className="flex items-center justify-between flex-wrap gap-4">
-          <div>
-            <h3 className="text-lg font-semibold opacity-80">Contribution Activity</h3>
-            <p className="text-sm opacity-80">
-              <span className="text-[#f0f0fa] font-medium">{totalCommits.toLocaleString()}</span> commits in the last year
-              <span className="mx-2">·</span>
-              <span className="text-purple-400">{activeDays}</span> active days
-            </p>
-          </div>
-          
-          {/* Legend */}
-          <div className="flex items-center gap-2 text-xs opacity-80">
-            <span>Less</span>
-            <div className="flex gap-1">
-              <div className="w-3 h-3 border border-[rgba(240,240,250,0.15)]" />
-              <div className="w-3 h-3" style={{ backgroundColor: getColor(1, 10) }} />
-              <div className="w-3 h-3" style={{ backgroundColor: getColor(3, 10) }} />
-              <div className="w-3 h-3" style={{ backgroundColor: getColor(6, 10) }} />
-              <div className="w-3 h-3" style={{ backgroundColor: getColor(10, 10) }} />
-            </div>
-            <span>More</span>
-          </div>
+    <div className={` bg-transparent border-none ${className}`}>
+      {/* Summary Stats */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 mb-8">
+        <div className="border-l-2 border-[rgba(240,240,250,0.1)] pl-4">
+          <p className="text-micro opacity-40 mb-2 tracking-[2px]">TOTAL COMMITS</p>
+          <p className="text-display-hero text-3xl opacity-90 tabular-nums">{totalCommits.toLocaleString()}</p>
         </div>
+        <div className="border-l-2 border-[rgba(240,240,250,0.1)] pl-4">
+          <p className="text-micro opacity-40 mb-2 tracking-[2px]">ACTIVE DAYS</p>
+          <p className="text-display-hero text-3xl opacity-90 tabular-nums">{activeDays}</p>
+        </div>
+      </div>
+
+      {/* Legend */}
+      <div className="flex items-center justify-end gap-3 text-micro opacity-40 mb-4 px-2 tracking-widest">
+        <span>LESS</span>
+        <div className="flex gap-[2px]">
+          <div className="w-[10px] h-[10px] bg-[rgba(240,240,250,0.05)]" />
+          <div className="w-[10px] h-[10px] bg-[rgba(240,240,250,0.2)]" />
+          <div className="w-[10px] h-[10px] bg-[rgba(240,240,250,0.4)]" />
+          <div className="w-[10px] h-[10px] bg-[rgba(240,240,250,0.7)]" />
+          <div className="w-[10px] h-[10px] bg-[rgba(240,240,250,0.9)]" />
+        </div>
+        <span>MORE</span>
       </div>
 
       {/* Heatmap Grid */}
@@ -104,15 +102,14 @@ export function ActivityHeatmap({ data, className = '' }: ActivityHeatmapProps) 
                       {/* Tooltip */}
                       {day && (
                         <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block z-10">
-                          <div className="border border-[rgba(240,240,250,0.15)] px-3 py-2 whitespace-nowrap">
-                            <p className="text-xs opacity-80">
-                              {formatDate(day.date)}
+                          <div className="brutalist-glass px-3 py-2 whitespace-nowrap border-none ring-1 ring-[#f0f0fa]/10">
+                            <p className="text-micro opacity-40 mb-1 tracking-widest">
+                              {formatDate(day.date).toUpperCase()}
                             </p>
-                            <p className="text-sm font-semibold text-[#f0f0fa]">
-                              {day.commits} commit{day.commits !== 1 ? 's' : ''}
+                            <p className="text-caption-bold text-[#f0f0fa]">
+                              {day.commits} COMMITS
                             </p>
                           </div>
-                          <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-slate-800" />
                         </div>
                       )}
                     </div>
@@ -209,15 +206,9 @@ function generateCalendarData(data: Record<string, number>) {
 }
 
 function getColor(commits: number, maxCommits: number): string {
-  if (commits === 0) return '#1e293b'; // slate-800
-  
+  if (commits === 0) return 'rgba(240, 240, 250, 0.05)';
   const intensity = Math.min(commits / Math.max(maxCommits, 1), 1);
-  
-  // Cyan color gradient
-  if (intensity < 0.25) return '#164e63'; // cyan-900
-  if (intensity < 0.5) return '#0e7490'; // cyan-700
-  if (intensity < 0.75) return '#06b6d4'; // cyan-500
-  return '#22d3ee'; // cyan-400
+  return `rgba(240, 240, 250, ${0.1 + intensity * 0.8})`;
 }
 
 function formatDate(dateStr: string): string {

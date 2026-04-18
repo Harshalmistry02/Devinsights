@@ -34,11 +34,11 @@ export function LanguageBreakdown({ data, className = '' }: LanguageBreakdownPro
   const total = chartData.reduce((sum, d) => sum + d.value, 0);
 
   return (
-    <div className={` border border-[rgba(240,240,250,0.15)]  backdrop-blur-sm ${className}`}>
-      {/* Header */}
-      <div className="p-4 sm:p-6 border-b border-[rgba(240,240,250,0.15)]">
-        <h3 className="text-lg font-semibold opacity-80">Language Distribution</h3>
-        <p className="text-sm opacity-80">Commits per programming language</p>
+    <div className={` bg-transparent border-none ${className}`}>
+      {/* Summary Stats */}
+      <div className="border-l-2 border-[rgba(240,240,250,0.1)] pl-4 mb-10">
+        <p className="text-micro opacity-40 mb-2 tracking-[2px]">TOTAL LANGUAGES</p>
+        <p className="text-display-hero text-3xl opacity-90 tabular-nums">{data.length}</p>
       </div>
 
       {/* Chart */}
@@ -60,7 +60,11 @@ export function LanguageBreakdown({ data, className = '' }: LanguageBreakdownPro
                     stroke="transparent"
                   >
                     {chartData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
+                      <Cell 
+                        key={`cell-${index}`} 
+                        fill="#f0f0fa" 
+                        opacity={0.1 + (index / chartData.length) * 0.8}
+                      />
                     ))}
                   </Pie>
                   <Tooltip content={<CustomTooltip total={total} />} />
@@ -71,26 +75,29 @@ export function LanguageBreakdown({ data, className = '' }: LanguageBreakdownPro
             {/* Legend / Stats */}
             <div className="w-full lg:w-1/2 space-y-3">
               {chartData.map((item, index) => (
-                <div key={item.name} className="flex items-center gap-3">
+                <div key={item.name} className="flex items-center gap-4">
                   <div
-                    className="w-3 h-3 -full shrink-0"
-                    style={{ backgroundColor: item.color }}
+                    className="w-[10px] h-[10px]"
+                    style={{ 
+                      backgroundColor: "#f0f0fa",
+                      opacity: 0.1 + (index / chartData.length) * 0.8
+                    }}
                   />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm opacity-80 font-medium truncate">
-                        {item.name}
+                      <span className="text-micro font-medium truncate tracking-widest opacity-80">
+                        {item.name.toUpperCase()}
                       </span>
-                      <span className="text-sm opacity-80 ml-2">
+                      <span className="text-micro opacity-40 ml-2 tabular-nums">
                         {item.percentage}%
                       </span>
                     </div>
-                    <div className="mt-1 h-1.5 -full overflow-hidden">
+                    <div className="mt-1 h-[1px] bg-[rgba(240,240,250,0.05)] overflow-hidden">
                       <div
-                        className="h-full -full transition-all duration-500"
+                        className="h-full bg-[#f0f0fa] transition-all duration-500"
                         style={{
                           width: `${item.percentage}%`,
-                          backgroundColor: item.color,
+                          opacity: 0.1 + (index / chartData.length) * 0.8
                         }}
                       />
                     </div>
@@ -128,18 +135,14 @@ function CustomTooltip({ active, payload, total }: any) {
   const percentage = ((data.value / total) * 100).toFixed(1);
 
   return (
-    <div className="border border-[rgba(240,240,250,0.15)] p-3">
-      <div className="flex items-center gap-2 mb-1">
-        <div
-          className="w-3 h-3 -full"
-          style={{ backgroundColor: data.color }}
-        />
-        <span className="text-sm font-medium opacity-80">{data.name}</span>
+    <div className="brutalist-glass p-3 border-none ring-1 ring-[#f0f0fa]/10">
+      <div className="flex items-center gap-2 mb-2">
+         <span className="text-micro font-medium opacity-40 tracking-widest">{data.name.toUpperCase()}</span>
       </div>
-      <p className="text-lg font-semibold text-[#f0f0fa]">
-        {data.value.toLocaleString()} commits
+      <p className="text-display-hero text-xl opacity-90">
+        {percentage}%
       </p>
-      <p className="text-xs opacity-80">{percentage}% of total</p>
+      <p className="text-micro opacity-30 mt-1">{data.value.toLocaleString()} COMMITS</p>
     </div>
   );
 }

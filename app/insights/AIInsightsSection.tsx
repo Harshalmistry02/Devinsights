@@ -237,9 +237,9 @@ export function AIInsightsSection({ analytics }: AIInsightsSectionProps) {
           </div>
           <div className="flex-1">
             <h4 className="text-amber-200 font-medium">Next Milestone</h4>
-            <p className="text-amber-400/70 text-sm">
-              Only <span className="font-bold text-amber-300">{meta.daysToMilestone.daysRemaining} days</span> until your{' '}
-              <span className="font-bold text-amber-300">{meta.daysToMilestone.milestone}-day</span> streak! 🎯
+            <p className="text-amber-400/70 text-sm uppercase tracking-widest">
+              ONLY <span className="font-bold text-amber-300">{meta.daysToMilestone.daysRemaining} DAYS</span> UNTIL YOUR{' '}
+              <span className="font-bold text-amber-300">{meta.daysToMilestone.milestone}-DAY</span> STREAK
             </p>
           </div>
           <div className="text-right">
@@ -424,10 +424,10 @@ function StreakHealthCard({
       <div className="flex items-baseline gap-2">
         <span className={`text-2xl font-bold ${text}`}>{label}</span>
       </div>
-      <p className="text-xs opacity-80 mt-1">
+      <p className="text-xs opacity-80 mt-1 uppercase tracking-widest">
         {currentStreak > 0 
-          ? `${currentStreak} day streak ${isActiveToday ? '✓' : '- commit today!'}`
-          : 'Start your streak today'}
+          ? `${currentStreak} DAY STREAK ${isActiveToday ? 'ACTIVE' : 'INCOMPLETE'}`
+          : 'START YOUR STREAK TODAY'}
       </p>
     </div>
   );

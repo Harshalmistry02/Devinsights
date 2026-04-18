@@ -177,9 +177,9 @@ function StatCard({
     <div
       role="region"
       aria-label={`${title} statistics`}
+      className="brutalist-glass"
       style={{
-        background: "transparent",
-        padding: "0",
+        padding: "24px",
         position: "relative",
       }}
       

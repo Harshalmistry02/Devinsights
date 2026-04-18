@@ -37,22 +37,12 @@ export function CodeImpactCard({ metrics, className }: CodeImpactCardProps) {
   if (!metrics) {
     return (
       <div className={cn(
-        " bg-transparent p-0",
+        "brutalist-glass p-12 text-center",
         className
       )}>
-        <div className="flex items-center gap-3 mb-4">
-          <div className="p-2">
-            <Gauge className="w-5 h-5 opacity-80" />
-          </div>
-          <h3 className="text-lg font-semibold opacity-80">Code Impact</h3>
-        </div>
-        <div className="flex flex-col items-center justify-center py-8 text-center">
-          <div className="w-12 h-12 -full flex items-center justify-center mb-3">
-            <Info className="w-6 h-6 opacity-80" />
-          </div>
-          <p className="opacity-80 text-sm">No commit data available</p>
-          <p className="opacity-80 text-xs mt-1">Sync your repositories to see impact metrics</p>
-        </div>
+        <Gauge className="w-12 h-12 opacity-20 mx-auto mb-6" />
+        <h3 className="text-display-hero text-xl opacity-80 mb-3 tracking-widest">NO IMPACT DATA</h3>
+        <p className="text-micro opacity-40 uppercase tracking-[2px]">SYNC YOUR REPOSITORIES TO SEE IMPACT METRICS</p>
       </div>
     );
   }
@@ -62,7 +52,7 @@ export function CodeImpactCard({ metrics, className }: CodeImpactCardProps) {
 
   return (
     <div className={cn(
-      " bg-transparent overflow-visible border-b border-[rgba(240,240,250,0.05)] pb-6",
+      "brutalist-glass p-8",
       className
     )}>
       {/* Header */}
@@ -107,26 +97,19 @@ export function CodeImpactCard({ metrics, className }: CodeImpactCardProps) {
         </div>
         
         {/* Stats Row */}
-        <div className="grid grid-cols-3 gap-4 mb-6">
-          <StatBlock
-            label="PRODUCTIVE"
-            value={`${metrics.productiveRate}%`}
-            icon={<Zap className="w-4 h-4 text-emerald-400" />}
-            color="emerald"
-          />
-          <StatBlock
-            label="REFACTORING"
-            value={`${metrics.churnGauge.refactoring}%`}
-            icon={<RefreshCw className="w-4 h-4 text-[#f0f0fa]" />}
-            color="blue"
-          />
-          <StatBlock
-            label="CHURN"
-            value={`${metrics.churnRate}%`}
-            icon={<Target className="w-4 h-4 text-orange-400" />}
-            color="orange"
-            tooltip={churnSeverity.description}
-          />
+        <div className="grid grid-cols-3 gap-8">
+          <div className="border-l-2 border-[rgba(240,240,250,0.1)] pl-4">
+            <p className="text-micro opacity-40 mb-2 tracking-[2px]">PRODUCTIVE</p>
+            <p className="text-display-hero text-2xl opacity-90 tabular-nums">{metrics.productiveRate}%</p>
+          </div>
+          <div className="border-l-2 border-[rgba(240,240,250,0.1)] pl-4">
+            <p className="text-micro opacity-40 mb-2 tracking-[2px]">REFACTORING</p>
+            <p className="text-display-hero text-2xl opacity-90 tabular-nums">{metrics.churnGauge.refactoring}%</p>
+          </div>
+          <div className="border-l-2 border-[rgba(240,240,250,0.1)] pl-4">
+            <p className="text-micro opacity-40 mb-2 tracking-[2px]">CHURN</p>
+            <p className="text-display-hero text-2xl opacity-90 tabular-nums">{metrics.churnRate}%</p>
+          </div>
         </div>
         
         {/* Insights */}
@@ -239,19 +222,19 @@ function ChurnGauge({ productive, refactoring, churn }: ChurnGaugeProps) {
           strokeLinecap="round"
         />
         
-        {/* Gradients */}
+        {/* Center label */}
         <defs>
           <linearGradient id="productive-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="#10b981" />
-            <stop offset="100%" stopColor="#34d399" />
+            <stop offset="0%" stopColor="#f0f0fa" stopOpacity={0.9} />
+            <stop offset="100%" stopColor="#f0f0fa" stopOpacity={0.7} />
           </linearGradient>
           <linearGradient id="refactor-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="#3b82f6" />
-            <stop offset="100%" stopColor="#60a5fa" />
+            <stop offset="0%" stopColor="#f0f0fa" stopOpacity={0.4} />
+            <stop offset="100%" stopColor="#f0f0fa" stopOpacity={0.3} />
           </linearGradient>
           <linearGradient id="churn-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="#f97316" />
-            <stop offset="100%" stopColor="#fb923c" />
+            <stop offset="0%" stopColor="#f0f0fa" stopOpacity={0.1} />
+            <stop offset="100%" stopColor="#f0f0fa" stopOpacity={0.05} />
           </linearGradient>
         </defs>
       </svg>

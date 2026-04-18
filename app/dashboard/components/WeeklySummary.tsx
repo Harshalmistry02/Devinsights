@@ -71,9 +71,10 @@ export function WeeklySummary({ analytics, className }: WeeklySummaryProps) {
 
   return (
     <div
+      className="brutalist-glass"
       style={{
-        background: "transparent",
-        border: "none",
+        padding: "0",
+        borderRadius: "2px",
       }}
     >
       {/* Header */}
@@ -418,8 +419,7 @@ export function WeeklySummaryCompact({ analytics, className }: WeeklySummaryProp
         </div>
         <div style={{ width: "1px", height: "32px", background: "rgba(240,240,250,0.08)" }} />
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          {streakInfo.current > 0 && <span style={{ fontSize: "1rem" }}>🔥</span>}
-          <span className="text-caption">{streakInfo.current} day streak</span>
+          <span className="text-caption uppercase tracking-widest">{streakInfo.current} DAY STREAK</span>
         </div>
       </div>
       <TrendBadge trend={comparison.trend} percentChange={comparison.commitsPercentChange} />

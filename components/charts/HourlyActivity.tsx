@@ -46,15 +46,17 @@ export function HourlyActivity({ data, className = '' }: HourlyActivityProps) {
   const codingStyle = getCodingStyle(morningCommits, afternoonCommits, eveningCommits, nightCommits);
 
   return (
-    <div className={` border border-[rgba(240,240,250,0.15)]  backdrop-blur-sm ${className}`}>
-      {/* Header */}
-      <div className="p-4 sm:p-6 border-b border-[rgba(240,240,250,0.15)]">
-        <h3 className="text-lg font-semibold opacity-80">Daily Pattern</h3>
-        <p className="text-sm opacity-80">
-          Peak coding time: <span className="text-[#f0f0fa] font-medium">{formatPeakTime(peakHour)}</span>
-          <span className="mx-2">·</span>
-          <span className="text-purple-400">{codingStyle}</span>
-        </p>
+    <div className={` bg-transparent border-none ${className}`}>
+      {/* Summary Stats */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 mb-10">
+        <div className="border-l-2 border-[rgba(240,240,250,0.1)] pl-4">
+          <p className="text-micro opacity-40 mb-2 tracking-[2px]">PEAK ACTIVITY</p>
+          <p className="text-display-hero text-3xl opacity-90">{formatPeakTime(peakHour).toUpperCase()}</p>
+        </div>
+        <div className="border-l-2 border-[rgba(240,240,250,0.1)] pl-4">
+          <p className="text-micro opacity-40 mb-2 tracking-[2px]">CODING STYLE</p>
+          <p className="text-display-hero text-3xl opacity-90">{codingStyle.replace(/[^a-zA-Z\s]/g, '').trim().toUpperCase()}</p>
+        </div>
       </div>
 
       {/* Chart */}
@@ -64,33 +66,34 @@ export function HourlyActivity({ data, className = '' }: HourlyActivityProps) {
             <div className="h-48">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.5} vertical={false} />
+                  <CartesianGrid strokeDasharray="0" stroke="rgba(240,240,250,0.05)" vertical={false} />
                   <XAxis
                     dataKey="hour"
-                    tick={{ fill: '#64748b', fontSize: 10 }}
+                    tick={{ fill: 'rgba(240,240,250,0.3)', fontSize: 10, letterSpacing: '1px' }}
                     tickLine={false}
-                    axisLine={{ stroke: '#475569' }}
+                    axisLine={{ stroke: 'rgba(240,240,250,0.1)' }}
                     interval={2}
-                    tickFormatter={(h) => formatHourLabel(h)}
+                    tickFormatter={(h) => formatHourLabel(h).toUpperCase()}
                   />
                   <YAxis
-                    tick={{ fill: '#64748b', fontSize: 11 }}
+                    tick={{ fill: 'rgba(240,240,250,0.3)', fontSize: 10 }}
                     tickLine={false}
                     axisLine={false}
                     allowDecimals={false}
                   />
-                  <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(139, 92, 246, 0.1)' }} />
+                  <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(240, 240, 250, 0.05)' }} />
                   
                   {/* Time period reference lines */}
-                  <ReferenceLine x={6} stroke="#475569" strokeDasharray="3 3" />
-                  <ReferenceLine x={12} stroke="#475569" strokeDasharray="3 3" />
-                  <ReferenceLine x={18} stroke="#475569" strokeDasharray="3 3" />
+                  <ReferenceLine x={6} stroke="rgba(240,240,250,0.1)" strokeDasharray="3 3" />
+                  <ReferenceLine x={12} stroke="rgba(240,240,250,0.1)" strokeDasharray="3 3" />
+                  <ReferenceLine x={18} stroke="rgba(240,240,250,0.1)" strokeDasharray="3 3" />
                   
-                  <Bar dataKey="commits" radius={[4, 4, 0, 0]} maxBarSize={20}>
+                  <Bar dataKey="commits" radius={[0, 0, 0, 0]} maxBarSize={30}>
                     {chartData.map((entry, index) => (
                       <Cell
                         key={`cell-${index}`}
-                        fill={getHourColor(entry.hour, entry.commits === maxCommits)}
+                        fill="#f0f0fa"
+                        opacity={entry.commits === maxCommits ? 0.9 : 0.2}
                       />
                     ))}
                   </Bar>
@@ -98,35 +101,30 @@ export function HourlyActivity({ data, className = '' }: HourlyActivityProps) {
               </ResponsiveContainer>
             </div>
 
-            {/* Time Period Stats */}
-            <div className="mt-4 grid grid-cols-4 gap-2 text-center">
+            <div className="mt-8 grid grid-cols-4 gap-4">
               <TimePeriodStat
-                label="Night"
-                sublabel="12am-6am"
+                label="NIGHT"
+                sublabel="00-06"
                 value={nightCommits}
                 total={total}
-                color="indigo"
               />
               <TimePeriodStat
-                label="Morning"
-                sublabel="6am-12pm"
+                label="MORNING"
+                sublabel="06-12"
                 value={morningCommits}
                 total={total}
-                color="amber"
               />
               <TimePeriodStat
-                label="Afternoon"
-                sublabel="12pm-6pm"
+                label="AFTERNOON"
+                sublabel="12-18"
                 value={afternoonCommits}
                 total={total}
-                color="cyan"
               />
               <TimePeriodStat
-                label="Evening"
-                sublabel="6pm-12am"
+                label="EVENING"
+                sublabel="18-00"
                 value={eveningCommits}
                 total={total}
-                color="purple"
               />
             </div>
           </>
@@ -149,28 +147,18 @@ function TimePeriodStat({
   sublabel,
   value,
   total,
-  color,
 }: {
   label: string;
   sublabel: string;
   value: number;
   total: number;
-  color: 'indigo' | 'amber' | 'cyan' | 'purple';
 }) {
   const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
   
-  const colorClasses = {
-    indigo: 'text-indigo-400',
-    amber: 'text-amber-400',
-    cyan: 'text-[#f0f0fa]',
-    purple: 'text-purple-400',
-  };
-
   return (
-    <div className="p-2">
-      <p className={`text-lg font-semibold ${colorClasses[color]}`}>{percentage}%</p>
-      <p className="text-xs opacity-80">{label}</p>
-      <p className="text-xs opacity-80">{sublabel}</p>
+    <div className="border-l-2 border-[rgba(240,240,250,0.05)] pl-3">
+      <p className="text-display-hero text-xl opacity-90 tabular-nums">{percentage}%</p>
+      <p className="text-micro opacity-40 tracking-widest mt-1">{label}</p>
     </div>
   );
 }
@@ -208,12 +196,12 @@ function getCodingStyle(morning: number, afternoon: number, evening: number, nig
   
   const max = Math.max(morning, afternoon, evening, night);
   
-  if (max === night && night / total > 0.3) return '🦉 Night Owl';
-  if (max === morning && morning / total > 0.3) return '🌅 Early Bird';
-  if (max === afternoon && afternoon / total > 0.3) return '☀️ Afternoon Coder';
-  if (max === evening && evening / total > 0.3) return '🌙 Evening Developer';
+  if (max === night && night / total > 0.3) return 'NIGHT OWL';
+  if (max === morning && morning / total > 0.3) return 'EARLY BIRD';
+  if (max === afternoon && afternoon / total > 0.3) return 'AFTERNOON CODER';
+  if (max === evening && evening / total > 0.3) return 'EVENING DEVELOPER';
   
-  return '⚖️ Balanced';
+  return 'BALANCED';
 }
 
 // ===========================================
@@ -228,12 +216,12 @@ function CustomTooltip({ active, payload }: any) {
   const displayHour = data.hour % 12 || 12;
 
   return (
-    <div className="border border-[rgba(240,240,250,0.15)] p-3">
-      <p className="text-xs opacity-80 mb-1">
+    <div className="brutalist-glass p-3 border-none ring-1 ring-[#f0f0fa]/10">
+      <p className="text-micro opacity-40 mb-1 tracking-widest">
         {displayHour}:00 - {displayHour}:59 {period}
       </p>
-      <p className="text-lg font-semibold text-[#f0f0fa]">
-        {data.commits} commit{data.commits !== 1 ? 's' : ''}
+      <p className="text-display-hero text-xl opacity-90">
+        {data.commits} COMMITS
       </p>
     </div>
   );

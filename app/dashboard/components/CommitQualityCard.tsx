@@ -68,9 +68,10 @@ export function CommitQualityCard({ metrics, className }: CommitQualityCardProps
 
   return (
     <div
+      className="brutalist-glass"
       style={{
-        background: "transparent",
-        border: "none",
+        padding: "32px",
+        borderRadius: "2px",
       }}
     >
       {/* Header */}

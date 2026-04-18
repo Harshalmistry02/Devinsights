@@ -40,47 +40,20 @@ export function CommitTimeline({ data, className = '' }: CommitTimelineProps) {
   const maxCommits = Math.max(...chartData.map(d => d.commits), 0);
 
   return (
-    <div className={` border border-[rgba(240,240,250,0.15)]  backdrop-blur-sm ${className}`}>
-      {/* Header */}
-      <div className="p-4 sm:p-6 border-b border-[rgba(240,240,250,0.15)]">
-        <div className="flex items-center justify-between flex-wrap gap-4">
-          <div>
-            <h3 className="text-lg font-semibold opacity-80">Commit Activity</h3>
-            <p className="text-sm opacity-80">Your coding activity over time</p>
-          </div>
-          
-          {/* Time Range Selector */}
-          <div className="flex items-center gap-1 p-1">
-            {(['30', '60', '90'] as TimeRange[]).map((range) => (
-              <button
-                key={range}
-                onClick={() => setTimeRange(range)}
-                className={`px-3 py-1.5 text-xs font-medium  transition-all ${
-                  timeRange === range
-                    ? 'bg-cyan-500/20 text-[#f0f0fa] border border-cyan-500/30'
-                    : 'opacity-80 hover:opacity-80 hover:'
-                }`}
-              >
-                {range}d
-              </button>
-            ))}
-          </div>
+    <div className={` bg-transparent border-none ${className}`}>
+      {/* Summary Stats */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 mb-8">
+        <div className="border-l-2 border-[rgba(240,240,250,0.1)] pl-4">
+          <p className="text-micro opacity-40 mb-2 tracking-[2px]">TOTAL COMMITS</p>
+          <p className="text-display-hero text-3xl opacity-90 tabular-nums">{totalCommits}</p>
         </div>
-        
-        {/* Summary Stats */}
-        <div className="flex items-center gap-6 mt-4">
-          <div>
-            <p className="text-2xl font-bold opacity-80">{totalCommits}</p>
-            <p className="text-xs opacity-80">Total Commits</p>
-          </div>
-          <div>
-            <p className="text-2xl font-bold text-[#f0f0fa]">{avgPerDay}</p>
-            <p className="text-xs opacity-80">Avg/Active Day</p>
-          </div>
-          <div>
-            <p className="text-2xl font-bold text-purple-400">{maxCommits}</p>
-            <p className="text-xs opacity-80">Peak Day</p>
-          </div>
+        <div className="border-l-2 border-[rgba(240,240,250,0.1)] pl-4">
+          <p className="text-micro opacity-40 mb-2 tracking-[2px]">AVG/ACTIVE DAY</p>
+          <p className="text-display-hero text-3xl opacity-90 tabular-nums">{avgPerDay}</p>
+        </div>
+        <div className="border-l-2 border-[rgba(240,240,250,0.1)] pl-4">
+          <p className="text-micro opacity-40 mb-2 tracking-[2px]">PEAK DAY</p>
+          <p className="text-display-hero text-3xl opacity-90 tabular-nums">{maxCommits}</p>
         </div>
       </div>
       
@@ -92,34 +65,34 @@ export function CommitTimeline({ data, className = '' }: CommitTimelineProps) {
               <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <defs>
                   <linearGradient id="commitGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="#06b6d4" stopOpacity={0} />
+                    <stop offset="5%" stopColor="#f0f0fa" stopOpacity={0.15} />
+                    <stop offset="95%" stopColor="#f0f0fa" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.5} />
+                <CartesianGrid strokeDasharray="0" stroke="rgba(240,240,250,0.05)" vertical={false} />
                 <XAxis 
                   dataKey="date" 
-                  tick={{ fill: '#64748b', fontSize: 11 }}
-                  tickLine={{ stroke: '#475569' }}
-                  axisLine={{ stroke: '#475569' }}
+                  tick={{ fill: 'rgba(240,240,250,0.3)', fontSize: 10, letterSpacing: '1px' }}
+                  tickLine={false}
+                  axisLine={{ stroke: 'rgba(240,240,250,0.1)' }}
                   interval="preserveStartEnd"
-                  tickFormatter={(value) => formatDateLabel(value)}
+                  tickFormatter={(value) => formatDateLabel(value).toUpperCase()}
                 />
                 <YAxis 
-                  tick={{ fill: '#64748b', fontSize: 11 }}
-                  tickLine={{ stroke: '#475569' }}
-                  axisLine={{ stroke: '#475569' }}
+                   tick={{ fill: 'rgba(240,240,250,0.3)', fontSize: 10 }}
+                  tickLine={false}
+                  axisLine={false}
                   allowDecimals={false}
                 />
                 <Tooltip content={<CustomTooltip />} />
                 <Area
                   type="monotone"
                   dataKey="commits"
-                  stroke="#06b6d4"
-                  strokeWidth={2}
+                  stroke="#f0f0fa"
+                  strokeWidth={1.5}
                   fill="url(#commitGradient)"
                   dot={false}
-                  activeDot={{ r: 6, fill: '#06b6d4', stroke: '#0f172a', strokeWidth: 2 }}
+                  activeDot={{ r: 4, fill: '#f0f0fa', stroke: '#000000', strokeWidth: 2 }}
                 />
               </AreaChart>
             </ResponsiveContainer>
@@ -176,10 +149,10 @@ function CustomTooltip({ active, payload, label }: any) {
   });
   
   return (
-    <div className="border border-[rgba(240,240,250,0.15)] p-3">
-      <p className="text-xs opacity-80 mb-1">{formattedDate}</p>
-      <p className="text-lg font-semibold text-[#f0f0fa]">
-        {payload[0].value} commit{payload[0].value !== 1 ? 's' : ''}
+    <div className="brutalist-glass p-3 border-none ring-1 ring-[#f0f0fa]/10">
+      <p className="text-micro opacity-40 mb-2 tracking-widest">{formattedDate.toUpperCase()}</p>
+      <p className="text-display-hero text-xl opacity-90">
+        {payload[0].value} COMMITS
       </p>
     </div>
   );

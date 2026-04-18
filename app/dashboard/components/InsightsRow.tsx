@@ -70,9 +70,9 @@ function InsightCell({
     <div
       role="article"
       aria-label={`Insight: ${label}`}
+      className="brutalist-glass"
       style={{
-        background: "transparent",
-        padding: "0",
+        padding: "24px",
         display: "flex",
         flexDirection: "column",
         gap: "6px",

@@ -116,7 +116,7 @@ export default async function DashboardPage() {
             aria-label="Dashboard overview"
           >
             {/* Welcome Header */}
-            <div style={{ paddingBottom: "16px", borderBottom: "1px solid rgba(240,240,250,0.06)" }}>
+            <div className="brutalist-glass" style={{ padding: "32px", borderRadius: "2px", borderBottom: "1px solid rgba(240,240,250,0.06)" }}>
               <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", flexWrap: "wrap", gap: "12px" }}>
                 <div>
                   <p className="text-micro uppercase tracking-widest" style={{ marginBottom: "8px" }}>DASHBOARD</p>

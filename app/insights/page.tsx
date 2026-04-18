@@ -207,22 +207,15 @@ export default async function InsightsPage() {
               
               {/* Code Quality Summary Card */}
               <div
+                className="brutalist-glass"
                 style={{
-                  background: "transparent",
-                  border: "none",
-                  padding: "0",
-                  borderBottom: "1px solid rgba(240,240,250,0.05)",
-                  paddingBottom: "24px"
+                  padding: "32px",
+                  borderRadius: "2px"
                 }}
               >
-                <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "16px" }}>
-                  <div className="p-2 opacity-30">
-                     <BarChart3 size={20} className="text-[#f0f0fa]" />
-                  </div>
-                  <div>
-                    <p className="text-caption-bold text-sm tracking-widest">CODE QUALITY SUMMARY</p>
-                    <p className="text-micro opacity-50 mt-1 uppercase tracking-widest">COMMIT MESSAGE ANALYSIS</p>
-                  </div>
+                <div className="mb-10 border-l-2 border-[rgba(240,240,250,0.35)] pl-4">
+                  <h3 className="text-caption-bold text-sm tracking-widest uppercase">CODE QUALITY SUMMARY</h3>
+                  <p className="text-micro opacity-40 uppercase tracking-widest mt-1">COMMIT MESSAGE ANALYSIS</p>
                 </div>
 
                 {commitQualityMetrics ? (
@@ -240,14 +233,14 @@ export default async function InsightsPage() {
                             </div>
                       </div>
                     </div>
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px", background: "transparent", borderRadius: "2px", overflow: "visible" }}>
-                      <div style={{ background: "transparent", padding: "12px 0", borderTop: "1px solid rgba(240, 240, 250, 0.1)" }}>
-                        <p className="text-micro opacity-50 mb-2 tracking-widest uppercase">CONVENTIONAL</p>
-                        <p className="stat-value" style={{ fontSize: "1.5rem" }}>{commitQualityMetrics.conventionalCommitScore}%</p>
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px" }}>
+                      <div className="border-l-2 border-[rgba(240,240,250,0.1)] pl-4">
+                        <p className="text-micro opacity-40 mb-2 tracking-[2px]">CONVENTIONAL</p>
+                        <p className="text-display-hero text-2xl opacity-90 tabular-nums">{commitQualityMetrics.conventionalCommitScore}%</p>
                       </div>
-                      <div style={{ background: "transparent", padding: "12px 0", borderTop: "1px solid rgba(240, 240, 250, 0.1)" }}>
-                        <p className="text-micro opacity-50 mb-2 tracking-widest uppercase">TICKET REFS</p>
-                        <p className="stat-value" style={{ fontSize: "1.5rem" }}>{commitQualityMetrics.hasTicketReferences}%</p>
+                      <div className="border-l-2 border-[rgba(240,240,250,0.1)] pl-4">
+                        <p className="text-micro opacity-40 mb-2 tracking-[2px]">TICKET REFS</p>
+                        <p className="text-display-hero text-2xl opacity-90 tabular-nums">{commitQualityMetrics.hasTicketReferences}%</p>
                       </div>
                     </div>
                     {commitQualityMetrics.insights.length > 0 && (

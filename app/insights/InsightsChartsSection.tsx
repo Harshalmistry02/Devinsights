@@ -97,12 +97,12 @@ export function InsightsChartsSection({
       {/* Section Header with Time Period Selector */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="text-xl font-semibold opacity-80 flex items-center gap-2">
-            <BarChart3 className="w-6 h-6 text-[#f0f0fa]" />
-            Visual Analytics
+          <h2 className="text-display-hero text-2xl flex items-center gap-3">
+            <BarChart3 className="w-5 h-5 text-[#f0f0fa]" />
+            VISUAL ANALYTICS
           </h2>
-          <p className="opacity-80 text-sm mt-1">
-            Explore your coding patterns through interactive charts
+          <p className="text-micro mt-2 tracking-[2px] opacity-40">
+            EXPLORE YOUR CODING PATTERNS THROUGH INDUSTRIAL DATA VISUALIZATIONS
           </p>
         </div>
         
@@ -199,20 +199,18 @@ function ChartCard({
   children: React.ReactNode;
 }) {
   return (
-    <div className="bg-transparent overflow-visible border-b border-[rgba(240,240,250,0.05)] pb-6">
+    <div className="brutalist-glass p-8">
       {/* Header */}
-      <div className="py-4">
-        <div className="flex items-center gap-3">
-          <div className="p-2 opacity-30">{icon}</div>
-          <div>
-            <h3 className="text-caption-bold text-sm tracking-widest">{title}</h3>
-            <p className="text-micro opacity-50 mt-1 uppercase tracking-widest">{subtitle}</p>
-          </div>
+      <div className="mb-8 border-l-2 border-[rgba(240,240,250,0.35)] pl-4">
+        <div className="flex items-center gap-3 mb-2">
+          <div className="opacity-30">{icon}</div>
+          <h3 className="text-caption-bold text-sm tracking-widest uppercase">{title}</h3>
         </div>
+        <p className="text-micro opacity-40 tracking-widest uppercase">{subtitle}</p>
       </div>
       
       {/* Chart Content */}
-      <div className="py-2">
+      <div className="mt-4">
         {children}
       </div>
     </div>
