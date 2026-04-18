@@ -273,8 +273,8 @@ export default async function DashboardPage() {
 
             {/* Activity Overview */}
             <ActivityOverview analytics={analytics} hasSyncedData={hasSyncedData} />
-
           </main>
+        </div>
       </div>
     </div>
   );
