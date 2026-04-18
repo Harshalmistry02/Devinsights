@@ -8,7 +8,7 @@
 export { CodeImpactCard, CodeImpactCardCompact } from './CodeImpactCard';
 
 // Repository Deep Dive
-export { RepoDeepDive, RepoLanguageLegend } from './RepoDeepDive';
+export { RepoDeepDive } from './RepoDeepDive';
 
 // Developer Persona Badges
 export { 
