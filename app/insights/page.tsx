@@ -173,18 +173,22 @@ export default async function InsightsPage() {
             {/* ============================================
                 AI-Powered Insights Hero (TOP - Most Important)
                 ============================================ */}
-            <AIInsightsHero 
-              analytics={{
-                totalCommits: analytics.totalCommits,
-                currentStreak: analytics.currentStreak,
-                longestStreak: analytics.longestStreak,
-                isActiveToday: analytics.isActiveToday,
-                lastCommitDate: analytics.lastCommitDate,
-              }}
-            />
+            <div className="brutalist-glass p-1">
+              <AIInsightsHero 
+                analytics={{
+                  totalCommits: analytics.totalCommits,
+                  currentStreak: analytics.currentStreak,
+                  longestStreak: analytics.longestStreak,
+                  isActiveToday: analytics.isActiveToday,
+                  lastCommitDate: analytics.lastCommitDate,
+                }}
+              />
+            </div>
 
             {/* AI Stats Banner with Developer Persona */}
-            <AIStatsBanner analytics={analytics} userId={user.id} persona={persona} />
+            <div className="brutalist-glass p-8">
+              <AIStatsBanner analytics={analytics} userId={user.id} persona={persona} />
+            </div>
 
             {/* Data Quality Indicator - shows if there are outliers */}
             {outlierCount > 0 && (
@@ -197,7 +201,9 @@ export default async function InsightsPage() {
 
             {/* Repository Deep Dive - Full Width */}
             {repoStats && repoStats.length > 0 && (
-              <RepoDeepDive repoStats={repoStats} />
+              <div className="brutalist-glass p-8">
+                <RepoDeepDive repoStats={repoStats} />
+              </div>
             )}
 
             {/* Code Quality & Impact Grid */}

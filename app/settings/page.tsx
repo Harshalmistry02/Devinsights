@@ -52,103 +52,108 @@ export default async function SettingsPage() {
           </div>
         </div>
 
-        <div style={{ display: "flex", flexDirection: "column", gap: "24px", background: "transparent", borderRadius: "0", overflow: "visible" }}>
+        <div className="space-y-8">
           {/* Account Settings */}
-          <SettingsSection
-            icon={<Shield size={14} />}
-            title="Account Settings"
-            description="Manage your account information and preferences"
-          >
-            <SettingItem
-              label="Email Address"
-              value={user.email || "Not provided"}
-              description="Your email from GitHub"
-            />
-            <SettingItem
-              label="GitHub Username"
-              value={`@${user.username}` || "Not available"}
-              description="Your GitHub username"
-            />
-            <SettingItem
-              label="Display Name"
-              value={user.name || "Not set"}
-              description="Your display name"
-            />
-          </SettingsSection>
+          <div className="brutalist-glass p-8">
+            <SettingsSection
+              icon={<Shield size={14} />}
+              title="ACCOUNT SETTINGS"
+              description="MANAGE YOUR ACCOUNT INFORMATION AND PREFERENCES"
+            >
+              <SettingItem
+                label="EMAIL ADDRESS"
+                value={user.email || "NOT PROVIDED"}
+                description="YOUR EMAIL FROM GITHUB"
+              />
+              <SettingItem
+                label="GITHUB USERNAME"
+                value={`@${user.username?.toUpperCase() || "N/A"}`}
+                description="YOUR GITHUB USERNAME"
+              />
+              <SettingItem
+                label="DISPLAY NAME"
+                value={(user.name || "NOT SET").toUpperCase()}
+                description="YOUR DISPLAY NAME"
+              />
+            </SettingsSection>
+          </div>
 
           {/* Security Settings */}
-          <SettingsSection
-            icon={<Key size={14} />}
-            title="Security"
-            description="Manage your security and authentication settings"
-          >
-            <div style={{ display: "flex", flexDirection: "column", gap: "24px", background: "transparent", borderRadius: "0", overflow: "visible" }}>
-              <div
-                style={{
-                  background: "transparent",
-                  padding: "0",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                }}
-              >
-                <div>
-                  <p className="text-caption-bold" style={{ fontSize: "0.75rem", marginBottom: "4px" }}>
-                    Authentication Method
-                  </p>
-                  <p className="text-micro" style={{ opacity: 0.35 }}>
-                    You are signed in with GitHub OAuth
-                  </p>
-                </div>
-                <span
+          <div className="brutalist-glass p-8">
+            <SettingsSection
+              icon={<Key size={14} />}
+              title="SECURITY"
+              description="MANAGE YOUR SECURITY AND AUTHENTICATION SETTINGS"
+            >
+              <div style={{ display: "flex", flexDirection: "column", gap: "24px", background: "transparent", borderRadius: "0", overflow: "visible" }}>
+                <div
                   style={{
-                    padding: "4px 10px",
-                    background: "rgba(134,239,172,0.06)",
-                    border: "1px solid rgba(134,239,172,0.15)",
-                    borderRadius: "2px",
+                    background: "transparent",
+                    padding: "0",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
                   }}
-                  className="text-micro"
                 >
-                  Active
-                </span>
-              </div>
-
-              <div
-                style={{
-                  background: "transparent",
-                  padding: "0",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                }}
-              >
-                <div>
-                  <p className="text-caption-bold" style={{ fontSize: "0.75rem", marginBottom: "4px" }}>Session</p>
-                  <p className="text-micro" style={{ opacity: 0.35 }}>
-                    Your session is active and secure
-                  </p>
+                  <div>
+                    <p className="text-caption-bold text-sm tracking-widest uppercase mb-1">
+                      AUTHENTICATION METHOD
+                    </p>
+                    <p className="text-micro opacity-40 uppercase tracking-widest">
+                      SIGNED IN WITH GITHUB OAUTH
+                    </p>
+                  </div>
+                  <span
+                    style={{
+                      padding: "4px 10px",
+                      background: "rgba(134,239,172,0.06)",
+                      border: "1px solid rgba(134,239,172,0.15)",
+                      borderRadius: "2px",
+                    }}
+                    className="text-micro"
+                  >
+                    ACTIVE
+                  </span>
                 </div>
-                <LogoutButton variant="minimal" />
+
+                <div
+                  style={{
+                    background: "transparent",
+                    padding: "0",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                  }}
+                >
+                  <div>
+                    <p className="text-caption-bold text-sm tracking-widest uppercase mb-1">SESSION</p>
+                    <p className="text-micro opacity-40 uppercase tracking-widest">
+                      YOUR SESSION IS ACTIVE AND SECURE
+                    </p>
+                  </div>
+                  <LogoutButton variant="minimal" />
+                </div>
               </div>
-            </div>
-          </SettingsSection>
+            </SettingsSection>
+          </div>
 
           {/* Notifications */}
-          <SettingsSection
-            icon={<Bell size={14} />}
-            title="Notifications"
-            description="Configure how you receive notifications"
-          >
-            <div
-              style={{
-                padding: "24px",
-                textAlign: "center",
-                opacity: 0.3,
-              }}
+          <div className="brutalist-glass p-8 opacity-50">
+            <SettingsSection
+              icon={<Bell size={14} />}
+              title="NOTIFICATIONS"
+              description="CONFIGURE HOW YOU RECEIVE NOTIFICATIONS"
             >
-              <p className="text-caption">Notification settings coming soon</p>
-            </div>
-          </SettingsSection>
+              <div
+                style={{
+                  padding: "24px",
+                  textAlign: "center",
+                }}
+              >
+                <p className="text-micro uppercase tracking-widest opacity-40">NOTIFICATION SETTINGS COMING SOON</p>
+              </div>
+            </SettingsSection>
+          </div>
         </div>
 
         {/* Danger Zone */}
@@ -162,28 +167,28 @@ export default async function SettingsPage() {
           }}
         >
           <p
-            className="text-caption-bold"
+            className="text-caption-bold uppercase tracking-widest text-sm"
             style={{ color: "rgba(252,165,165,0.6)", marginBottom: "8px" }}
           >
-            Danger Zone
+            DANGER ZONE
           </p>
-          <p className="text-micro" style={{ opacity: 0.3, marginBottom: "16px" }}>
-            These actions are irreversible. Please be careful.
+          <p className="text-micro uppercase tracking-widest" style={{ opacity: 0.3, marginBottom: "16px" }}>
+            THESE ACTIONS ARE IRREVERSIBLE. PLEASE BE CAREFUL.
           </p>
           <button
             disabled
             style={{
               padding: "10px 20px",
-              background: "rgba(252,165,165,0.04)",
-              border: "1px solid rgba(252,165,165,0.12)",
+              background: "rgba(252,165,172,0.04)",
+              border: "1px solid rgba(252,165,172,0.12)",
               borderRadius: "2px",
-              color: "rgba(252,165,165,0.4)",
+              color: "rgba(252,165,172,0.4)",
               cursor: "not-allowed",
               opacity: 0.5,
             }}
-            className="text-caption"
+            className="text-micro uppercase tracking-widest"
           >
-            Delete Account (Coming Soon)
+            DELETE ACCOUNT (COMING SOON)
           </button>
         </div>
       </div>

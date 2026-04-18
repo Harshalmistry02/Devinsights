@@ -76,13 +76,7 @@ export default async function DashboardPage() {
       <div className="section-overlay" style={{ position: "fixed" }} />
       
       <div className="section-content relative z-20 w-full" style={{ padding: "120px clamp(24px, 6vw, 80px) 40px" }}>
-        {/* Skip to main content link for keyboard users */}
-        <a
-          href="#main-content"
-          className="skip-link"
-        >
-          Skip to main content
-        </a>
+       
         <div
           style={{
             display: "grid",

@@ -51,45 +51,21 @@ export function RepoStatsChart({ data, className = '', limit = 6, showViewAll = 
   const hiddenRepos = data.length - topRepos.length;
 
   return (
-    <div className={` border border-[rgba(240,240,250,0.15)]  backdrop-blur-sm ${className}`}>
+    <div className={` bg-transparent border-none ${className}`}>
       {/* Header */}
-      <div className="p-4 sm:p-6 border-b border-[rgba(240,240,250,0.15)]">
-        <div className="flex items-start justify-between">
-          <div>
-            <h3 className="text-lg font-semibold opacity-80">
-              Top Repositories
-              {hiddenRepos > 0 && (
-                <span className="text-sm font-normal opacity-80 ml-2">
-                  (showing {topRepos.length} of {data.length})
-                </span>
-              )}
-            </h3>
-            <p className="text-sm opacity-80">By commit activity</p>
-          </div>
-          {showViewAll && data.length > limit && (
-            <a
-              href="/repositories"
-              className="text-sm text-[#f0f0fa] hover:text-[#f0f0fa] hover:underline transition-colors"
-            >
-              View all →
-            </a>
-          )}
+      {/* Summary Stats */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 mb-10">
+        <div className="border-l-2 border-[rgba(240,240,250,0.1)] pl-4">
+          <p className="text-micro opacity-40 mb-2 tracking-[2px]">TOTAL REPOSITORIES</p>
+          <p className="text-display-hero text-3xl opacity-90 tabular-nums">{data.length}</p>
         </div>
-        
-        {/* Summary Stats */}
-        <div className="flex items-center gap-6 mt-3">
-          <div className="flex items-center gap-2">
-            <GitBranch className="w-4 h-4 text-[#f0f0fa]" />
-            <span className="text-sm opacity-80">{data.length} repos</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Star className="w-4 h-4 text-yellow-400" />
-            <span className="text-sm opacity-80">{totalStars.toLocaleString()} stars</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <GitFork className="w-4 h-4 text-purple-400" />
-            <span className="text-sm opacity-80">{totalForks.toLocaleString()} forks</span>
-          </div>
+        <div className="border-l-2 border-[rgba(240,240,250,0.1)] pl-4">
+          <p className="text-micro opacity-40 mb-2 tracking-[2px]">TOTAL STARS</p>
+          <p className="text-display-hero text-3xl opacity-90 tabular-nums">{totalStars.toLocaleString()}</p>
+        </div>
+        <div className="border-l-2 border-[rgba(240,240,250,0.1)] pl-4">
+          <p className="text-micro opacity-40 mb-2 tracking-[2px]">TOTAL FORKS</p>
+          <p className="text-display-hero text-3xl opacity-90 tabular-nums">{totalForks.toLocaleString()}</p>
         </div>
       </div>
 
@@ -103,25 +79,30 @@ export function RepoStatsChart({ data, className = '', limit = 6, showViewAll = 
                 layout="vertical"
                 margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
               >
-                <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.5} horizontal={true} vertical={false} />
+                <CartesianGrid strokeDasharray="0" stroke="rgba(240,240,250,0.05)" horizontal={false} />
                 <XAxis
                   type="number"
-                  tick={{ fill: '#64748b', fontSize: 11 }}
+                  tick={{ fill: 'rgba(240,240,250,0.3)', fontSize: 10 }}
                   tickLine={false}
-                  axisLine={{ stroke: '#475569' }}
+                  axisLine={{ stroke: 'rgba(240,240,250,0.1)' }}
                 />
                 <YAxis
                   dataKey="name"
                   type="category"
-                  tick={{ fill: '#94a3b8', fontSize: 12 }}
+                  tick={{ fill: 'rgba(240,240,250,0.6)', fontSize: 10, letterSpacing: '1px' }}
                   tickLine={false}
                   axisLine={false}
-                  width={120}
+                  width={140}
+                  tickFormatter={(val) => val.toUpperCase()}
                 />
-                <Tooltip content={<CustomTooltip totalCommits={totalCommits} />} cursor={{ fill: 'rgba(6, 182, 212, 0.1)' }} />
-                <Bar dataKey="commits" radius={[0, 6, 6, 0]} maxBarSize={30}>
+                <Tooltip content={<CustomTooltip totalCommits={totalCommits} />} cursor={{ fill: 'rgba(240, 240, 250, 0.05)' }} />
+                <Bar dataKey="commits" radius={[0, 0, 0, 0]} maxBarSize={30}>
                   {topRepos.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    <Cell 
+                      key={`cell-${index}`} 
+                      fill="#f0f0fa" 
+                      opacity={0.8 - (index / topRepos.length) * 0.6}
+                    />
                   ))}
                 </Bar>
               </BarChart>
@@ -150,28 +131,24 @@ function CustomTooltip({ active, payload, totalCommits }: any) {
     : '0';
 
   return (
-    <div className="border border-[rgba(240,240,250,0.15)] p-3 min-w-[180px]">
-      <p className="text-sm font-medium opacity-80 mb-2 truncate">{data.fullName}</p>
+    <div className="brutalist-glass p-3 border-none ring-1 ring-[#f0f0fa]/10">
+      <p className="text-micro font-medium opacity-40 mb-2 tracking-widest truncate">{data.fullName.toUpperCase()}</p>
       
-      <div className="space-y-1.5">
-        <div className="flex items-center justify-between gap-4">
-          <span className="text-xs opacity-80">Commits</span>
-          <span className="text-sm font-semibold text-[#f0f0fa]">{data.commits.toLocaleString()}</span>
+      <div className="space-y-2">
+        <div className="flex items-center justify-between gap-6">
+          <span className="text-micro opacity-40 tracking-widest">COMMITS</span>
+          <span className="text-display-hero text-lg opacity-90 tabular-nums">{data.commits.toLocaleString()}</span>
         </div>
-        <div className="flex items-center justify-between gap-4">
-          <span className="text-xs opacity-80">Share</span>
-          <span className="text-sm opacity-80">{percentage}%</span>
+        <div className="flex items-center justify-between gap-6">
+          <span className="text-micro opacity-40 tracking-widest">SHARE</span>
+          <span className="text-display-hero text-lg opacity-90 tabular-nums">{percentage}%</span>
         </div>
         {data.language && (
-          <div className="flex items-center justify-between gap-4">
-            <span className="text-xs opacity-80">Language</span>
-            <span className="text-sm text-purple-400">{data.language}</span>
+          <div className="flex items-center justify-between gap-6">
+            <span className="text-micro opacity-40 tracking-widest">LANGUAGE</span>
+            <span className="text-micro opacity-90 tracking-widest">{data.language.toUpperCase()}</span>
           </div>
         )}
-        <div className="flex items-center justify-between gap-4">
-          <span className="text-xs opacity-80">Stars</span>
-          <span className="text-sm text-yellow-400">⭐ {data.stars}</span>
-        </div>
       </div>
     </div>
   );

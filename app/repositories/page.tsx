@@ -49,54 +49,57 @@ export default async function RepositoriesPage() {
   });
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-slate-950 via-slate-900 to-slate-950 pt-20 sm:pt-24">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="section-cinematic bg-black">
+      <div 
+        className="section-photo" 
+        style={{ 
+          backgroundImage: "url('/space-hero.png')", 
+          backgroundSize: "cover", 
+          backgroundPosition: "center",
+          position: "fixed"
+        }} 
+      />
+      <div className="section-overlay" style={{ position: "fixed" }} />
+      <div className="section-content relative z-20 w-full" style={{ padding: "120px clamp(24px, 6vw, 80px) 40px" }}>
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center gap-4 mb-4">
+        <div style={{ marginBottom: "40px" }}>
+          <div style={{ display: "flex", alignItems: "flex-start", gap: "24px" }}>
             <Link
               href="/dashboard"
-              className="p-2 border border-[rgba(240,240,250,0.15)] hover: hover:border-[rgba(240,240,250,0.15)] transition-all opacity-80 hover:opacity-80"
+              className="p-3 brutalist-glass hover:bg-white/5 transition-all opacity-40 hover:opacity-100"
             >
               <ArrowLeft className="w-5 h-5" />
             </Link>
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold opacity-80 flex items-center gap-3">
-                <Code className="w-8 h-8 text-[#f0f0fa]" />
-                Repositories
+              <p className="text-micro uppercase tracking-widest opacity-40 mb-2">ARCHIVE</p>
+              <h1 className="text-section-head flex items-center gap-4">
+                <Code className="w-8 h-8 opacity-50" />
+                REPOSITORIES
               </h1>
-              <p className="opacity-80 mt-1">
-                {totalRepos} repositories synced
+              <p className="text-micro uppercase tracking-widest opacity-30 mt-2">
+                {totalRepos} DEPLOYMENTS SYNCED TO THE ARCHIVE
               </p>
             </div>
           </div>
         </div>
 
-        {/* Summary Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        {/* Summary Stats Grid */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
           <SummaryCard
-            icon={<Code className="w-5 h-5" />}
-            label="Repositories"
+            label="TOTAL REPOS"
             value={totalRepos}
-            color="cyan"
           />
           <SummaryCard
-            icon={<GitCommit className="w-5 h-5" />}
-            label="Total Commits"
+            label="COMMIT LOGS"
             value={totalCommits}
-            color="blue"
           />
           <SummaryCard
-            icon={<Star className="w-5 h-5" />}
-            label="Stars"
+            label="STAR COUNT"
             value={totalStars}
-            color="yellow"
           />
           <SummaryCard
-            icon={<GitFork className="w-5 h-5" />}
-            label="Forks"
+            label="FORK COUNT"
             value={totalForks}
-            color="purple"
           />
         </div>
 
@@ -111,19 +114,19 @@ export default async function RepositoriesPage() {
           <EmptyState />
         )}
 
-        {/* Language Distribution */}
+        {/* Language Archive */}
         {Object.keys(languageCounts).length > 0 && (
-          <div className="mt-8 border border-[rgba(240,240,250,0.15)] p-6 backdrop-blur-sm">
-            <h3 className="text-lg font-semibold opacity-80 mb-4">Languages</h3>
-            <div className="flex flex-wrap gap-2">
+          <div className="mt-12 brutalist-glass p-8">
+            <p className="text-micro uppercase tracking-widest opacity-40 mb-6">TECHNOLOGY STACK</p>
+            <div className="flex flex-wrap gap-3">
               {Object.entries(languageCounts)
                 .sort((a, b) => b[1] - a[1])
                 .map(([language, count]) => (
                   <span
                     key={language}
-                    className="px-3 py-1.5 border border-[rgba(240,240,250,0.15)] -full text-sm opacity-80"
+                    className="px-4 py-2 border border-[rgba(240,240,250,0.1)] text-micro uppercase tracking-widest opacity-60"
                   >
-                    {language} <span className="opacity-80">({count})</span>
+                    {language} <span className="opacity-30">[{count}]</span>
                   </span>
                 ))}
             </div>
@@ -139,34 +142,16 @@ export default async function RepositoriesPage() {
 // ===========================================
 
 function SummaryCard({
-  icon,
   label,
   value,
-  color,
 }: {
-  icon: React.ReactNode;
   label: string;
   value: number;
-  color: 'cyan' | 'blue' | 'yellow' | 'purple';
 }) {
-  const colorClasses = {
-    cyan: 'text-[#f0f0fa] bg-cyan-500/10 border-cyan-500/20',
-    blue: 'text-[#f0f0fa] bg-blue-500/10 border-blue-500/20',
-    yellow: 'text-yellow-400 bg-yellow-500/10 border-yellow-500/20',
-    purple: 'text-purple-400 bg-purple-500/10 border-purple-500/20',
-  };
-
   return (
-    <div className="border border-[rgba(240,240,250,0.15)] p-4 backdrop-blur-sm">
-      <div className="flex items-center gap-3">
-        <div className={`p-2  border ${colorClasses[color]}`}>
-          {icon}
-        </div>
-        <div>
-          <p className="text-xl font-bold opacity-80">{value.toLocaleString()}</p>
-          <p className="text-xs opacity-80">{label}</p>
-        </div>
-      </div>
+    <div className="brutalist-glass p-6 border-l-2 border-l-[rgba(240,240,250,0.1)]">
+      <p className="text-micro opacity-40 mb-3 tracking-[2px] uppercase">{label}</p>
+      <p className="text-display-hero text-3xl font-bold opacity-80 tabular-nums">{value.toLocaleString()}</p>
     </div>
   );
 }
@@ -175,21 +160,11 @@ function RepositoryCard({
   repo,
   commitCount,
 }: {
-  repo: {
-    id: string;
-    name: string;
-    fullName: string;
-    description: string | null;
-    language: string | null;
-    stars: number;
-    forks: number;
-    isPrivate: boolean;
-    lastSyncedAt: Date | null;
-  };
+  repo: any;
   commitCount: number;
 }) {
   return (
-    <div className="border border-[rgba(240,240,250,0.15)] p-5 backdrop-blur-sm hover:border-cyan-500/30 transition-all group">
+    <div className="brutalist-glass p-8 hover:bg-white/[0.02] transition-all group flex flex-col justify-between h-some min-h-[220px]">
       {/* Header */}
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-2 min-w-0">

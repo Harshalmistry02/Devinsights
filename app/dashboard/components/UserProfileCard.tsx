@@ -31,7 +31,8 @@ export function UserProfileCard({ session, githubStatus, lastSync, analytics }: 
   return (
     <aside
       aria-label="User profile and actions"
-      style={{ alignSelf: "start", position: "sticky", top: "96px" }}
+      style={{ alignSelf: "start", position: "sticky", top: "120px" }}
+      className="brutalist-glass p-8"
     >
       <div
         style={{
@@ -45,29 +46,30 @@ export function UserProfileCard({ session, githubStatus, lastSync, analytics }: 
           style={{
             height: "1px",
             background: "rgba(240,240,250,0.35)",
+            marginBottom: "24px"
           }}
           aria-hidden="true"
         />
 
         {/* Avatar row */}
-        <div style={{ padding: "24px 0 0" }}>
+        <div style={{ display: "flex", justifyContent: "center" }}>
           {user.image ? (
             <Image
               src={user.image}
               alt={`${user.name || user.username || 'User'} GitHub profile picture`}
-              width={64}
-              height={64}
+              width={80}
+              height={80}
               style={{
                 borderRadius: "50%",
-                border: "1px solid rgba(240,240,250,0.12)",
+                border: "1px solid rgba(240,240,250,0.15)",
               }}
               priority={true}
             />
           ) : (
             <div
               style={{
-                width: "64px",
-                height: "64px",
+                width: "80px",
+                height: "80px",
                 borderRadius: "50%",
                 background: "rgba(240,240,250,0.05)",
                 border: "1px solid rgba(240,240,250,0.1)",
@@ -76,16 +78,16 @@ export function UserProfileCard({ session, githubStatus, lastSync, analytics }: 
                 justifyContent: "center",
               }}
             >
-              <Github size={28} style={{ opacity: 0.4 }} />
+              <Github size={32} style={{ opacity: 0.4 }} />
             </div>
           )}
         </div>
 
         {/* User info */}
-        <div style={{ padding: "16px 0 24px" }}>
+        <div style={{ padding: "24px 0 24px", textAlign: "center" }}>
           <h2
-            className="text-caption-bold uppercase tracking-widest"
-            style={{ fontSize: "0.875rem", marginBottom: "4px" }}
+            className="text-caption-bold uppercase tracking-widest text-lg"
+            style={{ marginBottom: "8px" }}
           >
             {user.name || user.username || "ANONYMOUS USER"}
           </h2>
@@ -94,7 +96,7 @@ export function UserProfileCard({ session, githubStatus, lastSync, analytics }: 
               href={`https://github.com/${user.username}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-caption"
+              className="text-micro uppercase tracking-widest"
               style={{
                 display: "inline-flex",
                 alignItems: "center",
@@ -102,75 +104,64 @@ export function UserProfileCard({ session, githubStatus, lastSync, analytics }: 
                 opacity: 0.45,
                 marginBottom: "8px",
                 textDecoration: "none",
-                transition: "opacity 0.2s ease",
               }}
-              aria-label={`Visit @${user.username} on GitHub (opens in new tab)`}
-              
-              
             >
               <Github size={11} />
-              @{user.username}
-              <ExternalLink size={9} />
+              GH/{user.username.toUpperCase()}
             </a>
           )}
           {user.email && (
             <p
-              className="text-micro"
-              style={{ opacity: 0.3, marginBottom: "16px", overflow: "hidden", textOverflow: "ellipsis" }}
+              className="text-micro opacity-30 mt-2 truncate max-w-full"
               title={user.email}
             >
-              {user.email}
+              {user.email.toUpperCase()}
             </p>
           )}
 
           {/* Status badges — minimal */}
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginBottom: "20px" }}>
+          <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "8px", margin: "24px 0" }}>
             <span
               style={{
                 display: "inline-flex",
                 alignItems: "center",
-                gap: "6px",
                 padding: "4px 10px",
-                border: "1px solid rgba(240, 240, 250, 0.35)",
-                borderRadius: "var(--radius-button)",
+                border: "1px solid rgba(240, 240, 250, 0.15)",
               }}
-              className="text-micro"
+              className="text-micro uppercase tracking-widest"
             >
-              AUTHENTICATED
+              VERIFIED
             </span>
             {analytics?.isActiveToday && (
               <span
                 style={{
                   display: "inline-flex",
                   alignItems: "center",
-                  gap: "6px",
                   padding: "4px 10px",
-                  border: "1px solid rgba(240, 240, 250, 0.35)",
-                  borderRadius: "var(--radius-button)",
+                  border: "1px solid rgba(240, 240, 250, 0.15)",
+                  background: "rgba(240,240,250,0.05)"
                 }}
-                className="text-micro"
+                className="text-micro uppercase tracking-widest"
               >
-                ACTIVE TODAY
+                ONLINE
               </span>
             )}
           </div>
 
           {/* Quick Actions */}
-          <nav style={{ display: "flex", flexDirection: "column", gap: "8px" }} aria-label="Quick actions">
+          <nav style={{ display: "flex", flexDirection: "column", gap: "10px" }} aria-label="Quick actions">
             <Link
               href="/profile"
-              className="btn-ghost btn-ghost-sm"
+              className="btn-ghost btn-ghost-sm uppercase tracking-widest"
               style={{ width: "100%", justifyContent: "center" }}
-              aria-label="View your full profile"
             >
               <User size={13} />
               PROFILE
             </Link>
             <Link
               href="/settings"
-              className="btn-ghost btn-ghost-sm"
+              className="btn-ghost btn-ghost-sm uppercase tracking-widest"
               style={{ width: "100%", justifyContent: "center" }}
-              aria-label="Manage account settings"
             >
               <Settings size={13} />
               SETTINGS
@@ -178,35 +169,26 @@ export function UserProfileCard({ session, githubStatus, lastSync, analytics }: 
           </nav>
 
           {/* Divider */}
-          <div style={{ height: "1px", background: "rgba(240,240,250,0.05)", margin: "20px 0" }} />
+          <div style={{ height: "1px", background: "rgba(240,240,250,0.05)", margin: "32px 0" }} />
 
           {/* Data Sync Section */}
-          <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-            <p className="text-micro uppercase tracking-widest" style={{ opacity: 0.4, letterSpacing: "1.5px" }}>DATA SYNC</p>
+          <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+            <p className="text-micro uppercase tracking-widest opacity-40">SYSTEM SYNC</p>
             <SyncButtonComplete />
 
             {/* Sync Status */}
             {isSyncInProgress ? (
               <p
-                className="text-micro"
-                role="status"
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: "6px",
-                  opacity: 0.5,
-                }}
+                className="text-micro uppercase tracking-widest opacity-50 flex items-center justify-center gap-2"
               >
-                <Loader2 size={10} style={{ animation: "spin 1s linear infinite" }} aria-hidden="true" />
-                SYNCING IN PROGRESS...
+                <Loader2 size={10} className="animate-spin" />
+                SYNC IN PROGRESS
               </p>
             ) : (
               <p
-                className="text-micro uppercase tracking-widest"
-                style={{ textAlign: "center", opacity: 0.3 }}
+                className="text-micro uppercase tracking-widest opacity-30 text-center"
               >
-                LAST SYNCED: {syncDate.toUpperCase()}
+                LAST: {syncDate.toUpperCase()}
               </p>
             )}
           </div>

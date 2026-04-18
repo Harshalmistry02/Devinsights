@@ -125,7 +125,7 @@ export function InsightsChartsSection({
         <ChartCard
           title="Activity Heatmap"
           subtitle="GitHub-style contribution graph"
-          icon={<Calendar className="w-5 h-5 text-emerald-400" />}
+          icon={<Calendar className="w-5 h-5 text-[#f0f0fa]" />}
         >
           <DynamicActivityHeatmap data={dailyCommits} />
         </ChartCard>
@@ -138,7 +138,7 @@ export function InsightsChartsSection({
           <ChartCard
             title="Language Distribution"
             subtitle="Your programming language usage"
-            icon={<PieChart className="w-5 h-5 text-purple-400" />}
+            icon={<PieChart className="w-5 h-5 text-[#f0f0fa]" />}
           >
             <DynamicLanguageBreakdown data={topLanguages} />
           </ChartCard>
@@ -160,7 +160,7 @@ export function InsightsChartsSection({
           <ChartCard
             title="Daily Rhythm"
             subtitle="Your most productive hours"
-            icon={<Clock className="w-5 h-5 text-amber-400" />}
+            icon={<Clock className="w-5 h-5 text-[#f0f0fa]" />}
           >
             <DynamicHourlyActivity data={hourlyStats} />
           </ChartCard>
@@ -171,7 +171,7 @@ export function InsightsChartsSection({
           <ChartCard
             title="Top Repositories"
             subtitle="Your most active repos"
-            icon={<GitBranch className="w-5 h-5 text-teal-400" />}
+            icon={<GitBranch className="w-5 h-5 text-[#f0f0fa]" />}
           >
             <DynamicRepoStatsChart data={repoStats.slice(0, 10)} />
           </ChartCard>
