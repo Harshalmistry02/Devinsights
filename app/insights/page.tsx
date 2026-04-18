@@ -15,6 +15,7 @@ import {
   Trophy,
   Brain,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { AIInsightsHero } from "./AIInsightsHero";
 import { InsightsChartsSection } from "./InsightsChartsSection";
 import { DataQualityIndicator } from "@/components/DataQualityIndicator";
@@ -124,18 +125,18 @@ export default async function InsightsPage() {
             className="text-micro"
           >
             <ArrowLeft size={11} />
-            Dashboard
+            DASHBOARD
           </Link>
 
           <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", flexWrap: "wrap", gap: "12px" }}>
             <div>
-              <p className="text-micro" style={{ marginBottom: "8px", opacity: 0.4 }}>Analytics</p>
+              <p className="text-micro uppercase tracking-widest" style={{ marginBottom: "8px", opacity: 0.4 }}>ANALYTICS</p>
               <h1 className="text-section-head" style={{ display: "flex", alignItems: "center", gap: "12px" }}>
                 <TrendingUp size={20} style={{ opacity: 0.5 }} />
-                Coding Insights
+                CODING INSIGHTS
               </h1>
-              <p className="text-body" style={{ opacity: 0.35, marginTop: "6px", fontSize: "0.875rem" }}>
-                Deep dive into your development patterns and productivity
+              <p className="text-body uppercase tracking-widest" style={{ opacity: 0.35, marginTop: "6px", fontSize: "0.75rem" }}>
+                DEEP DIVE INTO YOUR DEVELOPMENT PATTERNS AND PRODUCTIVITY
               </p>
             </div>
 
@@ -144,22 +145,22 @@ export default async function InsightsPage() {
               {analytics?.calculatedAt && (
                 <div style={{ display: "flex", alignItems: "center", gap: "6px", opacity: 0.3 }}>
                   <Clock size={11} />
-                  <span className="text-micro">
-                    Updated: {new Date(analytics.calculatedAt).toLocaleDateString('en-US', {
+                  <span className="text-micro uppercase tracking-widest">
+                    UPDATED: {new Date(analytics.calculatedAt).toLocaleDateString('en-US', {
                       month: 'short',
                       day: 'numeric',
                       year: 'numeric',
                       hour: '2-digit',
                       minute: '2-digit',
-                    })}
+                    }).toUpperCase()}
                   </span>
                 </div>
               )}
               {isDataStale && (
                 <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                   <AlertTriangle size={11} style={{ color: "rgba(251,191,36,0.6)" }} />
-                  <span className="text-micro" style={{ color: "rgba(251,191,36,0.5)" }}>
-                    Data may be outdated. Sync from dashboard.
+                  <span className="text-micro uppercase tracking-widest" style={{ color: "rgba(251,191,36,0.5)" }}>
+                    DATA MAY BE OUTDATED. SYNC FROM DASHBOARD.
                   </span>
                 </div>
               )}
@@ -210,44 +211,55 @@ export default async function InsightsPage() {
                   background: "transparent",
                   border: "none",
                   padding: "0",
+                  borderBottom: "1px solid rgba(240,240,250,0.05)",
+                  paddingBottom: "24px"
                 }}
               >
                 <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "16px" }}>
-                  <BarChart3 size={14} style={{ opacity: 0.3 }} />
+                  <div className="p-2 opacity-30">
+                     <BarChart3 size={20} className="text-[#f0f0fa]" />
+                  </div>
                   <div>
-                    <p className="text-caption-bold" style={{ fontSize: "0.75rem" }}>Code Quality Summary</p>
-                    <p className="text-micro" style={{ opacity: 0.3, marginTop: "2px" }}>Commit message analysis</p>
+                    <p className="text-caption-bold text-sm tracking-widest">CODE QUALITY SUMMARY</p>
+                    <p className="text-micro opacity-50 mt-1 uppercase tracking-widest">COMMIT MESSAGE ANALYSIS</p>
                   </div>
                 </div>
 
                 {commitQualityMetrics ? (
-                  <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                      <span className="text-micro" style={{ opacity: 0.4 }}>Quality Grade</span>
-                      <span className="stat-value" style={{ fontSize: "1.5rem" }}>
-                        {commitQualityMetrics.qualityGrade}
-                      </span>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "12px", padding: "8px 0" }}>
+                    <div style={{ display: "flex", justifyContent: "center", alignItems: "center", marginBottom: "8px" }}>
+                      <div className="flex flex-col items-center">
+                          <span className="text-section-head text-5xl font-bold opacity-80 mb-2">
+                            {commitQualityMetrics.qualityGrade}
+                          </span>
+                           <div className={cn(
+                              "px-3 py-1 text-sm font-medium border border-[rgba(240,240,250,0.35)]",
+                              "uppercase tracking-widest text-shadow-glow",
+                            )}>
+                              GRADE
+                            </div>
+                      </div>
                     </div>
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px", background: "transparent", borderRadius: "2px", overflow: "visible" }}>
-                      <div style={{ background: "transparent", padding: "12px 0" }}>
-                        <p className="text-micro" style={{ opacity: 0.3, marginBottom: "4px" }}>Conventional</p>
-                        <p className="stat-value" style={{ fontSize: "1rem" }}>{commitQualityMetrics.conventionalCommitScore}%</p>
+                      <div style={{ background: "transparent", padding: "12px 0", borderTop: "1px solid rgba(240, 240, 250, 0.1)" }}>
+                        <p className="text-micro opacity-50 mb-2 tracking-widest uppercase">CONVENTIONAL</p>
+                        <p className="stat-value" style={{ fontSize: "1.5rem" }}>{commitQualityMetrics.conventionalCommitScore}%</p>
                       </div>
-                      <div style={{ background: "transparent", padding: "12px 0" }}>
-                        <p className="text-micro" style={{ opacity: 0.3, marginBottom: "4px" }}>Ticket Refs</p>
-                        <p className="stat-value" style={{ fontSize: "1rem" }}>{commitQualityMetrics.hasTicketReferences}%</p>
+                      <div style={{ background: "transparent", padding: "12px 0", borderTop: "1px solid rgba(240, 240, 250, 0.1)" }}>
+                        <p className="text-micro opacity-50 mb-2 tracking-widest uppercase">TICKET REFS</p>
+                        <p className="stat-value" style={{ fontSize: "1.5rem" }}>{commitQualityMetrics.hasTicketReferences}%</p>
                       </div>
                     </div>
                     {commitQualityMetrics.insights.length > 0 && (
-                      <p className="text-micro" style={{ opacity: 0.3 }}>
-                        {commitQualityMetrics.insights[0]}
+                      <p className="text-micro opacity-80 tracking-widest uppercase mt-4">
+                        {commitQualityMetrics.insights[0].toUpperCase()}
                       </p>
                     )}
                   </div>
                 ) : (
                   <div style={{ textAlign: "center", padding: "24px 0" }}>
                     <BarChart3 size={24} style={{ opacity: 0.1, margin: "0 auto 8px" }} />
-                    <p className="text-micro" style={{ opacity: 0.25 }}>No quality data available</p>
+                    <p className="text-micro" style={{ opacity: 0.25 }}>NO QUALITY DATA AVAILABLE</p>
                   </div>
                 )}
               </div>
@@ -299,39 +311,39 @@ async function AIStatsBanner({ analytics, userId, persona }: {
 
   const stats = [
     {
-      label: 'AI Insights Generated',
+      label: 'AI INSIGHTS GENERATED',
       value: insightCount.toLocaleString(),
       icon: <Brain className="w-5 h-5 text-purple-400" />,
       color: 'purple',
-      sublabel: insightCount > 0 ? '✨ Powered by AI' : 'Generate your first',
+      sublabel: insightCount > 0 ? 'POWRED BY AI' : 'GENERATE YOUR FIRST',
       gradient: 'from-purple-500/20 to-purple-500/5',
       borderColor: 'border-purple-500/30',
     },
     {
-      label: 'Longest Streak',
+      label: 'LONGEST STREAK',
       value: `${analytics.longestStreak}d`,
       icon: <Trophy className="w-5 h-5 text-amber-400" />,
       color: 'amber',
-      sublabel: analytics.longestStreak > 0 ? '🏆 Personal best' : 'Start today!',
+      sublabel: analytics.longestStreak > 0 ? 'PERSONAL BEST' : 'START TODAY!',
       gradient: 'from-amber-500/20 to-amber-500/5',
       borderColor: 'border-amber-500/30',
     },
     {
-      label: 'Productivity Rate',
+      label: 'PRODUCTIVITY RATE',
       value: `${productivityPercentage}%`,
       icon: <TrendingUp className="w-5 h-5 text-emerald-400" />,
       color: 'emerald',
-      sublabel: productivityPercentage > 70 ? '🔥 Excellent!' : 
-                productivityPercentage > 40 ? '📈 Good pace' : '💪 Keep going',
+      sublabel: productivityPercentage > 70 ? 'EXCELLENT' : 
+                productivityPercentage > 40 ? 'GOOD PACE' : 'KEEP GOING',
       gradient: 'from-emerald-500/20 to-emerald-500/5',
       borderColor: 'border-emerald-500/30',
     },
     {
-      label: 'Avg Daily Commits',
+      label: 'AVG DAILY COMMITS',
       value: avgDailyCommits,
       icon: <GitCommit className="w-5 h-5 text-[#f0f0fa]" />,
       color: 'cyan',
-      sublabel: `across ${activeDaysCount} active days`,
+      sublabel: `ACROSS ${activeDaysCount} ACTIVE DAYS`,
       gradient: 'from-cyan-500/20 to-cyan-500/5',
       borderColor: 'border-cyan-500/30',
     },
@@ -346,19 +358,19 @@ async function AIStatsBanner({ analytics, userId, persona }: {
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            padding: "16px 20px",
+            padding: "16px 0",
             background: "transparent",
             border: "none",
             borderRadius: "0",
             flexWrap: "wrap",
             gap: "12px",
+            borderBottom: "1px solid rgba(240, 240, 250, 0.1)"
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-            <div style={{ fontSize: "1.25rem" }}>{persona.primary.emoji}</div>
             <div>
               <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
-                <span className="text-caption-bold" style={{ fontSize: "0.813rem" }}>
+                <span className="text-caption-bold uppercase tracking-widest text-shadow-glow" style={{ fontSize: "0.813rem" }}>
                   {persona.primary.name}
                 </span>
                 <span
@@ -373,7 +385,7 @@ async function AIStatsBanner({ analytics, userId, persona }: {
                   {persona.primary.rarity}
                 </span>
               </div>
-              <p className="text-micro" style={{ opacity: 0.3 }}>
+              <p className="text-micro tracking-widest uppercase" style={{ opacity: 0.3 }}>
                 {persona.primary.description}
               </p>
             </div>
@@ -382,7 +394,7 @@ async function AIStatsBanner({ analytics, userId, persona }: {
             <div className="stat-value" style={{ fontSize: "1.25rem" }}>
               {persona.confidence}%
             </div>
-            <div className="text-micro" style={{ opacity: 0.3 }}>match</div>
+            <div className="text-micro tracking-widest uppercase" style={{ opacity: 0.3 }}>MATCH</div>
           </div>
         </div>
       )}
@@ -406,16 +418,14 @@ async function AIStatsBanner({ analytics, userId, persona }: {
               background: "transparent",
               padding: "0",
             }}
-            
-            
           >
             <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px", opacity: 0.3 }}>
-              {stat.icon}
-              <p className="text-micro">{stat.label}</p>
+              <div className="opacity-30">{stat.icon}</div>
+              <p className="text-micro tracking-widest uppercase">{stat.label}</p>
             </div>
-            <p className="stat-value" style={{ fontSize: "1.5rem" }}>{stat.value}</p>
+            <p className="text-section-head text-5xl font-bold opacity-80">{stat.value}</p>
             {stat.sublabel && (
-              <p className="text-micro" style={{ marginTop: "4px", opacity: 0.25 }}>{stat.sublabel}</p>
+              <p className="text-micro tracking-widest uppercase" style={{ marginTop: "4px", opacity: 0.25 }}>{stat.sublabel}</p>
             )}
           </div>
         ))}
@@ -439,16 +449,20 @@ function EmptyState() {
       }}
     >
       <div style={{ maxWidth: "360px", margin: "0 auto" }}>
-        <BarChart3 size={40} style={{ opacity: 0.1, margin: "0 auto 20px" }} />
-        <h2 className="text-section-head" style={{ fontSize: "1.25rem", marginBottom: "12px" }}>
-          No Insights Available Yet
+        <div className="flex justify-center mb-6">
+            <div className="p-4 border border-[rgba(240,240,250,0.35)] opacity-30">
+               <BarChart3 size={32} className="text-[#f0f0fa]" />
+            </div>
+        </div>
+        <h2 className="text-caption-bold text-sm tracking-widest uppercase mb-4">
+          NO INSIGHTS AVAILABLE YET
         </h2>
-        <p className="text-body" style={{ opacity: 0.35, marginBottom: "28px", fontSize: "0.875rem" }}>
-          Sync your GitHub data to unlock comprehensive analytics and visualizations.
+        <p className="text-micro opacity-50 uppercase tracking-widest mb-8">
+          SYNC YOUR GITHUB DATA TO UNLOCK COMPREHENSIVE ANALYTICS AND VISUALIZATIONS.
         </p>
-        <Link href="/dashboard" className="btn-ghost btn-ghost-sm" style={{ display: "inline-flex" }}>
+        <Link href="/dashboard" className="btn-ghost" style={{ display: "inline-flex" }}>
           <RefreshCw size={13} />
-          Go to Dashboard to Sync
+          GO TO DASHBOARD TO SYNC
         </Link>
       </div>
     </div>

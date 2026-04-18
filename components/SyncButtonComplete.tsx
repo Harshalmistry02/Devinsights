@@ -60,20 +60,20 @@ export function SyncButtonComplete() {
     setStatus({
       status: 'syncing',
       message: forceFullSync 
-        ? 'Initializing full GitHub data re-sync...'
-        : 'Initializing GitHub data sync...',
+        ? 'INITIALIZING FULL GITHUB DATA RE-SYNC...'
+        : 'INITIALIZING GITHUB DATA SYNC...',
       progress: 5,
     });
 
     // Simulate progress while waiting for the actual sync
     const progressMessages = [
-      { progress: 10, message: 'Connecting to GitHub...' },
-      { progress: 20, message: 'Fetching repositories...' },
-      { progress: 35, message: 'Analyzing commit history...' },
-      { progress: 50, message: 'Processing commits...' },
-      { progress: 65, message: 'Enriching data with statistics...' },
-      { progress: 80, message: 'Saving to database...' },
-      { progress: 90, message: 'Calculating analytics...' },
+      { progress: 10, message: 'CONNECTING TO GITHUB...' },
+      { progress: 20, message: 'FETCHING REPOSITORIES...' },
+      { progress: 35, message: 'ANALYZING COMMIT HISTORY...' },
+      { progress: 50, message: 'PROCESSING COMMITS...' },
+      { progress: 65, message: 'ENRICHING DATA WITH STATISTICS...' },
+      { progress: 80, message: 'SAVING TO DATABASE...' },
+      { progress: 90, message: 'CALCULATING ANALYTICS...' },
     ];
 
     let progressIndex = 0;
@@ -224,12 +224,12 @@ export function SyncButtonComplete() {
         {status.status === 'syncing' ? (
           <>
             <Loader2 size={14} style={{ animation: "spin 1s linear infinite" }} aria-hidden="true" />
-            <span>Syncing...</span>
+            <span className="uppercase tracking-widest">SYNCING...</span>
           </>
         ) : (
           <>
             <RefreshCw size={14} aria-hidden="true" />
-            <span>Sync GitHub Data</span>
+            <span className="uppercase tracking-widest">SYNC GITHUB DATA</span>
             <Github size={12} style={{ opacity: 0.5 }} aria-hidden="true" />
           </>
         )}
@@ -260,7 +260,7 @@ export function SyncButtonComplete() {
           
         >
           <RefreshCw size={10} aria-hidden="true" />
-          <span>Force Full Re-sync</span>
+          <span className="uppercase tracking-widest">FORCE FULL RE-SYNC</span>
         </button>
       )}
 
@@ -314,7 +314,7 @@ export function SyncButtonComplete() {
 
             <div style={{ flex: 1 }}>
               <p
-                className="text-micro"
+                className="text-micro uppercase tracking-widest"
                 style={{
                   opacity: status.status === 'success' ? 0.6
                     : status.status === 'error' ? 0.55
@@ -326,7 +326,7 @@ export function SyncButtonComplete() {
                     : "var(--spectral-white)",
                 }}
               >
-                {status.message}
+                {status.message.toUpperCase()}
               </p>
 
               {/* Detailed Stats */}
@@ -343,16 +343,16 @@ export function SyncButtonComplete() {
                   }}
                 >
                   <div style={{ background: "#000", padding: "8px 10px" }}>
-                    <p className="text-micro" style={{ opacity: 0.25, marginBottom: "2px" }}>Repos</p>
+                    <p className="text-micro uppercase tracking-widest" style={{ opacity: 0.25, marginBottom: "2px" }}>REPOS</p>
                     <p className="stat-value" style={{ fontSize: "0.875rem" }}>{status.details.totalRepos}</p>
                   </div>
                   <div style={{ background: "#000", padding: "8px 10px" }}>
-                    <p className="text-micro" style={{ opacity: 0.25, marginBottom: "2px" }}>Commits</p>
+                    <p className="text-micro uppercase tracking-widest" style={{ opacity: 0.25, marginBottom: "2px" }}>COMMITS</p>
                     <p className="stat-value" style={{ fontSize: "0.875rem" }}>{status.details.totalCommits?.toLocaleString()}</p>
                   </div>
                   <div style={{ background: "#000", padding: "8px 10px" }}>
-                    <p className="text-micro" style={{ opacity: 0.25, marginBottom: "2px" }}>Duration</p>
-                    <p className="stat-value" style={{ fontSize: "0.875rem" }}>{status.details.syncDurationMin?.toFixed(1)}m</p>
+                    <p className="text-micro uppercase tracking-widest" style={{ opacity: 0.25, marginBottom: "2px" }}>DURATION</p>
+                    <p className="stat-value" style={{ fontSize: "0.875rem" }}>{status.details.syncDurationMin?.toFixed(1)}M</p>
                   </div>
                 </div>
               )}
@@ -361,8 +361,8 @@ export function SyncButtonComplete() {
 
           {/* Progress Percentage */}
           {status.status === 'syncing' && (
-            <p className="text-micro" style={{ textAlign: "right", marginTop: "6px", opacity: 0.25 }}>
-              {status.progress}% complete
+            <p className="text-micro uppercase tracking-widest" style={{ textAlign: "right", marginTop: "6px", opacity: 0.25 }}>
+              {status.progress}% COMPLETE
             </p>
           )}
         </div>

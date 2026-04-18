@@ -38,7 +38,7 @@ export const PERSONAS: Record<string, DeveloperPersona> = {
   NIGHT_OWL: {
     id: 'NIGHT_OWL',
     name: 'Night Owl',
-    emoji: '🦉',
+    emoji: '',
     description: 'Most productive when the world sleeps',
     criteria: '60%+ of commits made after 8 PM',
     category: 'timing',
@@ -49,7 +49,7 @@ export const PERSONAS: Record<string, DeveloperPersona> = {
   EARLY_BIRD: {
     id: 'EARLY_BIRD',
     name: 'Early Bird',
-    emoji: '🐦',
+    emoji: '',
     description: 'Catches the worm with morning commits',
     criteria: '50%+ of commits made before 9 AM',
     category: 'timing',
@@ -60,7 +60,7 @@ export const PERSONAS: Record<string, DeveloperPersona> = {
   WEEKEND_WARRIOR: {
     id: 'WEEKEND_WARRIOR',
     name: 'Weekend Warrior',
-    emoji: '⚔️',
+    emoji: '',
     description: 'Codes while others rest',
     criteria: '40%+ of commits on weekends',
     category: 'timing',
@@ -71,7 +71,7 @@ export const PERSONAS: Record<string, DeveloperPersona> = {
   NINE_TO_FIVE: {
     id: 'NINE_TO_FIVE',
     name: 'Steady Ship',
-    emoji: '⚓',
+    emoji: '',
     description: 'Reliable and consistent work hours',
     criteria: '70%+ of commits during business hours',
     category: 'timing',
@@ -84,7 +84,7 @@ export const PERSONAS: Record<string, DeveloperPersona> = {
   POLYGLOT: {
     id: 'POLYGLOT',
     name: 'Polyglot',
-    emoji: '🌐',
+    emoji: '',
     description: 'Master of multiple programming languages',
     criteria: '5+ languages with 10%+ each',
     category: 'skill',
@@ -95,7 +95,7 @@ export const PERSONAS: Record<string, DeveloperPersona> = {
   SPECIALIST: {
     id: 'SPECIALIST',
     name: 'Specialist',
-    emoji: '🎯',
+    emoji: '',
     description: 'Deep expertise in one domain',
     criteria: '70%+ commits in a single language',
     category: 'skill',
@@ -106,7 +106,7 @@ export const PERSONAS: Record<string, DeveloperPersona> = {
   TYPESCRIPT_WIZARD: {
     id: 'TYPESCRIPT_WIZARD',
     name: 'TypeScript Wizard',
-    emoji: '🧙‍♂️',
+    emoji: '',
     description: 'A master of type-safe JavaScript',
     criteria: '60%+ TypeScript commits',
     category: 'skill',
@@ -117,7 +117,7 @@ export const PERSONAS: Record<string, DeveloperPersona> = {
   PYTHON_CHARMER: {
     id: 'PYTHON_CHARMER',
     name: 'Python Charmer',
-    emoji: '🐍',
+    emoji: '',
     description: 'Writes poetry in Python',
     criteria: '60%+ Python commits',
     category: 'skill',
@@ -130,7 +130,7 @@ export const PERSONAS: Record<string, DeveloperPersona> = {
   STREAK_MASTER: {
     id: 'STREAK_MASTER',
     name: 'Streak Master',
-    emoji: '🔥',
+    emoji: '',
     description: 'Consistency is their superpower',
     criteria: '30+ day current streak',
     category: 'habit',
@@ -141,7 +141,7 @@ export const PERSONAS: Record<string, DeveloperPersona> = {
   CODE_NINJA: {
     id: 'CODE_NINJA',
     name: 'Code Ninja',
-    emoji: '🥷',
+    emoji: '',
     description: 'Swift, precise, efficient commits',
     criteria: 'Average commit size < 30 lines',
     category: 'habit',
@@ -152,7 +152,7 @@ export const PERSONAS: Record<string, DeveloperPersona> = {
   PROLIFIC_CODER: {
     id: 'PROLIFIC_CODER',
     name: 'Prolific Coder',
-    emoji: '⚡',
+    emoji: '',
     description: 'Sheer volume of quality work',
     criteria: '5+ commits per active day',
     category: 'habit',
@@ -165,7 +165,7 @@ export const PERSONAS: Record<string, DeveloperPersona> = {
   CENTURY_CLUB: {
     id: 'CENTURY_CLUB',
     name: 'Century Club',
-    emoji: '💯',
+    emoji: '',
     description: 'Proud member of the 100+ commit club',
     criteria: '100+ total commits',
     category: 'achievement',
@@ -176,7 +176,7 @@ export const PERSONAS: Record<string, DeveloperPersona> = {
   REPO_COLLECTOR: {
     id: 'REPO_COLLECTOR',
     name: 'Repo Collector',
-    emoji: '📚',
+    emoji: '',
     description: 'A diverse portfolio of projects',
     criteria: '10+ active repositories',
     category: 'achievement',
@@ -187,7 +187,7 @@ export const PERSONAS: Record<string, DeveloperPersona> = {
   OPEN_SOURCE_HERO: {
     id: 'OPEN_SOURCE_HERO',
     name: 'Open Source Hero',
-    emoji: '🦸',
+    emoji: '',
     description: 'Champion of public code',
     criteria: '80%+ public repositories',
     category: 'achievement',
@@ -201,7 +201,7 @@ export const PERSONAS: Record<string, DeveloperPersona> = {
 const DEFAULT_PERSONA: DeveloperPersona = {
   id: 'DEVELOPER',
   name: 'Developer',
-  emoji: '💻',
+  emoji: '',
   description: 'Building amazing things with code',
   criteria: 'Active GitHub user',
   category: 'habit',

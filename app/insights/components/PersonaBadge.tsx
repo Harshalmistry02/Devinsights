@@ -86,7 +86,6 @@ export function PersonaBadge({
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
-        <span className={iconSizes[size]}>{persona.emoji}</span>
         <span className={cn("font-medium", persona.color)}>{persona.name}</span>
       </div>
       
@@ -94,8 +93,8 @@ export function PersonaBadge({
       {showTooltip && isHovered && (
         <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-50 animate-in fade-in slide-in-from-bottom-2 duration-200">
           <div className="border border-[rgba(240,240,250,0.15)] p-3 min-w-[200px]">
-            <div className="text-sm opacity-80 font-medium mb-1">
-              {persona.emoji} {persona.name}
+            <div className="text-sm opacity-80 font-medium mb-1 uppercase tracking-widest text-shadow-glow">
+              {persona.name}
             </div>
             <div className="text-xs opacity-80 mb-2">
               {persona.description}
@@ -238,7 +237,6 @@ export function PersonaBadgeCompact({
         onMouseEnter={() => setShowTooltip(true)}
         onMouseLeave={() => setShowTooltip(false)}
       >
-        <span className="text-base">{persona.emoji}</span>
         <span className={cn("text-sm font-medium", persona.color)}>
           {persona.name}
         </span>

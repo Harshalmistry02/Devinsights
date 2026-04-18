@@ -199,20 +199,20 @@ function ChartCard({
   children: React.ReactNode;
 }) {
   return (
-    <div className="bg-transparent overflow-visible">
+    <div className="bg-transparent overflow-visible border-b border-[rgba(240,240,250,0.05)] pb-6">
       {/* Header */}
-      <div className="py-4 border-b border-[rgba(240,240,250,0.05)]">
+      <div className="py-4">
         <div className="flex items-center gap-3">
-          <div className="p-2">{icon}</div>
+          <div className="p-2 opacity-30">{icon}</div>
           <div>
-            <h3 className="font-medium opacity-80">{title}</h3>
-            <p className="text-xs opacity-80">{subtitle}</p>
+            <h3 className="text-caption-bold text-sm tracking-widest">{title}</h3>
+            <p className="text-micro opacity-50 mt-1 uppercase tracking-widest">{subtitle}</p>
           </div>
         </div>
       </div>
       
       {/* Chart Content */}
-      <div className="py-6">
+      <div className="py-2">
         {children}
       </div>
     </div>

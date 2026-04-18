@@ -60,8 +60,8 @@ export function EmptyState({
             {icon}
           </div>
         )}
-        <p className="text-caption-bold" style={{ opacity: 0.45, marginBottom: "4px" }}>{title}</p>
-        <p className="text-micro" style={{ opacity: 0.25, maxWidth: "240px" }}>{description}</p>
+        <p className="text-caption-bold uppercase tracking-widest text-[#f0f0fa]" style={{ opacity: 0.45, marginBottom: "4px" }}>{title}</p>
+        <p className="text-micro uppercase tracking-widest" style={{ opacity: 0.25, maxWidth: "240px" }}>{description}</p>
         {action && (
           <div style={{ marginTop: "16px" }}>
             {action.href ? (
@@ -117,25 +117,25 @@ export function NoDataEmptyState() {
         >
           <Github size={40} />
         </div>
-        <h3 className="text-caption-bold" style={{ fontSize: "0.875rem", marginBottom: "8px", opacity: 0.7 }}>
-          Sync your GitHub data to see insights
+        <h3 className="text-caption-bold text-sm uppercase tracking-widest text-[#f0f0fa]" style={{ marginBottom: "12px", opacity: 0.7 }}>
+          SYNC YOUR GITHUB DATA TO SEE INSIGHTS
         </h3>
-        <p className="text-micro" style={{ opacity: 0.3, marginBottom: "24px", maxWidth: "280px", margin: "0 auto 24px" }}>
-          Connect and sync your GitHub repositories to unlock powerful analytics,
-          activity tracking, and AI-powered insights about your coding patterns.
+        <p className="text-micro uppercase tracking-widest" style={{ opacity: 0.3, marginBottom: "24px", maxWidth: "280px", margin: "0 auto 24px" }}>
+          CONNECT AND SYNC YOUR GITHUB REPOSITORIES TO UNLOCK POWERFUL ANALYTICS,
+          ACTIVITY TRACKING, AND AI-POWERED INSIGHTS ABOUT YOUR CODING PATTERNS.
         </p>
         <div style={{ display: "flex", flexWrap: "wrap", gap: "16px", justifyContent: "center" }} aria-label="Benefits of syncing">
           <div style={{ display: "flex", alignItems: "center", gap: "6px", opacity: 0.3 }}>
             <Activity size={12} aria-hidden="true" />
-            <span className="text-micro">Track your commits</span>
+            <span className="text-micro uppercase tracking-widest">TRACK YOUR COMMITS</span>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: "6px", opacity: 0.3 }}>
             <Code size={12} aria-hidden="true" />
-            <span className="text-micro">Analyze languages</span>
+            <span className="text-micro uppercase tracking-widest">ANALYZE LANGUAGES</span>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: "6px", opacity: 0.3 }}>
             <TrendingUp size={12} aria-hidden="true" />
-            <span className="text-micro">Discover patterns</span>
+            <span className="text-micro uppercase tracking-widest">DISCOVER PATTERNS</span>
           </div>
         </div>
       </div>
@@ -148,8 +148,8 @@ export function ActivityEmptyState() {
   return (
     <EmptyState
       icon={<Activity size={40} />}
-      title="No activity data yet"
-      description='Use the "Sync GitHub Data" button to get started'
+      title="NO ACTIVITY DATA YET"
+      description='USE THE "SYNC GITHUB DATA" BUTTON TO GET STARTED'
     />
   );
 }
@@ -180,8 +180,8 @@ export function ChartEmptyState({ chartType = 'chart' }: { chartType?: string })
         <div style={{ opacity: 0.1, marginBottom: "8px" }}>
           {icons[chartType] || icons.chart}
         </div>
-        <p className="text-micro" style={{ opacity: 0.25 }}>No data available</p>
-        <p className="text-micro" style={{ opacity: 0.15, marginTop: "3px" }}>Sync your GitHub data to see {chartType}</p>
+        <p className="text-micro uppercase tracking-widest" style={{ opacity: 0.25 }}>NO DATA AVAILABLE</p>
+        <p className="text-micro uppercase tracking-widest" style={{ opacity: 0.15, marginTop: "3px" }}>SYNC YOUR GITHUB DATA TO SEE {chartType.toUpperCase()}</p>
       </div>
     </div>
   );
@@ -192,8 +192,8 @@ export function LanguageEmptyState() {
   return (
     <EmptyState
       icon={<Code size={32} />}
-      title="No language data yet"
-      description="Language statistics will appear after syncing repositories"
+      title="NO LANGUAGE DATA YET"
+      description="LANGUAGE STATISTICS WILL APPEAR AFTER SYNCING REPOSITORIES"
       variant="compact"
     />
   );
@@ -204,8 +204,8 @@ export function StreakEmptyState() {
   return (
     <div style={{ textAlign: "center", padding: "8px 0" }}>
       <Zap size={16} style={{ margin: "0 auto 4px", opacity: 0.15 }} />
-      <p className="text-caption" style={{ opacity: 0.35 }}>Start today!</p>
-      <p className="text-micro" style={{ opacity: 0.2 }}>Make a commit to begin your streak</p>
+      <p className="text-caption uppercase tracking-widest" style={{ opacity: 0.35 }}>START TODAY!</p>
+      <p className="text-micro uppercase tracking-widest" style={{ opacity: 0.2 }}>MAKE A COMMIT TO BEGIN YOUR STREAK</p>
     </div>
   );
 }
@@ -239,8 +239,8 @@ export function ErrorBanner({
       <div style={{ display: "flex", alignItems: "flex-start", gap: "12px" }}>
         <XCircle size={14} style={{ color: "rgba(252,165,165,0.6)", flexShrink: 0, marginTop: "1px" }} aria-hidden="true" />
         <div style={{ flex: 1 }}>
-          <p className="text-caption-bold" style={{ color: "rgba(252,165,165,0.7)", marginBottom: "4px" }}>{title}</p>
-          <p className="text-caption" style={{ color: "rgba(252,165,165,0.5)" }}>{message}</p>
+          <p className="text-caption-bold uppercase tracking-widest" style={{ color: "rgba(252,165,165,0.7)", marginBottom: "4px" }}>{title.toUpperCase()}</p>
+          <p className="text-caption uppercase tracking-widest text-xs" style={{ color: "rgba(252,165,165,0.5)" }}>{message.toUpperCase()}</p>
           <div style={{ display: "flex", gap: "8px", marginTop: "10px" }}>
             {onRetry && (
               <button
@@ -250,13 +250,13 @@ export function ErrorBanner({
                 aria-label="Retry the failed sync"
               >
                 <RefreshCw size={10} />
-                Retry Sync
+                RETRY SYNC
               </button>
             )}
             {onDismiss && (
               <button
                 onClick={onDismiss}
-                className="text-micro"
+                className="text-micro uppercase tracking-widest"
                 style={{
                   background: "none",
                   border: "none",
@@ -267,7 +267,7 @@ export function ErrorBanner({
                 }}
                 aria-label="Dismiss error"
               >
-                Dismiss
+                DISMISS
               </button>
             )}
           </div>
@@ -305,9 +305,9 @@ export function PartialSyncWarning({
         <AlertTriangle size={14} style={{ color: "rgba(251,191,36,0.6)", flexShrink: 0, marginTop: "1px" }} aria-hidden="true" />
         <div style={{ flex: 1 }}>
           <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
-            <p className="text-caption-bold" style={{ color: "rgba(251,191,36,0.7)" }}>Partial Sync</p>
+            <p className="text-caption-bold uppercase tracking-widest" style={{ color: "rgba(251,191,36,0.7)" }}>PARTIAL SYNC</p>
             <span
-              className="text-micro"
+              className="text-micro uppercase tracking-widest"
               style={{
                 padding: "2px 6px",
                 border: "1px solid rgba(251,191,36,0.2)",
@@ -315,11 +315,11 @@ export function PartialSyncWarning({
                 borderRadius: "2px",
               }}
             >
-              {syncedRepos}/{totalRepos} repos
+              {syncedRepos}/{totalRepos} REPOS
             </span>
           </div>
-          <p className="text-caption" style={{ color: "rgba(251,191,36,0.4)" }}>
-            Some repositories couldn&apos;t be synced. Showing available data.
+          <p className="text-caption uppercase tracking-widest text-xs" style={{ color: "rgba(251,191,36,0.4)" }}>
+            SOME REPOSITORIES COULDN&apos;T BE SYNCED. SHOWING AVAILABLE DATA.
           </p>
           {onRetry && (
             <button
@@ -329,7 +329,7 @@ export function PartialSyncWarning({
               aria-label="Retry sync for remaining repositories"
             >
               <RefreshCw size={10} />
-              Retry Sync
+              RETRY SYNC
             </button>
           )}
         </div>
@@ -372,14 +372,14 @@ export function SyncProgressBanner({
         />
         <div style={{ flex: 1 }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "8px" }}>
-            <p className="text-caption" style={{ opacity: 0.6 }}>{message}</p>
+            <p className="text-caption uppercase tracking-widest" style={{ opacity: 0.6 }}>{message.toUpperCase()}</p>
             {processedRepos !== undefined && totalRepos !== undefined && (
               <span
-                className="text-micro"
+                className="text-micro uppercase tracking-widest"
                 style={{ opacity: 0.35 }}
                 aria-label={`${processedRepos} of ${totalRepos} repositories processed`}
               >
-                {processedRepos}/{totalRepos} repos
+                {processedRepos}/{totalRepos} REPOS
               </span>
             )}
           </div>
@@ -393,7 +393,7 @@ export function SyncProgressBanner({
           >
             <div className="progress-bar-fill" style={{ width: `${progress}%` }} />
           </div>
-          <p className="text-micro" style={{ marginTop: "4px", opacity: 0.2 }}>{progress}% complete</p>
+          <p className="text-micro uppercase tracking-widest" style={{ marginTop: "4px", opacity: 0.2 }}>{progress}% COMPLETE</p>
         </div>
       </div>
     </div>
@@ -420,7 +420,7 @@ export function InfoNotice({ icon, message }: InfoNoticeProps) {
       }}
     >
       <span style={{ opacity: 0.3 }}>{icon || <AlertCircle size={12} />}</span>
-      <span className="text-micro" style={{ opacity: 0.4 }}>{message}</span>
+      <span className="text-micro uppercase tracking-widest" style={{ opacity: 0.4 }}>{message.toUpperCase()}</span>
     </div>
   );
 }

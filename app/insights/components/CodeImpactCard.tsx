@@ -62,39 +62,38 @@ export function CodeImpactCard({ metrics, className }: CodeImpactCardProps) {
 
   return (
     <div className={cn(
-      " bg-transparent overflow-visible",
+      " bg-transparent overflow-visible border-b border-[rgba(240,240,250,0.05)] pb-6",
       className
     )}>
       {/* Header */}
-      <div className="py-4 border-b border-[rgba(240,240,250,0.05)]">
+      <div className="py-4">
         <div className="flex items-center gap-3">
-          <div className="p-2">
+          <div className="p-2 opacity-30">
             <Gauge className="w-5 h-5 text-[#f0f0fa]" />
           </div>
           <div>
-            <h3 className="font-medium opacity-80">Code Impact</h3>
-            <p className="text-xs opacity-80">Measuring meaningful work vs churn</p>
+            <h3 className="text-caption-bold text-sm tracking-widest">CODE IMPACT</h3>
+            <p className="text-micro opacity-50 uppercase tracking-widest">MEASURING MEANINGFUL WORK VS CHURN</p>
           </div>
         </div>
       </div>
       
       {/* Main Content */}
-      <div className="py-6">
+      <div className="py-2">
         {/* Impact Score & Gauge Row */}
         <div className="grid grid-cols-2 gap-6 mb-6">
           {/* Impact Score */}
           <div className="flex flex-col items-center">
-            <div className="text-5xl font-bold opacity-80 mb-2">
+            <div className="text-section-head text-5xl font-bold opacity-80 mb-2">
               {metrics.impactScore}
             </div>
             <div className={cn(
-              "px-3 py-1 -full text-sm font-medium border",
-              impactRating.bgColor,
-              impactRating.color
+              "px-3 py-1 text-sm font-medium border border-[rgba(240,240,250,0.35)]",
+              "uppercase tracking-widest text-shadow-glow",
             )}>
               {impactRating.label}
             </div>
-            <div className="text-xs opacity-80 mt-2">Impact Score</div>
+            <div className="text-micro opacity-50 mt-2 tracking-widest uppercase">IMPACT SCORE</div>
           </div>
           
           {/* Churn Gauge */}
@@ -110,19 +109,19 @@ export function CodeImpactCard({ metrics, className }: CodeImpactCardProps) {
         {/* Stats Row */}
         <div className="grid grid-cols-3 gap-4 mb-6">
           <StatBlock
-            label="Productive"
+            label="PRODUCTIVE"
             value={`${metrics.productiveRate}%`}
             icon={<Zap className="w-4 h-4 text-emerald-400" />}
             color="emerald"
           />
           <StatBlock
-            label="Refactoring"
+            label="REFACTORING"
             value={`${metrics.churnGauge.refactoring}%`}
             icon={<RefreshCw className="w-4 h-4 text-[#f0f0fa]" />}
             color="blue"
           />
           <StatBlock
-            label="Churn"
+            label="CHURN"
             value={`${metrics.churnRate}%`}
             icon={<Target className="w-4 h-4 text-orange-400" />}
             color="orange"
@@ -136,7 +135,7 @@ export function CodeImpactCard({ metrics, className }: CodeImpactCardProps) {
             {metrics.insights.slice(0, expanded ? undefined : 2).map((insight, index) => (
               <div 
                 key={index}
-                className="flex items-start gap-2 text-sm opacity-80"
+                className="flex items-start gap-2 text-micro opacity-80 tracking-widest uppercase"
               >
                 <span className="shrink-0">{insight.slice(0, 2)}</span>
                 <span>{insight.slice(2)}</span>
@@ -146,17 +145,15 @@ export function CodeImpactCard({ metrics, className }: CodeImpactCardProps) {
             {metrics.insights.length > 2 && (
               <button
                 onClick={() => setExpanded(!expanded)}
-                className="flex items-center gap-1 text-xs text-[#f0f0fa] hover:text-[#f0f0fa] transition-colors mt-2"
+                className="flex items-center gap-1 text-micro text-[#f0f0fa] hover:text-[#f0f0fa] transition-colors mt-2 uppercase tracking-widest"
               >
                 {expanded ? (
                   <>
-                    <ChevronUp className="w-3 h-3" />
-                    Show less
+                     SHOW LESS
                   </>
                 ) : (
                   <>
-                    <ChevronDown className="w-3 h-3" />
-                    Show {metrics.insights.length - 2} more insights
+                     SHOW {metrics.insights.length - 2} MORE INSIGHTS
                   </>
                 )}
               </button>

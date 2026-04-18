@@ -55,7 +55,7 @@ export function StatsGrid({ analytics: initialAnalytics, previousAnalytics }: St
     <div>
       {/* Section header */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
-        <p className="text-micro" style={{ letterSpacing: "1.5px" }}>Statistics</p>
+        <p className="text-micro uppercase tracking-widest" style={{ letterSpacing: "1.5px" }}>STATISTICS</p>
         <button
           onClick={refreshStats}
           disabled={isRefreshing}
@@ -204,8 +204,8 @@ function StatCard({
 
       {/* Icon + trend badge row */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "12px" }}>
-        <div style={{ opacity: 0.35 }} aria-hidden="true">
-          {icon}
+        <div className="opacity-30 p-2" aria-hidden="true">
+            <span className="text-[#f0f0fa] scale-150 block">{icon}</span>
         </div>
 
         {/* Trend badge */}
@@ -227,18 +227,20 @@ function StatCard({
         )}
       </div>
 
-      {/* Label */}
-      <p className="text-micro" style={{ opacity: 0.35, marginBottom: "6px" }}>{title}</p>
+      <div className="flex flex-col items-start border-l-2 border-[rgba(240,240,250,0.35)] pl-4">
+        {/* Label */}
+        <p className="text-micro font-medium uppercase tracking-widest" style={{ opacity: 0.5, marginBottom: "8px" }}>{title}</p>
 
-      {/* Value */}
-      <p className="stat-value" style={{ fontSize: "clamp(1.25rem, 2.5vw, 1.75rem)" }} aria-live="polite">
-        {value}
-      </p>
+        {/* Value */}
+        <p className="text-section-head text-4xl font-bold tracking-widest text-[#f0f0fa] opacity-80" aria-live="polite">
+            {value}
+        </p>
 
-      {/* Subtitle */}
-      {subtitle && (
-        <p className="text-micro" style={{ marginTop: "4px", opacity: 0.25 }}>{subtitle}</p>
-      )}
+        {/* Subtitle */}
+        {subtitle && (
+            <p className="text-micro pt-1 uppercase tracking-widest" style={{ opacity: 0.25 }}>{subtitle}</p>
+        )}
+      </div>
 
       {/* Comparative section */}
       {metrics && (
@@ -264,7 +266,7 @@ function StatCard({
               }}
               aria-label={`Change: ${formatChange(metrics.change)} (${formatChangePercent(metrics.changePercent)})`}
             >
-              {trendIndicator?.emoji} {formatChange(metrics.change, 0)}
+              {formatChange(metrics.change, 0)}
             </span>
             <span className="text-micro" style={{ opacity: 0.25 }}>vs prev {period}</span>
           </div>

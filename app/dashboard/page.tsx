@@ -119,17 +119,17 @@ export default async function DashboardPage() {
             <div style={{ paddingBottom: "16px", borderBottom: "1px solid rgba(240,240,250,0.06)" }}>
               <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", flexWrap: "wrap", gap: "12px" }}>
                 <div>
-                  <p className="text-micro" style={{ marginBottom: "8px" }}>Dashboard</p>
+                  <p className="text-micro uppercase tracking-widest" style={{ marginBottom: "8px" }}>DASHBOARD</p>
                   <h2
-                    className="text-section-head"
+                    className="text-section-head uppercase tracking-widest"
                     style={{ fontSize: "clamp(1.25rem, 3vw, 1.75rem)" }}
                   >
-                    Welcome back, {user.name?.split(" ")[0] || user.username}
+                    WELCOME BACK, {user.name?.split(" ")[0] || user.username}
                   </h2>
-                  <p className="text-body" style={{ opacity: 0.45, marginTop: "6px", fontSize: "0.875rem" }}>
+                  <p className="text-body uppercase tracking-[2px]" style={{ opacity: 0.45, marginTop: "6px", fontSize: "0.75rem" }}>
                     {hasSyncedData
-                      ? "Overview of your GitHub activity and insights"
-                      : "Sync your GitHub data to see your coding insights"}
+                      ? "OVERVIEW OF YOUR GITHUB ACTIVITY AND INSIGHTS"
+                      : "SYNC YOUR GITHUB DATA TO SEE YOUR CODING INSIGHTS"}
                   </p>
                 </div>
                 <div className="hidden sm:flex items-center" style={{ gap: "8px", opacity: 0.35 }}>

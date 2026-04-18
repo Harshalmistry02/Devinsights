@@ -125,15 +125,15 @@ export function AIInsightsHero({ analytics }: AIInsightsHeroProps) {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           {/* Title & Meta */}
           <div className="flex items-center gap-4">
-            <div className="p-3 bg-linear-to-br from-purple-500/20 to-cyan-500/20 border border-purple-500/30">
-              <Wand2 className="w-6 h-6 text-purple-400" />
+            <div className="p-3 opacity-30">
+              <Wand2 className="w-6 h-6 text-[#f0f0fa]" />
             </div>
             <div>
-              <h2 className="text-xl font-semibold opacity-80">
-                AI-Powered Analysis
+              <h2 className="text-caption-bold text-sm tracking-widest uppercase">
+                AI-POWERED ANALYSIS
               </h2>
-              <p className="opacity-80 text-sm">
-                Deep insights into your development patterns
+              <p className="text-micro pt-1 opacity-50 uppercase tracking-widest">
+                DEEP INSIGHTS INTO YOUR DEVELOPMENT PATTERNS
               </p>
             </div>
           </div>
@@ -214,7 +214,7 @@ export function AIInsightsHero({ analytics }: AIInsightsHeroProps) {
               </div>
               <div className="flex-1">
                 <p className="text-amber-200 font-medium text-sm">
-                  🎯 {meta.daysToMilestone.daysRemaining} days to {meta.daysToMilestone.milestone}-day streak!
+                  {meta.daysToMilestone.daysRemaining} days to {meta.daysToMilestone.milestone}-day streak!
                 </p>
               </div>
             </div>
@@ -248,19 +248,19 @@ export function AIInsightsHero({ analytics }: AIInsightsHeroProps) {
       {!insights && !loading && !error && (
         <div className="py-6">
           <div className="bg-transparent py-8 text-center">
-            <div className="w-16 h-16 bg-linear-to-br from-purple-500/20 to-cyan-500/20 border border-purple-500/30 flex items-center justify-center mx-auto mb-4">
-              <Sparkles className="w-8 h-8 text-purple-400" />
+            <div className="w-16 h-16 border border-[rgba(240,240,250,0.35)] flex items-center justify-center mx-auto mb-4 p-4 text-[#f0f0fa]">
+               <Sparkles className="w-8 h-8 opacity-30" />
             </div>
-            <h3 className="text-lg font-semibold opacity-80 mb-2">
-              Unlock AI Insights
+             <h3 className="text-caption-bold text-sm tracking-widest uppercase mb-2">
+              UNLOCK AI INSIGHTS
             </h3>
-            <p className="opacity-80 text-sm max-w-md mx-auto mb-6">
-              Get personalized analysis of your coding patterns, strengths, and actionable suggestions powered by advanced AI.
+            <p className="text-micro opacity-50 uppercase tracking-widest max-w-md mx-auto mb-6">
+              GET PERSONALIZED ANALYSIS OF YOUR CODING PATTERNS, STRENGTHS, AND ACTIONABLE SUGGESTIONS POWERED BY ADVANCED AI.
             </p>
-            <div className="flex flex-wrap justify-center gap-3">
-              <FeatureTag icon="🧠" text="Pattern Detection" />
-              <FeatureTag icon="💪" text="Strength Analysis" />
-              <FeatureTag icon="💡" text="Smart Suggestions" />
+             <div className="flex flex-wrap justify-center gap-3">
+              <FeatureTag text="PATTERN DETECTION" />
+              <FeatureTag text="STRENGTH ANALYSIS" />
+              <FeatureTag text="SMART SUGGESTIONS" />
             </div>
           </div>
         </div>
@@ -333,10 +333,9 @@ function InsightPanel({
   );
 }
 
-function FeatureTag({ icon, text }: { icon: string; text: string }) {
+function FeatureTag({ text }: { text: string }) {
   return (
-    <div className="flex items-center gap-2 px-3 py-1.5 border border-[rgba(240,240,250,0.15)] -full text-sm opacity-80">
-      <span>{icon}</span>
+    <div className="flex items-center gap-2 px-3 py-1.5 border border-[rgba(240,240,250,0.35)] text-micro opacity-50 uppercase tracking-widest text-shadow-glow">
       <span>{text}</span>
     </div>
   );

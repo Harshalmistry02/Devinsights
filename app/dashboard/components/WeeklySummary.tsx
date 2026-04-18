@@ -92,7 +92,7 @@ export function WeeklySummary({ analytics, className }: WeeklySummaryProps) {
             <p className="text-caption-bold" style={{ fontSize: "0.75rem" }}>
               {getWeekLabel(currentWeek.weekNumber, currentWeek.year)}
             </p>
-            <p className="text-micro" style={{ opacity: 0.3, marginTop: "2px" }}>This Week at a Glance</p>
+            <p className="text-micro uppercase tracking-widest" style={{ opacity: 0.3, marginTop: "2px" }}>THIS WEEK AT A GLANCE</p>
           </div>
         </div>
 
@@ -122,27 +122,26 @@ export function WeeklySummary({ analytics, className }: WeeklySummaryProps) {
         <div style={{ background: "transparent", padding: "0" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "14px", opacity: 0.4 }}>
             <Target size={12} />
-            <p className="text-micro">Progress</p>
+            <p className="text-micro uppercase tracking-widest">PROGRESS</p>
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
             <ProgressItem
               icon={<GitCommit size={12} />}
-              label="commits"
+              label="COMMITS"
               value={currentWeek.totalCommits}
               change={comparison.commitsDiff}
-              changeLabel="vs last week"
+              changeLabel="VS LAST WEEK"
               positive={comparison.commitsDiff >= 0}
             />
             <ProgressItem
               icon={<Flame size={12} />}
-              label="day streak"
+              label="DAY STREAK"
               value={streakInfo.current}
-              badge={streakInfo.isActive ? "🔥" : undefined}
               positive={true}
             />
             <ProgressItem
               icon={<Code size={12} />}
-              label="repos touched"
+              label="REPOS TOUCHED"
               value={highlights.totalReposTouched}
               positive={true}
             />
@@ -166,36 +165,32 @@ export function WeeklySummary({ analytics, className }: WeeklySummaryProps) {
         <div style={{ background: "transparent", padding: "0" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "14px", opacity: 0.4 }}>
             <Sparkles size={12} />
-            <p className="text-micro">Highlights</p>
+            <p className="text-micro uppercase tracking-widest">HIGHLIGHTS</p>
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
             {highlights.bestDay && (
               <HighlightItem
-                emoji="🏆"
-                label="Best day"
-                value={`${highlights.bestDay.dayName} (${highlights.bestDay.commits} commits)`}
+                label="BEST DAY"
+                value={`${highlights.bestDay.dayName} (${highlights.bestDay.commits} COMMITS)`}
               />
             )}
             {highlights.mostActiveHour && (
               <HighlightItem
-                emoji="💻"
-                label="Most active"
+                label="MOST ACTIVE"
                 value={highlights.mostActiveHour.label}
               />
             )}
             {streakInfo.daysToMilestone && streakInfo.milestoneLabel && (
               <HighlightItem
-                emoji="🎯"
-                label="Streak milestone"
-                value={`${streakInfo.daysToMilestone} day${streakInfo.daysToMilestone !== 1 ? 's' : ''} to ${streakInfo.milestoneLabel} badge`}
+                label="STREAK MILESTONE"
+                value={`${streakInfo.daysToMilestone} DAY${streakInfo.daysToMilestone !== 1 ? 'S' : ''} TO ${streakInfo.milestoneLabel} BADGE`}
                 highlight
               />
             )}
             {highlights.topRepos.length > 0 && (
               <HighlightItem
-                emoji="📦"
-                label="Top repos"
-                value={highlights.topRepos.slice(0, 2).join(', ')}
+                label="TOP REPOS"
+                value={highlights.topRepos.slice(0, 2).join(', ').toUpperCase()}
               />
             )}
           </div>
@@ -205,7 +200,7 @@ export function WeeklySummary({ analytics, className }: WeeklySummaryProps) {
         <div style={{ background: "transparent", padding: "0" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "14px", opacity: 0.4 }}>
             <TrendingUp size={12} />
-            <p className="text-micro">This Week</p>
+            <p className="text-micro uppercase tracking-widest">THIS WEEK</p>
           </div>
           <WeekMiniChart data={currentWeek.dailyBreakdown} />
 
@@ -214,12 +209,12 @@ export function WeeklySummary({ analytics, className }: WeeklySummaryProps) {
             {!streakInfo.isActive && (
               <button className="btn-ghost btn-ghost-sm" style={{ fontSize: "0.625rem", padding: "8px 16px" }}>
                 <GitCommit size={11} />
-                Commit Today
+                COMMIT TODAY
               </button>
             )}
             <button className="btn-ghost btn-ghost-sm" style={{ fontSize: "0.625rem", padding: "8px 16px" }}>
               <ExternalLink size={11} />
-              Weekly Report
+              WEEKLY REPORT
             </button>
           </div>
         </div>
@@ -282,15 +277,14 @@ function ProgressItem({
     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
       <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
         <span style={{ opacity: 0.3 }}>{icon}</span>
-        <span className="text-caption">
+        <span className="text-caption uppercase tracking-widest">
           <span className="text-caption-bold" style={{ fontSize: "0.75rem" }}>{value}</span>
           {' '}{label}
-          {badge && <span style={{ marginLeft: "4px" }}>{badge}</span>}
         </span>
       </div>
       {change !== undefined && (
         <span
-          className="text-micro"
+          className="text-micro uppercase tracking-widest"
           style={{
             padding: "2px 6px",
             border: `1px solid ${change >= 0 ? "rgba(134,239,172,0.15)" : "rgba(252,165,165,0.15)"}`,
@@ -298,7 +292,7 @@ function ProgressItem({
             borderRadius: "2px",
           }}
         >
-          {formatWeekChange(change)} {changeLabel}
+          {formatWeekChange(change).toUpperCase()} {changeLabel?.toUpperCase()}
         </span>
       )}
     </div>
@@ -306,12 +300,10 @@ function ProgressItem({
 }
 
 function HighlightItem({
-  emoji,
   label,
   value,
   highlight = false,
 }: {
-  emoji: string;
   label: string;
   value: string;
   highlight?: boolean;
@@ -328,11 +320,10 @@ function HighlightItem({
         border: highlight ? "1px solid rgba(240,240,250,0.06)" : "none",
       }}
     >
-      <span style={{ fontSize: "0.875rem", lineHeight: 1 }}>{emoji}</span>
       <div style={{ flex: 1, minWidth: 0 }}>
-        <span className="text-micro" style={{ opacity: 0.3 }}>{label}: </span>
+        <span className="text-micro uppercase tracking-widest" style={{ opacity: 0.3 }}>{label}: </span>
         <span
-          className="text-caption"
+          className="text-caption uppercase tracking-widest"
           style={{ opacity: highlight ? 0.8 : 0.55 }}
         >
           {value}

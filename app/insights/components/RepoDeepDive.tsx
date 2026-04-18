@@ -153,12 +153,12 @@ export function RepoDeepDive({
       <div className="py-4 border-b border-[rgba(240,240,250,0.05)]">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="p-2">
+            <div className="p-2 opacity-30">
               <GitBranch className="w-5 h-5 text-teal-400" />
             </div>
             <div>
-              <h3 className="font-medium opacity-80">Repository Deep Dive</h3>
-              <p className="text-xs opacity-80">{repoStats.length} repositories analyzed</p>
+              <h3 className="text-caption-bold text-sm tracking-widest uppercase">REPOSITORY DEEP DIVE</h3>
+              <p className="text-micro opacity-50 uppercase tracking-widest">{repoStats.length} REPOSITORIES ANALYZED</p>
             </div>
           </div>
           

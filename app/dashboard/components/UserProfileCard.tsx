@@ -84,10 +84,10 @@ export function UserProfileCard({ session, githubStatus, lastSync, analytics }: 
         {/* User info */}
         <div style={{ padding: "16px 0 24px" }}>
           <h2
-            className="text-caption-bold"
+            className="text-caption-bold uppercase tracking-widest"
             style={{ fontSize: "0.875rem", marginBottom: "4px" }}
           >
-            {user.name || user.username || "Anonymous User"}
+            {user.name || user.username || "ANONYMOUS USER"}
           </h2>
           {user.username && (
             <a
@@ -131,23 +131,12 @@ export function UserProfileCard({ session, githubStatus, lastSync, analytics }: 
                 alignItems: "center",
                 gap: "6px",
                 padding: "4px 10px",
-                background: "rgba(134,239,172,0.06)",
-                border: "1px solid rgba(134,239,172,0.15)",
+                border: "1px solid rgba(240, 240, 250, 0.35)",
                 borderRadius: "var(--radius-button)",
               }}
               className="text-micro"
             >
-              <span
-                style={{
-                  width: "6px",
-                  height: "6px",
-                  borderRadius: "50%",
-                  background: "rgba(134,239,172,0.7)",
-                  animation: "pulse 2s ease infinite",
-                }}
-              />
-              <style>{`@keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.4; } }`}</style>
-              Authenticated
+              AUTHENTICATED
             </span>
             {analytics?.isActiveToday && (
               <span
@@ -156,14 +145,12 @@ export function UserProfileCard({ session, githubStatus, lastSync, analytics }: 
                   alignItems: "center",
                   gap: "6px",
                   padding: "4px 10px",
-                  background: "rgba(251,191,36,0.06)",
-                  border: "1px solid rgba(251,191,36,0.15)",
+                  border: "1px solid rgba(240, 240, 250, 0.35)",
                   borderRadius: "var(--radius-button)",
                 }}
                 className="text-micro"
               >
-                <Flame size={9} style={{ color: "rgba(251,191,36,0.6)" }} />
-                Active Today
+                ACTIVE TODAY
               </span>
             )}
           </div>
@@ -177,7 +164,7 @@ export function UserProfileCard({ session, githubStatus, lastSync, analytics }: 
               aria-label="View your full profile"
             >
               <User size={13} />
-              Profile
+              PROFILE
             </Link>
             <Link
               href="/settings"
@@ -186,7 +173,7 @@ export function UserProfileCard({ session, githubStatus, lastSync, analytics }: 
               aria-label="Manage account settings"
             >
               <Settings size={13} />
-              Settings
+              SETTINGS
             </Link>
           </nav>
 
@@ -195,7 +182,7 @@ export function UserProfileCard({ session, githubStatus, lastSync, analytics }: 
 
           {/* Data Sync Section */}
           <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-            <p className="text-micro" style={{ opacity: 0.4, letterSpacing: "1.5px" }}>Data Sync</p>
+            <p className="text-micro uppercase tracking-widest" style={{ opacity: 0.4, letterSpacing: "1.5px" }}>DATA SYNC</p>
             <SyncButtonComplete />
 
             {/* Sync Status */}
@@ -212,14 +199,14 @@ export function UserProfileCard({ session, githubStatus, lastSync, analytics }: 
                 }}
               >
                 <Loader2 size={10} style={{ animation: "spin 1s linear infinite" }} aria-hidden="true" />
-                Syncing in progress...
+                SYNCING IN PROGRESS...
               </p>
             ) : (
               <p
-                className="text-micro"
+                className="text-micro uppercase tracking-widest"
                 style={{ textAlign: "center", opacity: 0.3 }}
               >
-                Last synced: {syncDate}
+                LAST SYNCED: {syncDate.toUpperCase()}
               </p>
             )}
           </div>

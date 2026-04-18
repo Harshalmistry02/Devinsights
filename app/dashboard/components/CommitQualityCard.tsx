@@ -84,11 +84,13 @@ export function CommitQualityCard({ metrics, className }: CommitQualityCardProps
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          <FileText size={14} style={{ opacity: 0.35 }} aria-hidden="true" />
+          <div className="p-2 opacity-30">
+              <FileText size={16} className="text-[#f0f0fa]" aria-hidden="true" />
+          </div>
           <div>
-            <p className="text-caption-bold" style={{ fontSize: "0.75rem" }}>Commit Quality</p>
-            <p className="text-micro" style={{ opacity: 0.3, marginTop: "2px" }}>
-              {metrics.totalAnalyzed} commits analyzed
+            <p className="text-caption-bold text-sm uppercase tracking-widest text-[#f0f0fa]">COMMIT QUALITY</p>
+            <p className="text-micro pt-1 uppercase tracking-widest" style={{ opacity: 0.3 }}>
+              {metrics.totalAnalyzed} COMMITS ANALYZED
             </p>
           </div>
         </div>
@@ -181,8 +183,8 @@ export function CommitQualityCard({ metrics, className }: CommitQualityCardProps
                       gap: "8px",
                     }}
                   >
-                    <span style={{ flexShrink: 0, fontSize: "0.875rem" }}>{emoji}</span>
-                    <span className="text-caption" style={{ opacity: 0.55 }}>{text}</span>
+                    <span style={{ flexShrink: 0, fontSize: "0.875rem", opacity: 0.3 }}><Info size={14}/></span>
+                    <span className="text-caption uppercase tracking-widest" style={{ opacity: 0.55 }}>{text}</span>
                   </div>
                 );
               })}

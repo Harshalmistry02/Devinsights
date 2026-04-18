@@ -10,10 +10,10 @@ export function InsightsRow({ analytics }: InsightsRowProps) {
   return (
     <div>
       <p
-        className="text-micro"
+        className="text-micro uppercase tracking-widest"
         style={{ letterSpacing: "1.5px", marginBottom: "16px" }}
       >
-        Key Insights
+        KEY INSIGHTS
       </p>
       <div
         style={{
@@ -80,18 +80,17 @@ function InsightCell({
       
       
     >
-      <div style={{ display: "flex", alignItems: "center", gap: "8px", opacity: 0.3 }} aria-hidden="true">
-        {icon}
-        <p className="text-micro" style={{ opacity: 1 }}>{label}</p>
+      <div className="flex flex-col border-[rgba(240,240,250,0.35)] pl-4 border-l-2">
+         <p className="text-micro font-medium uppercase tracking-widest" style={{ opacity: 0.5, marginBottom: "8px" }}>{label}</p>
+         <div className="flex flex-col items-start">
+             <p
+                className="text-section-head text-3xl font-bold tracking-widest text-[#f0f0fa] opacity-80"
+                aria-live="polite"
+              >
+                {value}
+              </p>
+         </div>
       </div>
-      <p
-        className="text-section-head"
-        style={{ fontSize: "1.25rem" }}
-        aria-live="polite"
-      >
-        {value}
-      </p>
-      <p className="text-micro" style={{ opacity: 0.25 }}>{sublabel}</p>
     </div>
   );
 }

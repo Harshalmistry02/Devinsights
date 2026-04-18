@@ -24,8 +24,10 @@ export function ActivityOverview({ analytics, hasSyncedData }: ActivityOverviewP
           gap: "10px",
         }}
       >
-        <TrendingUp size={14} style={{ opacity: 0.35 }} aria-hidden="true" />
-        <p className="text-caption-bold" style={{ fontSize: "0.75rem" }}>Activity Overview</p>
+        <div className="p-2 opacity-30">
+            <TrendingUp size={16} className="text-[#f0f0fa]" aria-hidden="true" />
+        </div>
+        <p className="text-caption-bold text-sm uppercase tracking-widest text-[#f0f0fa]">ACTIVITY OVERVIEW</p>
       </div>
 
       <div style={{ padding: "20px 0" }}>
@@ -47,19 +49,19 @@ export function ActivityOverview({ analytics, hasSyncedData }: ActivityOverviewP
               }
             `}</style>
             <MiniStat
-              label="Lines Added"
+              label="LINES ADDED"
               value={formatNumber(analytics?.totalAdditions || 0)}
             />
             <MiniStat
-              label="Lines Deleted"
+              label="LINES DELETED"
               value={formatNumber(analytics?.totalDeletions || 0)}
             />
             <MiniStat
-              label="Total Forks"
+              label="TOTAL FORKS"
               value={formatNumber(analytics?.totalForks || 0)}
             />
             <MiniStat
-              label="Avg/Day"
+              label="AVG/DAY"
               value={analytics?.averageCommitsPerDay?.toFixed(1) || "0"}
             />
           </div>
@@ -84,16 +86,15 @@ function MiniStat({
         background: "transparent",
         padding: "0",
       }}
-      
-      
     >
-      <p className="text-micro" style={{ opacity: 0.3, marginBottom: "6px" }}>{label}</p>
-      <p
-        className="stat-value"
-        style={{ fontSize: "1.25rem" }}
-      >
-        {value}
-      </p>
+      <p className="text-micro font-medium uppercase tracking-widest" style={{ opacity: 0.5, marginBottom: "8px" }}>{label}</p>
+      <div className="flex flex-col items-start">
+         <p
+            className="text-section-head text-4xl font-bold tracking-widest text-[#f0f0fa] opacity-80"
+          >
+            {value}
+          </p>
+      </div>
     </div>
   );
 }
