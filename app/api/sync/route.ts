@@ -153,6 +153,36 @@ export async function POST(req: NextRequest) {
     }
 
     const repoIdMap = await RepositoryDataPipeline.upsertRepositories(userId, repos);
+    const repositoryUpsertFailures = repos.length - repoIdMap.size;
+
+    if (repoIdMap.size === 0) {
+      const syncDurationMs = Date.now() - syncStartTime;
+
+      await updateSyncJob({
+        status: SyncStatus.FAILED,
+        totalRepos: repos.length,
+        processedRepos: 0,
+        totalCommits: 0,
+        errorMessage: 'Unable to persist repositories to database',
+        completedAt: new Date(),
+      });
+
+      return NextResponse.json(
+        {
+          error: 'Repository sync setup failed',
+          message:
+            'Could not persist repositories to the database. Verify your database schema and run migrations on the deployed environment.',
+          data: {
+            totalRepos: repos.length,
+            persistedRepos: 0,
+            repositoryUpsertFailures,
+            syncDurationMs,
+            syncDurationMin: Number((syncDurationMs / 60000).toFixed(2)),
+          },
+        },
+        { status: 500 }
+      );
+    }
 
     const commitStats = {
       total: 0,
@@ -261,7 +291,8 @@ export async function POST(req: NextRequest) {
         totalCommits: commitStats.total,
         processedCommits: commitStats.processed,
         duplicateCommits: commitStats.duplicates,
-        syncErrors: commitStats.errors,
+        syncErrors: commitStats.errors + repositoryUpsertFailures,
+        repositoryUpsertFailures,
         syncDurationMs,
         syncDurationMin: Number((syncDurationMs / 60000).toFixed(2)),
       },

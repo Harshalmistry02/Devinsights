@@ -14,73 +14,38 @@ export interface RepositorySyncRecord {
   defaultBranch: string;
 }
 
-const MISSING_ON_CONFLICT_CONSTRAINT =
-  'there is no unique or exclusion constraint matching the on conflict specification';
-
-let hasLoggedConstraintFallback = false;
-
-function hasMissingOnConflictConstraint(error: unknown): boolean {
-  const stack: unknown[] = [error];
-
-  while (stack.length > 0) {
-    const current = stack.pop();
-    if (!current) continue;
-
-    const message =
-      current instanceof Error
-        ? current.message
-        : typeof current === 'string'
-          ? current
-          : typeof current === 'object' && current !== null && 'message' in current
-            ? String((current as { message?: unknown }).message ?? '')
-            : String(current);
-
-    if (message.toLowerCase().includes(MISSING_ON_CONFLICT_CONSTRAINT)) {
-      return true;
-    }
-
-    if (typeof current === 'object' && current !== null && 'cause' in current) {
-      stack.push((current as { cause?: unknown }).cause);
-    }
-  }
-
-  return false;
-}
-
 export async function upsertRepositoryForUser(userId: string, repository: RepositorySyncRecord) {
   const now = new Date();
 
-  try {
-    return await prisma.repository.upsert({
-      where: {
-        userId_githubId: {
-          userId,
-          githubId: repository.githubId,
-        },
-      },
-      update: {
+  const existingForUser = await prisma.repository.findFirst({
+    where: {
+      userId,
+      githubId: repository.githubId,
+    },
+    select: { id: true },
+  });
+
+  if (existingForUser) {
+    return prisma.repository.update({
+      where: { id: existingForUser.id },
+      data: {
         ...repository,
         lastSyncedAt: now,
       },
-      create: {
+    });
+  }
+
+  try {
+    return await prisma.repository.create({
+      data: {
         userId,
         ...repository,
         lastSyncedAt: now,
       },
     });
   } catch (error) {
-    if (!hasMissingOnConflictConstraint(error)) {
-      throw error;
-    }
-
-    if (!hasLoggedConstraintFallback) {
-      console.warn(
-        'Repository upsert fallback activated: missing unique constraint on repositories(userId, githubId). Run "prisma migrate deploy" to restore ON CONFLICT support.'
-      );
-      hasLoggedConstraintFallback = true;
-    }
-
-    const existing = await prisma.repository.findFirst({
+    // Handle race conditions and legacy schemas by resolving existing rows after create conflicts.
+    const existingForUserAfterCreate = await prisma.repository.findFirst({
       where: {
         userId,
         githubId: repository.githubId,
@@ -88,9 +53,9 @@ export async function upsertRepositoryForUser(userId: string, repository: Reposi
       select: { id: true },
     });
 
-    if (existing) {
+    if (existingForUserAfterCreate) {
       return prisma.repository.update({
-        where: { id: existing.id },
+        where: { id: existingForUserAfterCreate.id },
         data: {
           ...repository,
           lastSyncedAt: now,
@@ -98,12 +63,24 @@ export async function upsertRepositoryForUser(userId: string, repository: Reposi
       });
     }
 
-    return prisma.repository.create({
-      data: {
-        userId,
-        ...repository,
-        lastSyncedAt: now,
+    const existingByGithubId = await prisma.repository.findFirst({
+      where: { githubId: repository.githubId },
+      select: {
+        id: true,
+        userId: true,
       },
     });
+
+    if (existingByGithubId && existingByGithubId.userId === userId) {
+      return prisma.repository.update({
+        where: { id: existingByGithubId.id },
+        data: {
+          ...repository,
+          lastSyncedAt: now,
+        },
+      });
+    }
+
+    throw error;
   }
 }
