@@ -28,8 +28,7 @@ import {
 import { refreshUserAnalytics } from '@/lib/analytics';
 
 const sanitizeLog = (val: unknown): string =>
-  String(val).replace(/[
-]/g, ' ').slice(0, 200);
+  String(val).replace(/[\r\n]/g, ' ').slice(0, 200);
 
 /**
  * POST /api/sync/complete
