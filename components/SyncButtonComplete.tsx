@@ -146,7 +146,7 @@ export function SyncButtonComplete() {
         : 'Starting complete GitHub sync...'
       );
 
-      const response = await fetch('/api/sync/complete', {
+      const response = await fetch('/api/sync', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ forceFullSync }),

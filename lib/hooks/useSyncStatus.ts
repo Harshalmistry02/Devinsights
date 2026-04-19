@@ -46,7 +46,7 @@ export function useSyncStatus(pollInterval = 2000): UseSyncStatusResult {
 
   const fetchStatus = useCallback(async () => {
     try {
-      const response = await fetch('/api/sync/complete');
+      const response = await fetch('/api/sync');
       
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}`);
@@ -95,36 +95,37 @@ export function useSyncStatus(pollInterval = 2000): UseSyncStatusResult {
  */
 export function useLastSyncTime(): string {
   const { lastSyncedAt } = useSyncStatus();
-  const [timeAgo, setTimeAgo] = useState<string>('Never');
+  const [, setMinuteTick] = useState(0);
 
   useEffect(() => {
-    if (!lastSyncedAt) {
-      setTimeAgo('Never');
-      return;
-    }
+    const interval = setInterval(() => {
+      setMinuteTick((tick) => tick + 1);
+    }, 60000);
 
-    const updateTimeAgo = () => {
-      const now = new Date();
-      const diffMs = now.getTime() - lastSyncedAt.getTime();
-      const diffMins = Math.floor(diffMs / 60000);
-      const diffHours = Math.floor(diffMins / 60);
-      const diffDays = Math.floor(diffHours / 24);
-
-      if (diffMins < 1) {
-        setTimeAgo('Just now');
-      } else if (diffMins < 60) {
-        setTimeAgo(`${diffMins} minute${diffMins !== 1 ? 's' : ''} ago`);
-      } else if (diffHours < 24) {
-        setTimeAgo(`${diffHours} hour${diffHours !== 1 ? 's' : ''} ago`);
-      } else {
-        setTimeAgo(`${diffDays} day${diffDays !== 1 ? 's' : ''} ago`);
-      }
-    };
-
-    updateTimeAgo();
-    const interval = setInterval(updateTimeAgo, 60000); // Update every minute
     return () => clearInterval(interval);
-  }, [lastSyncedAt]);
+  }, []);
 
-  return timeAgo;
+  if (!lastSyncedAt) {
+    return 'Never';
+  }
+
+  const now = new Date();
+  const diffMs = now.getTime() - lastSyncedAt.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMins / 60);
+  const diffDays = Math.floor(diffHours / 24);
+
+  if (diffMins < 1) {
+    return 'Just now';
+  }
+
+  if (diffMins < 60) {
+    return `${diffMins} minute${diffMins !== 1 ? 's' : ''} ago`;
+  }
+
+  if (diffHours < 24) {
+    return `${diffHours} hour${diffHours !== 1 ? 's' : ''} ago`;
+  }
+
+  return `${diffDays} day${diffDays !== 1 ? 's' : ''} ago`;
 }

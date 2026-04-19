@@ -13,6 +13,7 @@
 import prisma from '@/lib/prisma';
 import { Prisma } from '@prisma/client';
 import type { ProcessedCommit, CommitStats } from '@/lib/github/advanced-sync-service';
+import { upsertRepositoryForUser } from '@/lib/github/repository-upsert';
 
 // ============================================
 // Types
@@ -191,7 +192,7 @@ export class CommitDataPipeline {
         skipped += batch.length - result.count;
         
         console.log(`  📝 Batch ${Math.floor(i / BATCH_SIZE) + 1}: Inserted ${result.count}, Skipped ${batch.length - result.count}`);
-      } catch (error: unknown) {
+      } catch {
         // Fallback to individual inserts if batch fails
         console.warn('Batch insert failed, falling back to individual inserts...');
         
@@ -323,41 +324,7 @@ export class RepositoryDataPipeline {
 
     for (const repo of repositories) {
       try {
-        const upserted = await prisma.repository.upsert({
-          where: {
-            userId_githubId: {
-              userId,
-              githubId: repo.githubId,
-            },
-          },
-          update: {
-            name: repo.name,
-            fullName: repo.fullName,
-            description: repo.description,
-            language: repo.language,
-            stars: repo.stars,
-            forks: repo.forks,
-            isPrivate: repo.isPrivate,
-            isFork: repo.isFork,
-            isArchived: repo.isArchived,
-            defaultBranch: repo.defaultBranch,
-            lastSyncedAt: new Date(),
-          },
-          create: {
-            userId,
-            githubId: repo.githubId,
-            name: repo.name,
-            fullName: repo.fullName,
-            description: repo.description,
-            language: repo.language,
-            stars: repo.stars,
-            forks: repo.forks,
-            isPrivate: repo.isPrivate,
-            isFork: repo.isFork,
-            isArchived: repo.isArchived,
-            defaultBranch: repo.defaultBranch,
-          },
-        });
+        const upserted = await upsertRepositoryForUser(userId, repo);
 
         idMap.set(repo.githubId, upserted.id);
       } catch (error) {

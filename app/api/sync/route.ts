@@ -139,13 +139,15 @@ export async function POST(req: NextRequest) {
     });
 
     if (repos.length === 0) {
+      const syncDurationMs = Date.now() - syncStartTime;
       return NextResponse.json({
         success: true,
         message: 'No repositories to sync',
         data: {
           totalRepos: 0,
           totalCommits: 0,
-          syncDurationMs: Date.now() - syncStartTime,
+          syncDurationMs,
+          syncDurationMin: Number((syncDurationMs / 60000).toFixed(2)),
         },
       });
     }
@@ -261,6 +263,7 @@ export async function POST(req: NextRequest) {
         duplicateCommits: commitStats.duplicates,
         syncErrors: commitStats.errors,
         syncDurationMs,
+        syncDurationMin: Number((syncDurationMs / 60000).toFixed(2)),
       },
     });
   } catch (error: unknown) {

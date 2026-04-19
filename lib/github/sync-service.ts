@@ -3,6 +3,7 @@ import { GitHubClient } from './client';
 import { SyncStatus } from '@prisma/client';
 import { refreshUserAnalytics } from '@/lib/analytics';
 import { analyzeCommitFiles } from '@/lib/utils/language-detector';
+import { upsertRepositoryForUser } from './repository-upsert';
 
 export class GitHubSyncService {
   private client: GitHubClient;
@@ -66,22 +67,7 @@ export class GitHubSyncService {
         // Upsert repository
         let storedRepo;
         try {
-          storedRepo = await prisma.repository.upsert({
-            where: {
-              userId_githubId: {
-                userId: this.userId,
-                githubId: repo.githubId,
-              },
-            },
-            update: {
-              ...repo,
-              lastSyncedAt: new Date(),
-            },
-            create: {
-              ...repo,
-              userId: this.userId,
-            },
-          });
+          storedRepo = await upsertRepositoryForUser(this.userId, repo);
         } catch (error) {
           console.error(`Failed to upsert repository ${repo.fullName}:`, error);
           await this.updateSyncJob({ processedRepos: i + 1 });
@@ -144,9 +130,15 @@ export class GitHubSyncService {
                   metadata, // Store file analysis metadata
                 },
               });
-            } catch (error: any) {
+            } catch (error: unknown) {
               // Skip duplicates (unique constraint violation on [repositoryId, sha])
-              if (error.code !== 'P2002') {
+              const isDuplicateCommit =
+                typeof error === 'object' &&
+                error !== null &&
+                'code' in error &&
+                (error as { code?: string }).code === 'P2002';
+
+              if (!isDuplicateCommit) {
                 throw error;
               }
             }
@@ -199,10 +191,12 @@ export class GitHubSyncService {
       });
 
       return { success: true, repos: repos.length };
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown sync error';
+
       await this.updateSyncJob({
         status: SyncStatus.FAILED,
-        errorMessage: error.message,
+        errorMessage,
         completedAt: new Date(),
       });
 
