@@ -1,17 +1,23 @@
 import { Github, User, Settings, Loader2 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
+import type { Session } from "next-auth";
 import { SyncButtonComplete } from "@/components/SyncButtonComplete";
 
 interface UserProfileCardProps {
-  session: any;
+  session: Session;
   githubStatus: {
     isConnected: boolean;
     lastSync: string | null;
-    provider: string;
+    provider: string | null;
   };
-  lastSync: any;
-  analytics?: any;
+  lastSync: {
+    status?: string | null;
+    completedAt?: string | Date | null;
+  } | null;
+  analytics?: {
+    isActiveToday?: boolean;
+  } | null;
 }
 
 export function UserProfileCard({ session, githubStatus, lastSync, analytics }: UserProfileCardProps) {

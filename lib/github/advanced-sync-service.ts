@@ -184,6 +184,28 @@ export class AdvancedGitHubSyncService {
     }
   }
 
+  private async refreshAuth(): Promise<void> {
+    const { accessToken } = await getValidGitHubAccessToken(this.userId, {
+      forceRefresh: true,
+    });
+
+    this.accessToken = accessToken;
+    this.octokit = this.createOctokit(accessToken);
+  }
+
+  private async withAuthRetry<T>(operation: () => Promise<T>): Promise<T> {
+    try {
+      return await operation();
+    } catch (error) {
+      if (isGitHubAuthenticationFailure(error)) {
+        await this.refreshAuth();
+        return await operation();
+      }
+
+      throw error;
+    }
+  }
+
   /**
    * Get the user ID this service is associated with
    */
@@ -198,24 +220,24 @@ export class AdvancedGitHubSyncService {
    * NOTE: Requires 'repo' OAuth scope for private repository access
    */
   async fetchAllRepositories(options?: FetchOptions): Promise<EnhancedRepository[]> {
-    await this.ensureFreshAuth();
+    return await this.withAuthRetry(async () => {
+      await this.ensureFreshAuth();
 
-    const repos: EnhancedRepository[] = [];
-    const includeArchived = options?.includeArchived ?? false;
-    const includeForks = options?.includeForks ?? false;
-    const includeOrgRepos = options?.includeOrgRepos ?? true;
+      const repos: EnhancedRepository[] = [];
+      const includeArchived = options?.includeArchived ?? false;
+      const includeForks = options?.includeForks ?? false;
+      const includeOrgRepos = options?.includeOrgRepos ?? true;
 
-    // Build affiliation string based on options
-    // 'owner' = repos you own
-    // 'collaborator' = repos you're a collaborator on
-    // 'organization_member' = org repos you have access to
-    const affiliations = ['owner'];
-    if (includeOrgRepos) {
-      affiliations.push('collaborator', 'organization_member');
-    }
-    const affiliation = affiliations.join(',');
+      // Build affiliation string based on options
+      // 'owner' = repos you own
+      // 'collaborator' = repos you're a collaborator on
+      // 'organization_member' = org repos you have access to
+      const affiliations = ['owner'];
+      if (includeOrgRepos) {
+        affiliations.push('collaborator', 'organization_member');
+      }
+      const affiliation = affiliations.join(',');
 
-    try {
       console.log(`Starting repository fetch with affiliation: ${sanitizeLog(affiliation)}...`);
       
       // Use paginate iterator for automatic pagination
@@ -264,11 +286,7 @@ export class AdvancedGitHubSyncService {
 
       console.log(`Fetched ${repos.length} repositories (${repos.filter(r => r.isPrivate).length} private)`);
       return repos;
-    } catch (error) {
-      this.metrics.errorsEncountered++;
-      console.error('Error fetching repositories:', error);
-      throw error;
-    }
+    });
   }
 
   /**
@@ -295,12 +313,12 @@ export class AdvancedGitHubSyncService {
     lastSyncDate?: Date,
     maxCommits?: number
   ): Promise<ProcessedCommit[]> {
-    await this.ensureFreshAuth();
+    return await this.withAuthRetry(async () => {
+      await this.ensureFreshAuth();
 
-    const commits: ProcessedCommit[] = [];
-    const since = lastSyncDate?.toISOString();
+      const commits: ProcessedCommit[] = [];
+      const since = lastSyncDate?.toISOString();
 
-    try {
       console.log(`Fetching commits from ${sanitizeLog(owner)}/${sanitizeLog(repo)}${since ? ` since ${sanitizeLog(since)}` : ''}...`);
       
       // Use iterator for automatic pagination through ALL commits
@@ -347,16 +365,7 @@ export class AdvancedGitHubSyncService {
 
       console.log(`Fetched ${commits.length} commits from ${sanitizeLog(owner)}/${sanitizeLog(repo)}`);
       return commits;
-    } catch (error) {
-      if (isGitHubAuthenticationFailure(error)) {
-        throw error;
-      }
-
-      this.metrics.errorsEncountered++;
-      console.error(`Error fetching commits from ${sanitizeLog(owner)}/${sanitizeLog(repo)}:`, error);
-      console.log(`Returning ${commits.length} partial commits from ${sanitizeLog(owner)}/${sanitizeLog(repo)}`);
-      return commits;
-    }
+    });
   }
 
   /**
@@ -383,38 +392,38 @@ export class AdvancedGitHubSyncService {
       includeRecentDays?: number;
     }
   ): Promise<Map<string, CommitStats>> {
-    await this.ensureFreshAuth();
+    return await this.withAuthRetry(async () => {
+      await this.ensureFreshAuth();
 
-    const stats = new Map<string, CommitStats>();
-    const maxApiCalls = options?.maxApiCalls ?? 100;
-    const recentDays = options?.includeRecentDays ?? 30;
-    
-    if (commits.length === 0) return stats;
+      const stats = new Map<string, CommitStats>();
+      const maxApiCalls = options?.maxApiCalls ?? 100;
+      const recentDays = options?.includeRecentDays ?? 30;
+      
+      if (commits.length === 0) return stats;
 
-    // Calculate cutoff date for "recent" commits
-    const recentCutoff = new Date();
-    recentCutoff.setDate(recentCutoff.getDate() - recentDays);
+      // Calculate cutoff date for "recent" commits
+      const recentCutoff = new Date();
+      recentCutoff.setDate(recentCutoff.getDate() - recentDays);
 
-    // Separate recent commits from older ones
-    const recentCommits = commits.filter(c => c.authorDate >= recentCutoff);
-    const olderCommits = commits.filter(c => c.authorDate < recentCutoff);
+      // Separate recent commits from older ones
+      const recentCommits = commits.filter(c => c.authorDate >= recentCutoff);
+      const olderCommits = commits.filter(c => c.authorDate < recentCutoff);
 
-    // Calculate sample rate for older commits to stay within API budget
-    const recentBudget = Math.min(recentCommits.length, Math.floor(maxApiCalls * 0.7));
-    const olderBudget = maxApiCalls - recentBudget;
-    const sampleRate = olderCommits.length > 0 
-      ? Math.max(1, Math.floor(olderCommits.length / olderBudget))
-      : 1;
+      // Calculate sample rate for older commits to stay within API budget
+      const recentBudget = Math.min(recentCommits.length, Math.floor(maxApiCalls * 0.7));
+      const olderBudget = maxApiCalls - recentBudget;
+      const sampleRate = olderCommits.length > 0 
+        ? Math.max(1, Math.floor(olderCommits.length / olderBudget))
+        : 1;
 
-    // Sample commits to fetch
-    const commitsToFetch = [
-      ...recentCommits.slice(0, recentBudget),
-      ...olderCommits.filter((_, idx) => idx % sampleRate === 0).slice(0, olderBudget),
-    ];
+      // Sample commits to fetch
+      const commitsToFetch = [
+        ...recentCommits.slice(0, recentBudget),
+        ...olderCommits.filter((_, idx) => idx % sampleRate === 0).slice(0, olderBudget),
+      ];
 
-    console.log(`Fetching stats for ${commitsToFetch.length} commits (${recentBudget} recent, ${commitsToFetch.length - recentBudget} sampled older)`);
+      console.log(`Fetching stats for ${commitsToFetch.length} commits (${recentBudget} recent, ${commitsToFetch.length - recentBudget} sampled older)`);
 
-    try {
       for (const commit of commitsToFetch) {
         try {
           const response = await this.octokit.repos.getCommit({
@@ -445,15 +454,7 @@ export class AdvancedGitHubSyncService {
 
       console.log(`Fetched stats for ${stats.size} commits`);
       return stats;
-    } catch (error) {
-      if (isGitHubAuthenticationFailure(error)) {
-        throw error;
-      }
-
-      this.metrics.errorsEncountered++;
-      console.error('Error fetching commit stats:', error);
-      return stats;
-    }
+    });
   }
 
   /**
@@ -464,9 +465,9 @@ export class AdvancedGitHubSyncService {
     owner: string,
     repo: string
   ): Promise<LanguageBreakdown[]> {
-    await this.ensureFreshAuth();
+    return await this.withAuthRetry(async () => {
+      await this.ensureFreshAuth();
 
-    try {
       const response = await this.octokit.repos.listLanguages({
         owner,
         repo,
@@ -486,14 +487,7 @@ export class AdvancedGitHubSyncService {
           percentage: Math.round((bytes / totalBytes) * 1000) / 10, // 1 decimal place
         }))
         .sort((a, b) => b.bytes - a.bytes);
-    } catch (error) {
-      if (isGitHubAuthenticationFailure(error)) {
-        throw error;
-      }
-
-      console.warn(`Could not fetch languages for ${sanitizeLog(owner)}/${sanitizeLog(repo)}:`, error);
-      return [];
-    }
+    });
   }
 
   /**
@@ -504,11 +498,11 @@ export class AdvancedGitHubSyncService {
     repo: string,
     maxContributors: number = 100
   ): Promise<ContributorData[]> {
-    await this.ensureFreshAuth();
+    return await this.withAuthRetry(async () => {
+      await this.ensureFreshAuth();
 
-    const contributors: ContributorData[] = [];
+      const contributors: ContributorData[] = [];
 
-    try {
       for await (const response of this.octokit.paginate.iterator(
         'GET /repos/{owner}/{repo}/contributors',
         {
@@ -536,14 +530,7 @@ export class AdvancedGitHubSyncService {
       }
 
       return contributors;
-    } catch (error) {
-      if (isGitHubAuthenticationFailure(error)) {
-        throw error;
-      }
-
-      console.warn(`Could not fetch contributors for ${sanitizeLog(owner)}/${sanitizeLog(repo)}:`, error);
-      return [];
-    }
+    });
   }
 
   /**
@@ -553,11 +540,11 @@ export class AdvancedGitHubSyncService {
     owner: string,
     repo: string
   ): Promise<string[]> {
-    await this.ensureFreshAuth();
+    return await this.withAuthRetry(async () => {
+      await this.ensureFreshAuth();
 
-    const branches: string[] = [];
+      const branches: string[] = [];
 
-    try {
       for await (const response of this.octokit.paginate.iterator(
         'GET /repos/{owner}/{repo}/branches',
         {
@@ -574,42 +561,23 @@ export class AdvancedGitHubSyncService {
       }
 
       return branches;
-    } catch (error) {
-      if (isGitHubAuthenticationFailure(error)) {
-        throw error;
-      }
-
-      console.warn(`Could not fetch branches for ${sanitizeLog(owner)}/${sanitizeLog(repo)}:`, error);
-      return [];
-    }
+    });
   }
 
   /**
    * Get current rate limit status
    */
   async getRateLimit(): Promise<RateLimitState> {
-    await this.ensureFreshAuth();
+    return await this.withAuthRetry(async () => {
+      await this.ensureFreshAuth();
 
-    try {
       const response = await this.octokit.rateLimit.get();
       return {
         remaining: response.data.rate.remaining,
         reset: response.data.rate.reset,
         limit: response.data.rate.limit,
       };
-    } catch (error: any) {
-      // Check if it's an authentication error
-      if (error.status === 401 || error.message?.includes('Bad credentials')) {
-        console.error('GitHub authentication failed - token may be expired or invalid');
-        const authErr = new Error('GitHub authentication failed. Please reconnect your GitHub account.') as Error & { status: number };
-        authErr.status = 401;
-        throw authErr;
-      }
-      
-      console.error('Error fetching rate limit:', error);
-      // Return minimal values instead of zeros to indicate an error state
-      return { remaining: -1, reset: 0, limit: 0 };
-    }
+    });
   }
 
   /**

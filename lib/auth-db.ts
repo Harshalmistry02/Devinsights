@@ -24,15 +24,56 @@ export const authConfigWithDatabase: NextAuthConfig = {
     async signIn({ user, account, profile, isNewUser }) {
       if (account?.provider === "github" && profile && typeof profile === "object" && "login" in profile) {
         const githubProfile = profile as { login: string; name?: string | null; avatar_url?: string };
+        const sessionState = typeof account.session_state === "string" ? account.session_state : null;
+        const userId = user.id;
+
+        if (!userId) {
+          return;
+        }
+
         try {
-          await prisma.user.update({
-            where: { id: user.id },
-            data: {
-              username: githubProfile.login,
-              name: githubProfile.name || githubProfile.login,
-              image: githubProfile.avatar_url,
-            },
-          });
+          await prisma.$transaction([
+            prisma.user.update({
+              where: { id: userId },
+              data: {
+                username: githubProfile.login,
+                name: githubProfile.name || githubProfile.login,
+                image: githubProfile.avatar_url,
+              },
+            }),
+            prisma.account.upsert({
+              where: {
+                provider_providerAccountId: {
+                  provider: account.provider,
+                  providerAccountId: account.providerAccountId,
+                },
+              },
+              update: {
+                userId,
+                type: account.type,
+                access_token: account.access_token,
+                refresh_token: account.refresh_token,
+                expires_at: account.expires_at,
+                token_type: account.token_type,
+                scope: account.scope,
+                id_token: account.id_token,
+                session_state: sessionState,
+              },
+              create: {
+                userId,
+                type: account.type,
+                provider: account.provider,
+                providerAccountId: account.providerAccountId,
+                access_token: account.access_token,
+                refresh_token: account.refresh_token,
+                expires_at: account.expires_at,
+                token_type: account.token_type,
+                scope: account.scope,
+                id_token: account.id_token,
+                session_state: sessionState,
+              },
+            }),
+          ]);
         } catch (error) {
           console.error("Error updating user profile:", error);
         }

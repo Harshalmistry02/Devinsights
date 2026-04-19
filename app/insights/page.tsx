@@ -74,7 +74,7 @@ export default async function InsightsPage() {
       <div 
         className="section-photo grayscale opacity-40 transition-opacity duration-1000" 
         style={{ 
-          backgroundImage: "url('/insights-hero.png')", 
+          backgroundImage: "url('/space-hero.png')", 
           backgroundSize: "cover", 
           backgroundPosition: "center"
         }} 

@@ -67,7 +67,7 @@ export default function Home() {
           </div>
 
           {/* Bottom Block: Three Capabilities */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-[60px] w-full" style={{ marginTop: "auto" }}>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-15 w-full" style={{ marginTop: "auto" }}>
             <div>
               <p className="text-micro" style={{ marginBottom: "12px" }}>Analytics</p>
               <h2 className="text-section-head" style={{ fontSize: "1.25rem", marginBottom: "12px" }}>

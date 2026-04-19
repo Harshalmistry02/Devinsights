@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
-import { requireAuth } from "@/lib/auth-helpers";
+import { auth } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import {
+  getValidGitHubAccessToken,
+  isGitHubAuthError,
+  isGitHubAuthenticationFailure,
+} from "@/lib/github/auth-token";
 
 /**
  * GET /api/profile/github-status
@@ -13,8 +18,21 @@ import prisma from "@/lib/prisma";
  */
 export async function GET() {
   try {
-    // Require authentication
-    const session = await requireAuth();
+    const session = await auth();
+
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        {
+          isConnected: false,
+          lastSync: null,
+          provider: null,
+          requiresReauth: false,
+          error: "Unauthorized",
+        },
+        { status: 401 }
+      );
+    }
+
     const userId = session.user.id;
 
     // Fetch user's GitHub account from database
@@ -35,13 +53,31 @@ export async function GET() {
         isConnected: false,
         lastSync: null,
         provider: null,
+        requiresReauth: true,
       });
+    }
+
+    try {
+      await getValidGitHubAccessToken(userId);
+    } catch (error: unknown) {
+      if (isGitHubAuthError(error) || isGitHubAuthenticationFailure(error)) {
+        return NextResponse.json({
+          isConnected: false,
+          lastSync: githubAccount.updatedAt.toISOString(),
+          provider: githubAccount.provider,
+          requiresReauth: true,
+          error: error instanceof Error ? error.message : "GitHub auth needs to be refreshed",
+        });
+      }
+
+      throw error;
     }
 
     return NextResponse.json({
       isConnected: true,
       lastSync: githubAccount.updatedAt.toISOString(),
       provider: githubAccount.provider,
+      requiresReauth: false,
     });
   } catch (error) {
     console.error("Error fetching GitHub status:", error);
@@ -53,6 +89,7 @@ export async function GET() {
         isConnected: false,
         lastSync: null,
         provider: null,
+        requiresReauth: false,
         error: "Failed to fetch GitHub status",
       },
       { status: 500 }

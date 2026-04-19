@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import prisma from '@/lib/prisma';
 import {
-  getValidGitHubAccessToken,
+  withGitHubAuth,
   isGitHubAuthError,
   isGitHubAuthenticationFailure,
   toGitHubAuthErrorPayload,
@@ -38,43 +38,33 @@ export async function GET(
       return NextResponse.json({ error: 'Not found' }, { status: 404 });
     }
 
-    const { accessToken } = await getValidGitHubAccessToken(session.user.id);
-
-    // Fetch language data from GitHub API
     const [owner, repo] = repository.fullName.split('/');
-    const response = await fetch(
-      `https://api.github.com/repos/${owner}/${repo}/languages`,
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          Accept: 'application/vnd.github.v3+json',
-        },
-      }
-    );
-
-    if (response.status === 401) {
-      return NextResponse.json(
+    const breakdown = await withGitHubAuth(session.user.id, async (accessToken) => {
+      const response = await fetch(
+        `https://api.github.com/repos/${owner}/${repo}/languages`,
         {
-          error: 'GitHub authentication required',
-          message: 'Your GitHub token has expired. Please log out and log back in to reconnect your GitHub account.',
-          requiresReauth: true,
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            Accept: 'application/vnd.github.v3+json',
+          },
         },
-        { status: 401 }
       );
-    }
 
-    if (!response.ok) {
-      throw new Error(`GitHub API error: ${response.status}`);
-    }
+      if (!response.ok) {
+        throw new Error(`GitHub API error: ${response.status}`);
+      }
 
-    const languages = (await response.json()) as Record<string, number>;
-    const total = Object.values(languages).reduce((sum, bytes) => sum + bytes, 0);
+      const languages = (await response.json()) as Record<string, number>;
+      const total = Object.values(languages).reduce((sum, bytes) => sum + bytes, 0);
 
-    const breakdown = Object.entries(languages).map(([language, bytes]) => ({
-      language,
-      bytes,
-      percentage: total > 0 ? Math.round((bytes / total) * 1000) / 10 : 0,
-    })).sort((a, b) => b.bytes - a.bytes);
+      return Object.entries(languages)
+        .map(([language, bytes]) => ({
+          language,
+          bytes,
+          percentage: total > 0 ? Math.round((bytes / total) * 1000) / 10 : 0,
+        }))
+        .sort((a, b) => b.bytes - a.bytes);
+    });
 
     return NextResponse.json({ languages: breakdown });
   } catch (error: unknown) {

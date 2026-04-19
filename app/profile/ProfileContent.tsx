@@ -32,6 +32,7 @@ interface GitHubConnectionData {
   isConnected: boolean;
   lastSync: string | null;
   provider: string | null;
+  requiresReauth?: boolean;
   error?: string;
 }
 
@@ -89,7 +90,7 @@ export function ProfileContent({ session }: ProfileContentProps) {
       <div 
         className="section-photo grayscale opacity-40 transition-opacity duration-1000" 
         style={{ 
-          backgroundImage: "url('/profile-hero.png')", 
+          backgroundImage: "url('/space-hero.png')", 
           backgroundSize: "cover", 
           backgroundPosition: "center"
         }} 
@@ -202,7 +203,12 @@ export function ProfileContent({ session }: ProfileContentProps) {
                       : <AlertCircle size={12} className="opacity-40" />
                     }
                     label="NETWORK_SYNC"
-                    value={githubData?.isConnected ? "LINKED / ACTIVE" : "LINK_TERMINATED"}
+                    value={githubData?.requiresReauth
+                      ? "REAUTH_REQUIRED"
+                      : githubData?.isConnected
+                        ? "LINKED / ACTIVE"
+                        : "LINK_TERMINATED"
+                    }
                     isStatus
                   />
                   {githubData?.lastSync && (
@@ -246,7 +252,7 @@ export function ProfileContent({ session }: ProfileContentProps) {
             PROTOCOL_SETTINGS
           </Link>
 
-          {!githubData?.isConnected && !isLoading && (
+          {(githubData?.requiresReauth || !githubData?.isConnected) && !isLoading && (
             <button
               onClick={handleReconnectGitHub}
               disabled={isReconnecting}
@@ -283,7 +289,7 @@ function InfoRow({
       <div className="flex-1 min-w-0">
         <p className="text-micro uppercase tracking-[3px] opacity-20 font-bold mb-1">{label}</p>
         <p className={cn(
-          "text-caption-bold text-sm uppercase tracking-widest break-words",
+          "text-caption-bold text-sm uppercase tracking-widest wrap-break-word",
           isStatus ? "opacity-100" : "opacity-60 group-hover:opacity-80 transition-opacity"
         )}>
           {value}

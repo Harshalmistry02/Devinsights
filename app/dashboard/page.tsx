@@ -55,11 +55,22 @@ export default async function DashboardPage() {
     lastSync.processedRepos > 0 &&
     lastSync.processedRepos < lastSync.totalRepos;
 
+  const githubAccount = await prisma.account.findFirst({
+    where: {
+      userId: user.id,
+      provider: "github",
+    },
+    select: {
+      provider: true,
+      updatedAt: true,
+    },
+  });
+
   // GitHub status for UserProfileCard
   const githubStatus = {
-    isConnected: true,
+    isConnected: !!githubAccount,
     lastSync: lastSync?.completedAt?.toISOString() || null,
-    provider: "github"
+    provider: githubAccount?.provider || null,
   };
 
   return (

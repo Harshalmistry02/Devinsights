@@ -5,11 +5,16 @@
  * Only available in development mode.
  */
 
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import prisma from '@/lib/prisma';
+import {
+  getValidGitHubAccessToken,
+  isGitHubAuthError,
+  isGitHubAuthenticationFailure,
+} from '@/lib/github/auth-token';
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   // Only allow in development
   if (process.env.NODE_ENV !== 'development') {
     return NextResponse.json(
@@ -43,6 +48,24 @@ export async function GET(req: NextRequest) {
         scope: true,
       },
     });
+
+    let needsReauth = false;
+    let tokenRefreshed = false;
+    let tokenExpiresAt: number | null = null;
+
+    if (account) {
+      try {
+        const tokenResult = await getValidGitHubAccessToken(userId);
+        tokenRefreshed = tokenResult.refreshed;
+        tokenExpiresAt = tokenResult.expiresAt;
+      } catch (error: unknown) {
+        if (isGitHubAuthError(error) || isGitHubAuthenticationFailure(error)) {
+          needsReauth = true;
+        } else {
+          throw error;
+        }
+      }
+    }
 
     // Get repositories
     const repositories = await prisma.repository.findMany({
@@ -115,9 +138,9 @@ export async function GET(req: NextRequest) {
       githubAccount: {
         linked: !!account,
         hasAccessToken: !!account?.access_token,
-        accessTokenPreview: account?.access_token 
-          ? `${account.access_token.slice(0, 10)}...${account.access_token.slice(-5)}`
-          : null,
+        needsReauth,
+        tokenRefreshed,
+        tokenExpiresAt,
         scope: account?.scope || 'Not stored (may be default)',
       },
       repositories: {
@@ -140,10 +163,11 @@ export async function GET(req: NextRequest) {
       syncJobs,
       analytics,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Debug sync-status error:', error);
+    const message = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
-      { error: 'Failed to fetch debug info', message: error.message },
+      { error: 'Failed to fetch debug info', message },
       { status: 500 }
     );
   }
