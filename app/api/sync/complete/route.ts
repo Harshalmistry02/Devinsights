@@ -14,18 +14,22 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import prisma from '@/lib/prisma';
 import {
-  getValidGitHubAccessToken,
+  withGitHubAuth,
   isGitHubAuthError,
   isGitHubAuthenticationFailure,
   toGitHubAuthErrorPayload,
 } from '@/lib/github/auth-token';
-import { 
+import {
   AdvancedGitHubSyncService,
 } from '@/lib/github/advanced-sync-service';
-import { 
+import {
   createCommitPipeline,
 } from '@/lib/data-pipeline/commit-pipeline';
 import { refreshUserAnalytics } from '@/lib/analytics';
+
+const sanitizeLog = (val: unknown): string =>
+  String(val).replace(/[
+]/g, ' ').slice(0, 200);
 
 /**
  * POST /api/sync/complete
@@ -68,65 +72,40 @@ export async function POST(req: NextRequest) {
 
   try {
     // ============================================
-    // STEP 1: Get GitHub Access Token
+    // STEP 1: Get GitHub Access Token & Check Rate Limit
     // ============================================
-    console.log('📋 Step 1: Retrieving GitHub credentials...');
+    console.log('📋 Step 1: Retrieving GitHub credentials and checking rate limits...');
 
-    let accessToken: string;
+    let syncService: AdvancedGitHubSyncService;
+    let rateLimitBefore: Awaited<ReturnType<AdvancedGitHubSyncService['getRateLimit']>>;
+
     try {
-      const tokenResult = await getValidGitHubAccessToken(userId);
-      accessToken = tokenResult.accessToken;
-    } catch (tokenError) {
-      if (isGitHubAuthError(tokenError)) {
-        return NextResponse.json(
-          toGitHubAuthErrorPayload(tokenError),
-          { status: tokenError.status }
-        );
+      ({ syncService, rateLimitBefore } = await withGitHubAuth(userId, async (token) => {
+        const svc = new AdvancedGitHubSyncService(token, userId);
+        const rl = await svc.getRateLimit();
+        return { syncService: svc, rateLimitBefore: rl };
+      }));
+    } catch (initError) {
+      if (isGitHubAuthError(initError)) {
+        return NextResponse.json(toGitHubAuthErrorPayload(initError), { status: initError.status });
       }
-
-      throw tokenError;
-    }
-
-    // Initialize sync service with throttling
-    const syncService = new AdvancedGitHubSyncService(
-      accessToken,
-      userId
-    );
-
-    // ============================================
-    // STEP 2: Check Rate Limit Before Starting
-    // ============================================
-    console.log('🔍 Step 2: Checking GitHub API rate limits...');
-
-    let rateLimitBefore;
-    try {
-      rateLimitBefore = await syncService.getRateLimit();
-    } catch (rateLimitError: unknown) {
-      // Handle authentication errors
-      if (isGitHubAuthenticationFailure(rateLimitError)) {
+      if (isGitHubAuthenticationFailure(initError)) {
         return NextResponse.json(
-          {
-            error: 'GitHub authentication required',
-            message: 'Your GitHub token has expired. Please log out and log back in to reconnect your GitHub account.',
-            requiresReauth: true,
-          },
+          { error: 'GitHub authentication required', message: 'Your GitHub token has expired. Please log out and log back in.', requiresReauth: true },
           { status: 401 }
         );
       }
-      
-      // For other errors, default to a generic message
       return NextResponse.json(
-        {
-          error: 'Failed to check rate limit',
-          message: 'Unable to verify GitHub API status. Please try again later.',
-        },
+        { error: 'Failed to connect to GitHub', message: 'Unable to verify GitHub API status. Please try again later.' },
         { status: 503 }
       );
     }
     
     console.log(`   Rate limit: ${rateLimitBefore.remaining}/${rateLimitBefore.limit} requests`);
 
-    // Check if we have a valid rate limit response
+    // ============================================
+    // STEP 2: Validate Rate Limit
+    // ============================================
     if (rateLimitBefore.remaining === -1) {
       return NextResponse.json(
         {
@@ -231,7 +210,7 @@ export async function POST(req: NextRequest) {
       const storedRepo = storedRepos[i];
       const sourceRepo = repos[i];
 
-      console.log(`\n   📦 Processing ${i + 1}/${storedRepos.length}: ${sourceRepo.fullName}`);
+      console.log(`   Processing ${i + 1}/${storedRepos.length}: ${sanitizeLog(sourceRepo.fullName)}`);
 
       try {
         const [owner, repoName] = sourceRepo.fullName.split('/');
@@ -240,7 +219,7 @@ export async function POST(req: NextRequest) {
         // DETERMINE INCREMENTAL SYNC DATE
         // ========================================
         let sinceDateForRepo: Date | undefined = undefined;
-        
+
         if (!forceFullSync) {
           // For incremental sync: get the latest commit date we already have for this repo
           // This is more accurate than using last sync job date
@@ -255,11 +234,11 @@ export async function POST(req: NextRequest) {
         }
         
         if (forceFullSync) {
-          console.log(`      🔄 Force full sync enabled - fetching ALL commits`);
+          console.log('      Force full sync enabled - fetching ALL commits');
         } else if (sinceDateForRepo) {
-          console.log(`      📅 Incremental sync from: ${sinceDateForRepo.toISOString()}`);
+          console.log(`      Incremental sync from: ${sanitizeLog(sinceDateForRepo.toISOString())}`);
         } else {
-          console.log(`      🆕 Full sync (no existing commits found)`);
+          console.log('      Full sync (no existing commits found)');
         }
 
         // ========================================
@@ -271,58 +250,35 @@ export async function POST(req: NextRequest) {
           sinceDateForRepo
         );
 
-        console.log(`      📝 Fetched ${commits.length} commits`);
+        console.log(`      Fetched ${commits.length} commits`);
         commitStats.total += commits.length;
 
         if (commits.length === 0) {
           continue;
         }
 
-        // ========================================
-        // FETCH COMMIT STATISTICS (SAMPLED)
-        // ========================================
-        console.log(`      📊 Enriching commits with statistics...`);
-
-        const stats = await syncService.fetchCommitStats(
-          owner,
-          repoName,
-          commits
-        );
-
-        // Enrich commits with stats
+        const stats = await syncService.fetchCommitStats(owner, repoName, commits);
         const enrichedCommits = pipeline.enrichBatch(commits, stats);
-
-        // ========================================
-        // VALIDATE COMMITS
-        // ========================================
         const validCommits = pipeline.validateBatch(enrichedCommits);
 
         if (validCommits.length === 0) {
-          console.warn(`      ⚠️ No valid commits found for ${sourceRepo.fullName}`);
+          console.warn(`      No valid commits found for ${sanitizeLog(sourceRepo.fullName)}`);
           continue;
         }
 
-        // ========================================
-        // BATCH INSERT INTO DATABASE
-        // ========================================
-        const insertResult = await pipeline.batchInsertCommits(
-          storedRepo.id,
-          validCommits
-        );
-
+        const insertResult = await pipeline.batchInsertCommits(storedRepo.id, validCommits);
         commitStats.processed += insertResult.inserted;
         commitStats.duplicates += insertResult.skipped;
 
-        console.log(`      ✅ Inserted: ${insertResult.inserted}, Skipped: ${insertResult.skipped}`);
+        console.log(`      Inserted: ${insertResult.inserted}, Skipped: ${insertResult.skipped}`);
 
-        // Update last synced timestamp
         await prisma.repository.update({
           where: { id: storedRepo.id },
           data: { lastSyncedAt: new Date() },
         });
       } catch (error) {
         commitStats.errors++;
-        console.error(`      ❌ Error syncing ${sourceRepo.fullName}:`, error);
+        console.error(`      Error syncing ${sanitizeLog(sourceRepo.fullName)}:`, error);
         // Continue with next repo instead of failing entire sync
       }
     }

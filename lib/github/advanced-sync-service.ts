@@ -23,6 +23,9 @@
 import { Octokit } from '@octokit/rest';
 import { throttling } from '@octokit/plugin-throttling';
 
+const sanitizeLog = (val: unknown): string =>
+  String(val).replace(/[\r\n]/g, ' ').slice(0, 200);
+
 // Apply throttling plugin to handle rate limits gracefully
 const OctokitWithThrottling = Octokit.plugin(throttling);
 
@@ -195,7 +198,7 @@ export class AdvancedGitHubSyncService {
     const affiliation = affiliations.join(',');
 
     try {
-      console.log(`🔄 Starting repository fetch with affiliation: ${affiliation}...`);
+      console.log(`Starting repository fetch with affiliation: ${sanitizeLog(affiliation)}...`);
       
       // Use paginate iterator for automatic pagination
       for await (const response of this.octokit.paginate.iterator(
@@ -241,7 +244,7 @@ export class AdvancedGitHubSyncService {
         });
       }
 
-      console.log(`✅ Fetched ${repos.length} repositories (${repos.filter(r => r.isPrivate).length} private)`);
+      console.log(`Fetched ${repos.length} repositories (${repos.filter(r => r.isPrivate).length} private)`);
       return repos;
     } catch (error) {
       this.metrics.errorsEncountered++;
@@ -278,7 +281,7 @@ export class AdvancedGitHubSyncService {
     const since = lastSyncDate?.toISOString();
 
     try {
-      console.log(`🔄 Fetching commits from ${owner}/${repo}${since ? ` since ${since}` : ''}...`);
+      console.log(`Fetching commits from ${sanitizeLog(owner)}/${sanitizeLog(repo)}${since ? ` since ${sanitizeLog(since)}` : ''}...`);
       
       // Use iterator for automatic pagination through ALL commits
       for await (const response of this.octokit.paginate.iterator(
@@ -295,7 +298,7 @@ export class AdvancedGitHubSyncService {
         for (const commit of response.data) {
           // Check if we've hit the maxCommits limit
           if (maxCommits && commits.length >= maxCommits) {
-            console.log(`📊 Hit max commits limit (${maxCommits}) for ${owner}/${repo}`);
+            console.log(`Hit max commits limit (${maxCommits}) for ${sanitizeLog(owner)}/${sanitizeLog(repo)}`);
             return commits;
           }
 
@@ -318,17 +321,16 @@ export class AdvancedGitHubSyncService {
 
         // Log progress for large repositories
         if (commits.length > 0 && commits.length % 500 === 0) {
-          console.log(`  📈 Processed ${commits.length} commits from ${owner}/${repo}...`);
+          console.log(`Processed ${commits.length} commits from ${sanitizeLog(owner)}/${sanitizeLog(repo)}...`);
         }
       }
 
-      console.log(`✅ Fetched ${commits.length} commits from ${owner}/${repo}`);
+      console.log(`Fetched ${commits.length} commits from ${sanitizeLog(owner)}/${sanitizeLog(repo)}`);
       return commits;
     } catch (error) {
       this.metrics.errorsEncountered++;
-      console.error(`Error fetching commits from ${owner}/${repo}:`, error);
-      // Return partial results instead of failing completely
-      console.log(`⚠️ Returning ${commits.length} partial commits from ${owner}/${repo}`);
+      console.error(`Error fetching commits from ${sanitizeLog(owner)}/${sanitizeLog(repo)}:`, error);
+      console.log(`Returning ${commits.length} partial commits from ${sanitizeLog(owner)}/${sanitizeLog(repo)}`);
       return commits;
     }
   }
@@ -384,7 +386,7 @@ export class AdvancedGitHubSyncService {
       ...olderCommits.filter((_, idx) => idx % sampleRate === 0).slice(0, olderBudget),
     ];
 
-    console.log(`📊 Fetching stats for ${commitsToFetch.length} commits (${recentBudget} recent, ${commitsToFetch.length - recentBudget} sampled older)`);
+    console.log(`Fetching stats for ${commitsToFetch.length} commits (${recentBudget} recent, ${commitsToFetch.length - recentBudget} sampled older)`);
 
     try {
       for (const commit of commitsToFetch) {
@@ -407,12 +409,11 @@ export class AdvancedGitHubSyncService {
           // Small delay to be respectful to the API
           await this.delay(25);
         } catch (error) {
-          console.warn(`Could not fetch stats for commit ${commit.sha.slice(0, 7)}:`, error);
-          // Continue with other commits
+          console.warn(`Could not fetch stats for commit ${sanitizeLog(commit.sha.slice(0, 7))}:`, error);
         }
       }
 
-      console.log(`✅ Fetched stats for ${stats.size} commits`);
+      console.log(`Fetched stats for ${stats.size} commits`);
       return stats;
     } catch (error) {
       this.metrics.errorsEncountered++;
@@ -450,7 +451,7 @@ export class AdvancedGitHubSyncService {
         }))
         .sort((a, b) => b.bytes - a.bytes);
     } catch (error) {
-      console.warn(`Could not fetch languages for ${owner}/${repo}:`, error);
+      console.warn(`Could not fetch languages for ${sanitizeLog(owner)}/${sanitizeLog(repo)}:`, error);
       return [];
     }
   }
@@ -494,7 +495,7 @@ export class AdvancedGitHubSyncService {
 
       return contributors;
     } catch (error) {
-      console.warn(`Could not fetch contributors for ${owner}/${repo}:`, error);
+      console.warn(`Could not fetch contributors for ${sanitizeLog(owner)}/${sanitizeLog(repo)}:`, error);
       return [];
     }
   }
@@ -526,7 +527,7 @@ export class AdvancedGitHubSyncService {
 
       return branches;
     } catch (error) {
-      console.warn(`Could not fetch branches for ${owner}/${repo}:`, error);
+      console.warn(`Could not fetch branches for ${sanitizeLog(owner)}/${sanitizeLog(repo)}:`, error);
       return [];
     }
   }
@@ -545,8 +546,10 @@ export class AdvancedGitHubSyncService {
     } catch (error: any) {
       // Check if it's an authentication error
       if (error.status === 401 || error.message?.includes('Bad credentials')) {
-        console.error('❌ GitHub authentication failed - token may be expired or invalid');
-        throw new Error('GitHub authentication failed. Please reconnect your GitHub account.');
+        console.error('GitHub authentication failed - token may be expired or invalid');
+        const authErr = new Error('GitHub authentication failed. Please reconnect your GitHub account.') as Error & { status: number };
+        authErr.status = 401;
+        throw authErr;
       }
       
       console.error('Error fetching rate limit:', error);

@@ -98,7 +98,23 @@ async function refreshGitHubAccessToken(
 
   if (rawBody) {
     try {
-      payload = JSON.parse(rawBody) as GitHubRefreshResponse;
+      const parsed: unknown = JSON.parse(rawBody);
+      if (
+        typeof parsed === 'object' &&
+        parsed !== null &&
+        !Array.isArray(parsed)
+      ) {
+        const p = parsed as Record<string, unknown>;
+        payload = {
+          access_token: typeof p.access_token === 'string' ? p.access_token : undefined,
+          refresh_token: typeof p.refresh_token === 'string' ? p.refresh_token : undefined,
+          expires_in: typeof p.expires_in === 'number' || typeof p.expires_in === 'string' ? p.expires_in as number | string : undefined,
+          token_type: typeof p.token_type === 'string' ? p.token_type : undefined,
+          scope: typeof p.scope === 'string' ? p.scope : undefined,
+          error: typeof p.error === 'string' ? p.error : undefined,
+          error_description: typeof p.error_description === 'string' ? p.error_description : undefined,
+        };
+      }
     } catch {
       payload = {};
     }
@@ -145,6 +161,26 @@ export function toGitHubAuthErrorPayload(error: GitHubAuthError) {
     requiresReauth: error.requiresReauth,
     code: error.code,
   };
+}
+
+/**
+ * Wraps a GitHub API call with automatic token refresh on 401.
+ * On first 401, forces a token refresh and retries once.
+ */
+export async function withGitHubAuth<T>(
+  userId: string,
+  fn: (accessToken: string) => Promise<T>
+): Promise<T> {
+  const { accessToken } = await getValidGitHubAccessToken(userId);
+  try {
+    return await fn(accessToken);
+  } catch (err: unknown) {
+    if (isGitHubAuthenticationFailure(err)) {
+      const { accessToken: refreshed } = await getValidGitHubAccessToken(userId, { forceRefresh: true });
+      return await fn(refreshed);
+    }
+    throw err;
+  }
 }
 
 export async function getValidGitHubAccessToken(

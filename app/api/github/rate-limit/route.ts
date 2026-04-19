@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { Octokit } from '@octokit/rest';
 import {
-  getValidGitHubAccessToken,
+  withGitHubAuth,
   isGitHubAuthError,
   isGitHubAuthenticationFailure,
   toGitHubAuthErrorPayload,
@@ -19,10 +19,11 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { accessToken } = await getValidGitHubAccessToken(session.user.id);
-
-    const octokit = new Octokit({ auth: accessToken });
-    const { data } = await octokit.rateLimit.get();
+    const data = await withGitHubAuth(session.user.id, async (accessToken) => {
+      const octokit = new Octokit({ auth: accessToken });
+      const { data } = await octokit.rateLimit.get();
+      return data;
+    });
 
     return NextResponse.json({
       remaining: data.rate.remaining,

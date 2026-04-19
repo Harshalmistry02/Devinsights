@@ -3,7 +3,7 @@ import { auth } from '@/lib/auth';
 import { GitHubSyncService } from '@/lib/github/sync-service';
 import { SyncProgressEvent } from '@/lib/sync/sync-stream';
 import {
-  getValidGitHubAccessToken,
+  withGitHubAuth,
   isGitHubAuthError,
   isGitHubAuthenticationFailure,
   toGitHubAuthErrorPayload,
@@ -23,8 +23,7 @@ export async function POST() {
 
   let accessToken: string;
   try {
-    const tokenResult = await getValidGitHubAccessToken(userId);
-    accessToken = tokenResult.accessToken;
+    accessToken = await withGitHubAuth(userId, async (token) => token);
   } catch (error) {
     if (isGitHubAuthError(error)) {
       return NextResponse.json(

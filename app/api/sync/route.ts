@@ -3,7 +3,7 @@ import { auth } from '@/lib/auth';
 import { GitHubSyncService } from '@/lib/github/sync-service';
 import prisma from '@/lib/prisma';
 import {
-  getValidGitHubAccessToken,
+  withGitHubAuth,
   isGitHubAuthError,
   isGitHubAuthenticationFailure,
   toGitHubAuthErrorPayload,
@@ -21,16 +21,10 @@ export async function POST() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { accessToken } = await getValidGitHubAccessToken(session.user.id);
-
-    // For now, sync runs synchronously
-    // Later: Move to background queue (BullMQ, Inngest, etc.)
-    const syncService = new GitHubSyncService(
-      accessToken,
-      session.user.id
-    );
-
-    const result = await syncService.syncUserData();
+    const result = await withGitHubAuth(session.user.id, async (accessToken) => {
+      const syncService = new GitHubSyncService(accessToken, session.user.id!);
+      return syncService.syncUserData();
+    });
 
     return NextResponse.json({
       success: true,

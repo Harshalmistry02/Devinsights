@@ -19,11 +19,15 @@ import { auth } from '@/lib/auth';
 import prisma from '@/lib/prisma';
 import { createSyncOrchestrator } from '@/lib/github/sync-orchestrator';
 import {
-  getValidGitHubAccessToken,
+  withGitHubAuth,
   isGitHubAuthError,
   isGitHubAuthenticationFailure,
   toGitHubAuthErrorPayload,
 } from '@/lib/github/auth-token';
+
+const sanitizeLog = (val: unknown): string =>
+  String(val).replace(/[
+]/g, ' ').slice(0, 200);
 
 /**
  * POST /api/sync/advanced
@@ -50,8 +54,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { accessToken } = await getValidGitHubAccessToken(session.user.id);
-
     // Parse request options
     let options = {
       fullSync: false,
@@ -74,20 +76,14 @@ export async function POST(req: NextRequest) {
       // No body or invalid JSON, use defaults
     }
 
-    console.log(`🚀 Starting advanced sync for user ${session.user.id}`, options);
-
-    // Create orchestrator and run sync
-    const orchestrator = createSyncOrchestrator(
-      accessToken,
-      session.user.id
-    );
-
-    const result = await orchestrator.sync({
-      ...options,
-      onProgress: (progress) => {
-        // Log progress (could also be sent via WebSocket/SSE in future)
-        console.log(`[${progress.phase}] ${progress.message} (${progress.percentage}%)`);
-      },
+    const result = await withGitHubAuth(session.user.id, async (accessToken) => {
+      const orchestrator = createSyncOrchestrator(accessToken, session.user.id!);
+      return orchestrator.sync({
+        ...options,
+        onProgress: (progress) => {
+          console.log(`[${sanitizeLog(progress.phase)}] ${sanitizeLog(progress.message)} (${progress.percentage}%)`);
+        },
+      });
     });
 
     if (result.success) {

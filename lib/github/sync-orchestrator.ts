@@ -28,6 +28,9 @@ import {
   createCommitPipeline,
 } from '@/lib/data-pipeline/commit-pipeline';
 
+const sanitizeLog = (val: unknown): string =>
+  String(val).replace(/[\r\n]/g, ' ').slice(0, 200);
+
 // ============================================
 // Types
 // ============================================
@@ -152,7 +155,7 @@ export class AdvancedSyncOrchestrator {
         percentage: 5,
       });
 
-      console.log('📦 Phase 1: Fetching repositories...');
+      console.log('Phase 1: Fetching repositories...');
       const repositories = await this.syncService.fetchAllRepositories({
         includeForks,
         includeArchived,
@@ -174,7 +177,7 @@ export class AdvancedSyncOrchestrator {
       // ======================================
       // Phase 2: Upsert Repositories to DB
       // ======================================
-      console.log('💾 Phase 2: Saving repositories to database...');
+      console.log('Phase 2: Saving repositories to database...');
       const repoIdMap = await RepositoryDataPipeline.upsertRepositories(
         this.userId,
         repositories
@@ -183,7 +186,7 @@ export class AdvancedSyncOrchestrator {
       // ======================================
       // Phase 3: Fetch & Store Commits
       // ======================================
-      console.log('📝 Phase 3: Fetching commits...');
+      console.log('Phase 3: Fetching commits...');
       
       for (let i = 0; i < repositories.length; i++) {
         const repo = repositories[i];
@@ -191,7 +194,7 @@ export class AdvancedSyncOrchestrator {
         const dbRepoId = repoIdMap.get(repo.githubId);
 
         if (!dbRepoId) {
-          console.warn(`⚠️ No DB ID for repo ${repo.fullName}, skipping...`);
+          console.warn(`No DB ID for repo ${sanitizeLog(repo.fullName)}, skipping...`);
           continue;
         }
 
@@ -212,7 +215,7 @@ export class AdvancedSyncOrchestrator {
         if (!fullSync) {
           lastSyncDate = await RepositoryDataPipeline.getLastCommitDate(dbRepoId);
           if (lastSyncDate) {
-            console.log(`  📅 Incremental sync from ${lastSyncDate.toISOString()}`);
+            console.log(`  Incremental sync from ${sanitizeLog(lastSyncDate.toISOString())}`);
           }
         }
 
@@ -225,7 +228,7 @@ export class AdvancedSyncOrchestrator {
         );
 
         if (commits.length === 0) {
-          console.log(`  ✨ No new commits in ${repo.name}`);
+          console.log(`  No new commits in ${sanitizeLog(repo.name)}`);
           this.syncService.incrementReposProcessed();
           await this.updateSyncJob({ processedRepos: i + 1 });
           continue;
@@ -289,13 +292,12 @@ export class AdvancedSyncOrchestrator {
         metrics: this.syncService.getMetrics(),
       });
 
-      console.log('📊 Phase 4: Refreshing analytics...');
+      console.log('Phase 4: Refreshing analytics...');
       try {
         await refreshUserAnalytics(this.userId);
-        console.log('✅ Analytics refreshed successfully');
+        console.log('Analytics refreshed successfully');
       } catch (analyticsError) {
-        console.error('⚠️ Failed to refresh analytics:', analyticsError);
-        // Don't fail the entire sync if analytics fails
+        console.error('Failed to refresh analytics:', analyticsError);
       }
 
       // ======================================
@@ -320,10 +322,10 @@ export class AdvancedSyncOrchestrator {
         metrics: this.syncService.getMetrics(),
       });
 
-      console.log(`\n✅ Sync completed in ${(duration / 1000).toFixed(1)}s`);
-      console.log(`   📊 Repositories: ${repositories.length}`);
-      console.log(`   📝 Commits: ${totalCommitsInserted} inserted, ${totalCommitsSkipped} skipped`);
-      console.log(`   ⚠️ Errors: ${totalErrors}`);
+      console.log(`Sync completed in ${(duration / 1000).toFixed(1)}s`);
+      console.log(`Repositories: ${repositories.length}`);
+      console.log(`Commits: ${totalCommitsInserted} inserted, ${totalCommitsSkipped} skipped`);
+      console.log(`Errors: ${totalErrors}`);
 
       return {
         success: true,
@@ -355,7 +357,7 @@ export class AdvancedSyncOrchestrator {
         error: errorMessage,
       });
 
-      console.error('❌ Sync failed:', error);
+      console.error('Sync failed:', error);
 
       return {
         success: false,

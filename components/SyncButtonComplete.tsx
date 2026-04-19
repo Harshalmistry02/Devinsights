@@ -100,9 +100,9 @@ export function SyncButtonComplete() {
     }, 3000);
 
     try {
-      console.log(forceFullSync 
-        ? '🚀 Starting FULL GitHub sync (force)...'
-        : '🚀 Starting complete GitHub sync...'
+      console.log(forceFullSync
+        ? 'Starting FULL GitHub sync (force)...'
+        : 'Starting complete GitHub sync...'
       );
 
       const response = await fetch('/api/sync/complete', {
@@ -140,7 +140,11 @@ export function SyncButtonComplete() {
       // Success
       const syncData = data.data!;
 
-      console.log('✅ Sync completed!', syncData);
+      console.log('Sync completed!', {
+        totalRepos: syncData.totalRepos,
+        totalCommits: syncData.totalCommits,
+        syncDurationMin: syncData.syncDurationMin,
+      });
 
       setStatus({
         status: syncData.syncErrors > 0 ? 'warning' : 'success',
@@ -157,14 +161,14 @@ export function SyncButtonComplete() {
 
       // Log detailed stats
       if (syncData.duplicateCommits > 0) {
-        console.log(`ℹ️ ${syncData.duplicateCommits} duplicate commits skipped`);
+        console.log(`${syncData.duplicateCommits} duplicate commits skipped`);
       }
 
       // Reload page to show updated insights
       setTimeout(() => window.location.reload(), 2500);
     } catch (err: unknown) {
       clearInterval(progressInterval);
-      console.error('❌ Sync error:', err);
+      console.error('Sync error:', err instanceof Error ? err.message : String(err));
 
       let errorMessage = 'Sync failed. Please try again.';
       const errorData =
@@ -183,7 +187,7 @@ export function SyncButtonComplete() {
         });
         
         // Optionally redirect to sign out after delay
-        console.log('💡 Tip: Log out and log back in to refresh your GitHub connection');
+        console.log('Tip: Log out and log back in to refresh your GitHub connection');
         return;
       }
 
