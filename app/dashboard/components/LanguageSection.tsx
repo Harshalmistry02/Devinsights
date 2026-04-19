@@ -20,13 +20,12 @@ export function LanguageSection({ analytics }: LanguageSectionProps) {
         Top Languages
       </h3>
       <div className="space-y-2 sm:space-y-3">
-        {topLanguages.slice(0, 5).map((lang, index) => (
+        {topLanguages.slice(0, 5).map((lang) => (
           <LanguageBar
             key={lang.language}
             language={lang.language}
             percentage={lang.percentage}
             count={lang.count}
-            rank={index + 1}
           />
         ))}
       </div>
@@ -38,12 +37,10 @@ function LanguageBar({
   language,
   percentage,
   count,
-  rank,
 }: {
   language: string;
   percentage: number;
   count: number;
-  rank: number;
 }) {
   return (
     <div 
@@ -62,7 +59,7 @@ function LanguageBar({
           <span className="sr-only">Count:</span> {count} commits
         </span>
       </div>
-      <div className="h-2 -full overflow-hidden" aria-hidden="true">
+      <div className="h-2 rounded-full overflow-hidden" aria-hidden="true">
         <div
           className="h-full bg-linear-to-r from-cyan-500 to-blue-500 transition-all duration-1000"
           style={{ width: `${percentage}%` }}

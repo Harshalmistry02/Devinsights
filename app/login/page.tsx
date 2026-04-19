@@ -5,6 +5,7 @@ import Link from "next/link";
 import { signIn } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
+import Image from "next/image";
 
 function LoginForm() {
   const searchParams = useSearchParams();
@@ -34,14 +35,16 @@ function LoginForm() {
   return (
     <div
       className="section-cinematic"
-      style={{ justifyContent: "center", alignItems: "center" }}
+      style={{ justifyContent: "center", alignItems: "center", minHeight: "100svh" }}
     >
       {/* Photography background */}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
+      <Image
         src="/space-hero.png"
         alt="Space background"
         className="section-photo"
+        fill
+        priority
+        sizes="100vw"
       />
 
       {/* Dark overlay */}
@@ -60,8 +63,8 @@ function LoginForm() {
         href="/"
         style={{
           position: "absolute",
-          top: "20px",
-          left: "30px",
+          top: "max(16px, env(safe-area-inset-top))",
+          left: "clamp(16px, 4vw, 30px)",
           zIndex: 10,
           display: "flex",
           alignItems: "center",
@@ -69,6 +72,7 @@ function LoginForm() {
           opacity: 0.6,
           transition: "opacity 0.2s ease",
           textDecoration: "none",
+          minHeight: "44px",
         }}
         className="text-nav"
         aria-label="Back to home"
@@ -88,8 +92,8 @@ function LoginForm() {
           flexDirection: "column",
           alignItems: "center",
           textAlign: "center",
-          padding: "0 24px",
-          maxWidth: "420px",
+          padding: "0 24px max(24px, env(safe-area-inset-bottom))",
+          maxWidth: "460px",
           width: "100%",
         }}
       >
@@ -104,7 +108,7 @@ function LoginForm() {
         {/* Headline — text on image */}
         <h1
           className="text-display-hero"
-          style={{ fontSize: "clamp(1.75rem, 4vw, 2.5rem)", marginBottom: "16px" }}
+          style={{ fontSize: "clamp(1.75rem, 6.5vw, 2.5rem)", marginBottom: "16px" }}
         >
           Sign in to DevInsight
         </h1>
@@ -186,7 +190,7 @@ export default function LoginPage() {
       fallback={
         <div
           style={{
-            minHeight: "100vh",
+            minHeight: "100svh",
             background: "#000",
             display: "flex",
             alignItems: "center",

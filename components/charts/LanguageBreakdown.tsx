@@ -12,7 +12,6 @@ import {
   Cell,
   ResponsiveContainer,
   Tooltip,
-  Legend,
 } from 'recharts';
 import { LANGUAGE_COLORS } from '@/lib/analytics/language-analyzer';
 
@@ -77,7 +76,7 @@ export function LanguageBreakdown({ data, className = '' }: LanguageBreakdownPro
               {chartData.map((item, index) => (
                 <div key={item.name} className="flex items-center gap-4">
                   <div
-                    className="w-[10px] h-[10px]"
+                    className="w-2.5 h-2.5"
                     style={{ 
                       backgroundColor: "#f0f0fa",
                       opacity: 0.1 + (index / chartData.length) * 0.8
@@ -92,7 +91,7 @@ export function LanguageBreakdown({ data, className = '' }: LanguageBreakdownPro
                         {item.percentage}%
                       </span>
                     </div>
-                    <div className="mt-1 h-[1px] bg-[rgba(240,240,250,0.05)] overflow-hidden">
+                    <div className="mt-1 h-px bg-[rgba(240,240,250,0.05)] overflow-hidden">
                       <div
                         className="h-full bg-[#f0f0fa] transition-all duration-500"
                         style={{
@@ -128,7 +127,20 @@ export function LanguageBreakdown({ data, className = '' }: LanguageBreakdownPro
 // Custom Tooltip Component
 // ===========================================
 
-function CustomTooltip({ active, payload, total }: any) {
+type LanguageTooltipDatum = {
+  name: string;
+  value: number;
+  percentage: number;
+  color: string;
+};
+
+type LanguageTooltipProps = {
+  active?: boolean;
+  payload?: Array<{ payload: LanguageTooltipDatum }>;
+  total: number;
+};
+
+function CustomTooltip({ active, payload, total }: LanguageTooltipProps) {
   if (!active || !payload || !payload.length) return null;
 
   const data = payload[0].payload;

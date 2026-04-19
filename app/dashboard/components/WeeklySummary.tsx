@@ -6,7 +6,6 @@ import {
   TrendingDown,
   Minus,
   Flame,
-  Clock,
   GitCommit,
   Code,
   Target,
@@ -18,8 +17,8 @@ import {
   buildWeeklySummary,
   getWeekLabel,
   formatWeekChange,
-  type WeeklySummaryData,
 } from "@/lib/analytics/weekly-summary";
+import { cn } from "@/lib/utils";
 
 interface WeeklySummaryProps {
   analytics: {
@@ -57,6 +56,7 @@ export function WeeklySummary({ analytics, className }: WeeklySummaryProps) {
           padding: "20px",
           display: "flex",
           alignItems: "center",
+          flexWrap: "wrap",
           gap: "10px",
           opacity: 0.5,
         }}
@@ -71,7 +71,7 @@ export function WeeklySummary({ analytics, className }: WeeklySummaryProps) {
 
   return (
     <div
-      className="brutalist-glass"
+      className={cn("brutalist-glass", className)}
       style={{
         padding: "0",
         borderRadius: "2px",
@@ -85,6 +85,8 @@ export function WeeklySummary({ analytics, className }: WeeklySummaryProps) {
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
+          gap: "12px",
+          flexWrap: "wrap",
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
@@ -112,7 +114,13 @@ export function WeeklySummary({ analytics, className }: WeeklySummaryProps) {
         className="weekly-grid"
       >
         <style>{`
-          @media (min-width: 960px) {
+          @media (min-width: 640px) {
+            .weekly-grid {
+              grid-template-columns: repeat(2, 1fr) !important;
+            }
+          }
+
+          @media (min-width: 1024px) {
             .weekly-grid {
               grid-template-columns: repeat(3, 1fr) !important;
             }
@@ -132,19 +140,16 @@ export function WeeklySummary({ analytics, className }: WeeklySummaryProps) {
               value={currentWeek.totalCommits}
               change={comparison.commitsDiff}
               changeLabel="VS LAST WEEK"
-              positive={comparison.commitsDiff >= 0}
             />
             <ProgressItem
               icon={<Flame size={12} />}
               label="DAY STREAK"
               value={streakInfo.current}
-              positive={true}
             />
             <ProgressItem
               icon={<Code size={12} />}
               label="REPOS TOUCHED"
               value={highlights.totalReposTouched}
-              positive={true}
             />
             {comparison.weekendChange !== 0 && (
               <p
@@ -206,14 +211,14 @@ export function WeeklySummary({ analytics, className }: WeeklySummaryProps) {
           <WeekMiniChart data={currentWeek.dailyBreakdown} />
 
           {/* Quick Actions */}
-          <div style={{ display: "flex", gap: "8px", marginTop: "16px" }}>
+          <div style={{ display: "flex", gap: "8px", marginTop: "16px", flexWrap: "wrap" }}>
             {!streakInfo.isActive && (
-              <button className="btn-ghost btn-ghost-sm" style={{ fontSize: "0.625rem", padding: "8px 16px" }}>
+              <button className="btn-ghost btn-ghost-sm w-full sm:w-auto" style={{ fontSize: "0.625rem", padding: "8px 16px" }}>
                 <GitCommit size={11} />
                 COMMIT TODAY
               </button>
             )}
-            <button className="btn-ghost btn-ghost-sm" style={{ fontSize: "0.625rem", padding: "8px 16px" }}>
+            <button className="btn-ghost btn-ghost-sm w-full sm:w-auto" style={{ fontSize: "0.625rem", padding: "8px 16px" }}>
               <ExternalLink size={11} />
               WEEKLY REPORT
             </button>
@@ -263,16 +268,12 @@ function ProgressItem({
   value,
   change,
   changeLabel,
-  badge,
-  positive = true,
 }: {
   icon: React.ReactNode;
   label: string;
   value: number;
   change?: number;
   changeLabel?: string;
-  badge?: string;
-  positive?: boolean;
 }) {
   return (
     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -403,6 +404,7 @@ export function WeeklySummaryCompact({ analytics, className }: WeeklySummaryProp
 
   return (
     <div
+      className={className}
       style={{
         display: "flex",
         alignItems: "center",

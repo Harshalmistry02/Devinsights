@@ -32,7 +32,7 @@ export default function DashboardError({
         <div className="border border-red-500/30 p-8 backdrop-blur-sm">
           {/* Error Icon */}
           <div 
-            className="w-16 h-16 mx-auto mb-4 -full bg-red-500/10 flex items-center justify-center border border-red-500/30"
+            className="w-16 h-16 mx-auto mb-4 rounded-full bg-red-500/10 flex items-center justify-center border border-red-500/30"
             aria-hidden="true"
           >
             <AlertTriangle className="w-8 h-8 text-red-400" />
@@ -75,7 +75,7 @@ export default function DashboardError({
             
             <Link
               href="/"
-              className="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-medium opacity-80 border border-[rgba(240,240,250,0.15)] hover: hover:border-[rgba(240,240,250,0.15)] transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2 focus:ring-offset-slate-900"
+              className="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-medium opacity-80 border border-[rgba(240,240,250,0.15)] hover:opacity-100 hover:border-[rgba(240,240,250,0.35)] transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2 focus:ring-offset-slate-900"
               aria-label="Return to home page"
             >
               <Home className="w-4 h-4" aria-hidden="true" />

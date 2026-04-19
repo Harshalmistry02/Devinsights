@@ -38,8 +38,8 @@ export function AIAnalysisProgress({ isAnalyzing, currentStep = 0 }: AIAnalysisP
             </svg>
           </div>
           <span className="absolute -bottom-1 -right-1 flex h-3 w-3">
-            <span className="animate-ping absolute inline-flex h-full w-full -full bg-white opacity-20"></span>
-            <span className="relative inline-flex -full h-3 w-3 bg-white/40"></span>
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-20"></span>
+            <span className="relative inline-flex rounded-full h-3 w-3 bg-white/40"></span>
           </span>
         </div>
         <div>
@@ -49,7 +49,7 @@ export function AIAnalysisProgress({ isAnalyzing, currentStep = 0 }: AIAnalysisP
       </div>
 
       <div className="space-y-4">
-        {steps.map((step, index) => (
+        {steps.map((step) => (
           <div key={step.id} className="flex items-center gap-4">
             <div className={`shrink-0 h-2 w-2 transition-all duration-300 ${
               step.status === 'complete' 
@@ -71,7 +71,7 @@ export function AIAnalysisProgress({ isAnalyzing, currentStep = 0 }: AIAnalysisP
         ))}
       </div>
 
-      <div className="mt-8 h-[1px] w-full bg-white/5 overflow-hidden">
+      <div className="mt-8 h-px w-full bg-white/5 overflow-hidden">
         <div 
           className="h-full bg-[#f0f0fa] opacity-30 transition-all duration-1000 ease-out"
           style={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}

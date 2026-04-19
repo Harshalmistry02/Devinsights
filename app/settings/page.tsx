@@ -11,18 +11,17 @@ export default async function SettingsPage() {
   const { user } = session;
 
   return (
-    <div className="section-cinematic bg-black">
+    <div className="section-cinematic bg-black items-start">
       <div 
         className="section-photo" 
         style={{ 
           backgroundImage: "url('/space-hero.png')", 
           backgroundSize: "cover", 
-          backgroundPosition: "center",
-          position: "fixed"
+          backgroundPosition: "center"
         }} 
       />
-      <div className="section-overlay" style={{ position: "fixed" }} />
-      <div className="section-content relative z-20 w-full" style={{ padding: "120px clamp(24px, 6vw, 80px) 40px", maxWidth: "800px", margin: "0 auto" }}>
+      <div className="section-overlay" />
+      <div className="section-content relative z-20 w-full" style={{ padding: "clamp(88px, 14vh, 120px) clamp(24px, 6vw, 80px) 40px", maxWidth: "800px", margin: "0 auto" }}>
         {/* Header */}
         <div style={{ marginBottom: "40px" }}>
           <Link
@@ -35,6 +34,7 @@ export default async function SettingsPage() {
               marginBottom: "20px",
               opacity: 0.4,
               transition: "opacity 0.2s ease",
+              minHeight: "44px",
             }}
             className="text-micro"
             
@@ -54,7 +54,7 @@ export default async function SettingsPage() {
 
         <div className="space-y-8">
           {/* Account Settings */}
-          <div className="brutalist-glass p-8">
+          <div className="brutalist-glass p-5 sm:p-8">
             <SettingsSection
               icon={<Shield size={14} />}
               title="ACCOUNT SETTINGS"
@@ -79,7 +79,7 @@ export default async function SettingsPage() {
           </div>
 
           {/* Security Settings */}
-          <div className="brutalist-glass p-8">
+          <div className="brutalist-glass p-5 sm:p-8">
             <SettingsSection
               icon={<Key size={14} />}
               title="SECURITY"
@@ -93,6 +93,8 @@ export default async function SettingsPage() {
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "space-between",
+                    gap: "12px",
+                    flexWrap: "wrap",
                   }}
                 >
                   <div>
@@ -123,6 +125,8 @@ export default async function SettingsPage() {
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "space-between",
+                    gap: "12px",
+                    flexWrap: "wrap",
                   }}
                 >
                   <div>
@@ -138,7 +142,7 @@ export default async function SettingsPage() {
           </div>
 
           {/* Notifications */}
-          <div className="brutalist-glass p-8 opacity-50">
+          <div className="brutalist-glass p-5 sm:p-8 opacity-50">
             <SettingsSection
               icon={<Bell size={14} />}
               title="NOTIFICATIONS"
@@ -185,6 +189,7 @@ export default async function SettingsPage() {
               color: "rgba(252,165,172,0.4)",
               cursor: "not-allowed",
               opacity: 0.5,
+              width: "100%",
             }}
             className="text-micro uppercase tracking-widest"
           >

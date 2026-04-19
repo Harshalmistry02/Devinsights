@@ -2,6 +2,8 @@
 
 import React, { useEffect, useState } from "react"
 import Link from "next/link"
+import Image from "next/image"
+import { usePathname } from "next/navigation"
 import { useSession } from "next-auth/react"
 import { LucideIcon, Github, User, LogOut, Menu, X } from "lucide-react"
 import { signOut } from "next-auth/react"
@@ -20,19 +22,12 @@ interface NavBarProps {
 
 export function NavBar({ items, className }: NavBarProps) {
   const { data: session, status } = useSession();
-  const [activeTab, setActiveTab] = useState(items[0]?.name || "")
+  const pathname = usePathname();
   const [isLoggingOut, setIsLoggingOut] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
 
-  // Synchronize active tab with URL
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const currentPath = window.location.pathname
-      const currentItem = items.find(item => item.url === currentPath)
-      if (currentItem) setActiveTab(currentItem.name)
-    }
-  }, [items])
+  const activeTab = items.find((item) => item.url === pathname)?.name ?? items[0]?.name ?? ""
 
   // Detect scroll to adjust nav appearance
   useEffect(() => {
@@ -40,6 +35,17 @@ export function NavBar({ items, className }: NavBarProps) {
     window.addEventListener("scroll", handleScroll, { passive: true })
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
+
+  useEffect(() => {
+    if (!mobileOpen) return
+
+    const previous = document.body.style.overflow
+    document.body.style.overflow = "hidden"
+
+    return () => {
+      document.body.style.overflow = previous
+    }
+  }, [mobileOpen])
 
   const handleLogout = async () => {
     setIsLoggingOut(true)
@@ -63,18 +69,14 @@ export function NavBar({ items, className }: NavBarProps) {
       {/* WORDMARK */}
       <Link
         href="/"
-        className="text-nav"
-        style={{ letterSpacing: "3px", fontSize: "0.875rem" }}
+        className="text-nav tracking-[3px] text-sm"
         aria-label="DevInsight — Home"
       >
         DEVINSIGHT
       </Link>
 
       {/* DESKTOP NAV LINKS */}
-      <div
-        className="hidden md:flex items-center"
-        style={{ gap: "36px" }}
-      >
+      <div className="hidden md:flex items-center gap-7 lg:gap-9">
         {items.map((item) => {
           const isActive = activeTab === item.name
           if (item.authRequired && !isAuthenticated) return null
@@ -83,7 +85,6 @@ export function NavBar({ items, className }: NavBarProps) {
             <Link
               key={item.name}
               href={item.url}
-              onClick={() => setActiveTab(item.name)}
               className="text-nav transition-opacity duration-200"
               style={{
                 opacity: isActive ? 1 : 0.55,
@@ -99,7 +100,7 @@ export function NavBar({ items, className }: NavBarProps) {
       </div>
 
       {/* AUTH SECTION — DESKTOP */}
-      <div className="hidden md:flex items-center" style={{ gap: "20px" }}>
+      <div className="hidden md:flex items-center gap-5">
         {isLoading ? (
           <div
             className="skeleton"
@@ -109,21 +110,17 @@ export function NavBar({ items, className }: NavBarProps) {
           <>
             <Link
               href="/profile"
-              className="flex items-center transition-opacity duration-200"
-              style={{ gap: "10px", opacity: 0.7 }}
+              className="flex items-center gap-2.5 transition-opacity duration-200"
+              style={{ opacity: 0.7 }}
               title={`Profile — ${session.user.name || session.user.username || 'User'}`}
             >
               {session.user.image ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
+                <Image
                   src={session.user.image}
                   alt={session.user.name || "User"}
-                  style={{
-                    width: "24px",
-                    height: "24px",
-                    borderRadius: "50%",
-                    border: "1px solid rgba(240,240,250,0.2)",
-                  }}
+                  width={24}
+                  height={24}
+                  className="rounded-full border border-[rgba(240,240,250,0.2)]"
                 />
               ) : (
                 <User size={16} />
@@ -164,13 +161,13 @@ export function NavBar({ items, className }: NavBarProps) {
 
       {/* MOBILE HAMBURGER */}
       <button
-        className="md:hidden"
+        className="md:hidden inline-flex min-h-11 min-w-11 items-center justify-center"
         style={{
           background: "none",
           border: "none",
           color: "var(--spectral-white)",
           cursor: "pointer",
-          padding: "8px",
+          padding: "10px",
         }}
         onClick={() => setMobileOpen(!mobileOpen)}
         aria-label={mobileOpen ? "Close menu" : "Open menu"}
@@ -185,14 +182,18 @@ export function NavBar({ items, className }: NavBarProps) {
           style={{
             position: "fixed",
             inset: 0,
-            top: "64px",
+            top: "var(--nav-height)",
             background: "rgba(0,0,0,0.95)",
             backdropFilter: "blur(8px)",
             zIndex: 200,
             display: "flex",
             flexDirection: "column",
-            padding: "40px 30px",
-            gap: "32px",
+            padding: "24px",
+            gap: "24px",
+            maxHeight: "calc(100dvh - var(--nav-height))",
+            overflowY: "auto",
+            overscrollBehavior: "contain",
+            borderTop: "1px solid rgba(240,240,250,0.08)",
           }}
           role="dialog"
           aria-label="Mobile navigation menu"
@@ -204,12 +205,15 @@ export function NavBar({ items, className }: NavBarProps) {
               <Link
                 key={item.name}
                 href={item.url}
-                onClick={() => { setActiveTab(item.name); setMobileOpen(false); }}
+                onClick={() => { setMobileOpen(false); }}
                 className="text-section-head"
                 style={{
-                  fontSize: "1.5rem",
+                    fontSize: "clamp(1.125rem, 5.8vw, 1.5rem)",
                   opacity: isActive ? 1 : 0.4,
                   textDecoration: "none",
+                    minHeight: "44px",
+                    display: "inline-flex",
+                    alignItems: "center",
                 }}
               >
                 {item.name}

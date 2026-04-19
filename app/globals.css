@@ -22,6 +22,9 @@
   --ring: 240 5.9% 10%;
   --radius: 0.5rem;
   --radius-button: 32px;
+  --radius-sharp: 2px;
+  --spectral-white: #f0f0fa;
+  --nav-height: 72px;
 }
 
 .dark {
@@ -94,14 +97,37 @@
   }
 }
 
+@media (max-width: 640px) {
+  :root {
+    --nav-height: 64px;
+  }
+}
+
+html,
 body {
-  background: var(--color-background);
-  color: var(--color-foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  max-width: 100%;
+  overflow-x: clip;
+}
+
+body {
+  background: #000000;
+  color: #f0f0fa;
+  font-family: var(--font-barlow), Arial, Verdana, sans-serif;
 }
 
 /* Conic gradient utilities for lamp effect */
 @layer utilities {
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
   .bg-gradient-conic {
     background-image: conic-gradient(var(--tw-gradient-stops));
   }
@@ -152,6 +178,8 @@ body {
   .section-cinematic {
     @apply relative w-full overflow-hidden flex items-end justify-start;
     min-height: 100vh;
+    min-height: 100svh;
+    min-height: 100dvh;
   }
   
   .section-photo {
@@ -172,16 +200,26 @@ body {
   
   .section-content {
     @apply relative z-20 w-full;
-    padding-bottom: 15vh;
+    padding-top: clamp(88px, 14vh, 124px);
+    padding-bottom: clamp(28px, 10vh, 120px);
     padding-left: clamp(24px, 6vw, 80px);
     padding-right: clamp(24px, 6vw, 80px);
+  }
+
+  @media (max-width: 640px) {
+    .section-content {
+      padding-top: calc(var(--nav-height) + 20px);
+      padding-bottom: 24px;
+      padding-left: 24px;
+      padding-right: 24px;
+    }
   }
   
   /* Typography */
   .text-display-hero {
     font-family: var(--font-barlow-condensed), sans-serif;
     font-weight: 700;
-    font-size: 48px;
+    font-size: clamp(2rem, 8vw, 3rem);
     line-height: 1;
     letter-spacing: 0.96px;
     text-transform: uppercase;
@@ -191,7 +229,7 @@ body {
   .text-section-head {
     font-family: var(--font-barlow-condensed), sans-serif;
     font-weight: 700;
-    font-size: 24px;
+    font-size: clamp(1.125rem, 3.8vw, 1.5rem);
     line-height: 1;
     letter-spacing: 0.96px;
     text-transform: uppercase;
@@ -201,7 +239,7 @@ body {
   .text-body {
     font-family: var(--font-barlow), sans-serif;
     font-weight: 400;
-    font-size: 16px;
+    font-size: clamp(0.875rem, 2.7vw, 1rem);
     line-height: 1.5;
     color: #f0f0fa;
     text-transform: uppercase;
@@ -228,7 +266,7 @@ body {
     justify-content: center;
     background: rgba(240, 240, 250, 0.1);
     color: #f0f0fa;
-    padding: 18px 36px;
+    padding: 14px 24px;
     border-radius: 32px;
     border: 1px solid rgba(240, 240, 250, 0.35);
     font-family: var(--font-barlow-condensed), sans-serif;
@@ -243,19 +281,38 @@ body {
     background: rgba(240, 240, 250, 0.2);
     color: #ffffff;
   }
+
+  @media (min-width: 640px) {
+    .btn-ghost {
+      padding: 18px 36px;
+    }
+  }
   
   /* Navbar */
   .nav-overlay {
     @apply fixed top-0 left-0 right-0 z-50 flex items-center justify-between transition-all duration-300;
-    padding: 24px clamp(24px, 6vw, 80px);
+    min-height: var(--nav-height);
+    padding: 14px clamp(20px, 5vw, 80px);
   }
   
   .nav-overlay.scrolled {
     @apply backdrop-blur-md;
     background: rgba(0, 0, 0, 0.85);
     border-bottom: 1px solid rgba(240, 240, 250, 0.05);
-    padding-top: 16px;
-    padding-bottom: 16px;
+    padding-top: 12px;
+    padding-bottom: 12px;
+  }
+
+  @media (min-width: 768px) {
+    .nav-overlay {
+      padding-top: 24px;
+      padding-bottom: 24px;
+    }
+
+    .nav-overlay.scrolled {
+      padding-top: 16px;
+      padding-bottom: 16px;
+    }
   }
   
   .text-nav {
@@ -309,5 +366,21 @@ body {
     );
     background-size: 200% 100%;
     animation: skeleton-loading 1.5s ease-in-out infinite;
+  }
+
+  .progress-bar-track {
+    width: 100%;
+    height: 6px;
+    border-radius: 9999px;
+    background: rgba(240, 240, 250, 0.08);
+    overflow: hidden;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    width: 0;
+    border-radius: 9999px;
+    background: rgba(240, 240, 250, 0.5);
+    transition: width 0.35s ease;
   }
 }

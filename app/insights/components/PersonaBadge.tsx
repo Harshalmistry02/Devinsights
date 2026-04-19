@@ -284,7 +284,7 @@ export function PersonaShowcase({ context, className }: PersonaShowcaseProps) {
         <div className="flex items-center gap-8 flex-wrap sm:flex-nowrap">
           <div 
             className={cn(
-              "w-24 h-24 border border-white/10 flex items-center justify-center text-4xl bg-white/2",
+              "w-24 h-24 border border-white/10 flex items-center justify-center text-4xl bg-white/[0.02]",
               "grayscale opacity-40"
             )}
           >

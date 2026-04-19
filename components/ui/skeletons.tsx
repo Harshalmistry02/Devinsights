@@ -2,6 +2,8 @@
 
 import React from 'react';
 
+const CHART_SKELETON_HEIGHTS = [24, 36, 48, 32, 58, 42, 54, 30, 62, 40, 68, 46];
+
 /**
  * Skeleton Components for Loading States
  * 
@@ -13,7 +15,7 @@ import React from 'react';
 function Skeleton({ className = '', style }: { className?: string; style?: React.CSSProperties }) {
   return (
     <div
-      className={`animate-pulse   ${className}`}
+      className={`animate-pulse ${className}`}
       style={style}
     />
   );
@@ -28,7 +30,7 @@ export function ProfileCardSkeleton() {
       
       {/* Avatar */}
       <div className="px-6 -mt-12 relative">
-        <Skeleton className="w-24 h-24 -full border-4 border-[rgba(240,240,250,0.15)]" />
+        <Skeleton className="w-24 h-24 rounded-full border-4 border-[rgba(240,240,250,0.15)]" />
       </div>
 
       {/* User Info */}
@@ -39,7 +41,7 @@ export function ProfileCardSkeleton() {
         
         {/* Status Badge */}
         <div className="flex items-center gap-2 pt-2">
-          <Skeleton className="h-6 w-24 -full" />
+          <Skeleton className="h-6 w-24 rounded-full" />
         </div>
         
         {/* Action Buttons */}
@@ -89,11 +91,11 @@ export function ChartSkeleton({ height = "h-64" }: { height?: string }) {
   return (
     <div className={`${height}   relative overflow-hidden`}>
       <div className="absolute inset-0 flex items-end justify-around px-4 pb-4">
-        {[...Array(12)].map((_, i) => (
+        {CHART_SKELETON_HEIGHTS.map((height, i) => (
           <Skeleton 
             key={i} 
-            className={`w-4 -t`} 
-            style={{ height: `${Math.random() * 60 + 20}%` }} 
+            className="w-4 rounded-t" 
+            style={{ height: `${height}%` }} 
           />
         ))}
       </div>
@@ -126,7 +128,7 @@ export function LanguageBarSkeleton() {
         <Skeleton className="h-4 w-20" />
         <Skeleton className="h-4 w-24" />
       </div>
-      <Skeleton className="h-2 w-full -full" />
+      <Skeleton className="h-2 w-full rounded-full" />
     </div>
   );
 }

@@ -110,8 +110,8 @@ export function KeyboardShortcuts() {
   if (pressedKey === 'g') {
     return (
       <div 
-        className="fixed bottom-8 left-8 z-50 px-6 py-4 border border-[rgba(240,240,250,0.35)] bg-[rgba(0,0,0,0.85)] backdrop-blur animate-in slide-in-from-bottom-2 duration-200" 
-        style={{ borderRadius: 0 }}
+        className="fixed z-50 px-4 sm:px-6 py-3 sm:py-4 border border-[rgba(240,240,250,0.35)] bg-[rgba(0,0,0,0.85)] backdrop-blur animate-in slide-in-from-bottom-2 duration-200"
+        style={{ borderRadius: 0, left: 'clamp(12px, 3vw, 32px)', bottom: 'max(12px, env(safe-area-inset-bottom))' }}
       >
         <p className="text-micro" style={{ opacity: 0.8, display: "flex", alignItems: "center", gap: "8px", margin: 0 }}>
           PRESS D FOR DASHBOARD, I FOR INSIGHTS, P FOR PROFILE
@@ -167,18 +167,20 @@ export function KeyboardShortcutsHelp() {
       <button
         id="shortcuts-help-button"
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-8 right-8 z-40 group transition-all"
+        className="fixed z-40 group transition-all"
         style={{
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          width: "48px",
-          height: "48px",
+          width: "52px",
+          height: "52px",
           background: "rgba(240, 240, 250, 0.1)",
           border: "1px solid rgba(240, 240, 250, 0.35)",
           borderRadius: "50%",
           color: "#f0f0fa",
-          backdropFilter: "blur(4px)"
+          backdropFilter: "blur(4px)",
+          right: 'clamp(12px, 3vw, 32px)',
+          bottom: 'max(12px, env(safe-area-inset-bottom))',
         }}
         title="Keyboard shortcuts (press ?)"
         aria-label="Show keyboard shortcuts"
@@ -201,7 +203,7 @@ export function KeyboardShortcutsHelp() {
               border: "1px solid rgba(240, 240, 250, 0.35)",
               borderRadius: "0",
             }}
-            className="max-w-lg w-full relative pt-8 pb-4"
+            className="max-w-lg w-full relative pt-6 sm:pt-8 pb-4 max-h-[calc(100dvh-2rem)] overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
@@ -220,11 +222,11 @@ export function KeyboardShortcutsHelp() {
             </div>
 
             {/* Shortcuts List */}
-            <div className="px-8 py-6 space-y-4 max-h-[60vh] overflow-y-auto">
+            <div className="px-4 sm:px-8 py-4 sm:py-6 space-y-4 max-h-[calc(100dvh-200px)] sm:max-h-[60vh] overflow-y-auto">
               {shortcuts.map((shortcut, index) => (
                 <div
                   key={index}
-                  className="flex items-center justify-between py-2 border-b border-[rgba(240,240,250,0.05)] last:border-0"
+                  className="flex items-center justify-between py-2 border-b border-[rgba(240,240,250,0.05)] last:border-0 gap-3"
                 >
                   <span className="text-body text-dim" style={{ fontSize: "0.875rem" }}>
                     {shortcut.description}

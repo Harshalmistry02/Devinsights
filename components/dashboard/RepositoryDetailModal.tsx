@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { X, Loader2, GitBranch, Star, GitFork, Clock, Code2, Activity } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -46,11 +46,29 @@ export function RepositoryDetailModal({ repoId, open, onClose }: RepositoryDetai
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'overview' | 'commits' | 'activity'>('overview');
 
-  useEffect(() => {
-    if (open && repoId) {
-      fetchRepositoryDetails();
+  const fetchRepositoryDetails = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch(`/api/repositories/${repoId}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch repository details');
+      }
+      const data = await response.json();
+      setRepoData(data);
+    } catch (err) {
+      console.error('Failed to fetch repository details:', err);
+      setError(err instanceof Error ? err.message : 'An error occurred');
+    } finally {
+      setLoading(false);
     }
-  }, [open, repoId]);
+  }, [repoId]);
+
+  useEffect(() => {
+    if (!open || !repoId) return;
+
+    void fetchRepositoryDetails();
+  }, [open, repoId, fetchRepositoryDetails]);
 
   // Close modal on Escape key
   useEffect(() => {
@@ -72,46 +90,28 @@ export function RepositoryDetailModal({ repoId, open, onClose }: RepositoryDetai
     };
   }, [open, onClose]);
 
-  async function fetchRepositoryDetails() {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetch(`/api/repositories/${repoId}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch repository details');
-      }
-      const data = await response.json();
-      setRepoData(data);
-    } catch (err) {
-      console.error('Failed to fetch repository details:', err);
-      setError(err instanceof Error ? err.message : 'An error occurred');
-    } finally {
-      setLoading(false);
-    }
-  }
-
   if (!open) return null;
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 backdrop-blur-sm bg-black/85"
       onClick={onClose}
       role="dialog"
       aria-modal="true"
       aria-labelledby="repo-modal-title"
     >
       <div
-        className="border border-[rgba(240,240,250,0.15)] -2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col"
+        className="border border-[rgba(240,240,250,0.15)] rounded-2xl w-full max-w-4xl max-h-[90dvh] overflow-hidden flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Header */}
-        <div className="flex items-center justify-between p-6 border-b border-[rgba(240,240,250,0.15)]">
-          <h2 id="repo-modal-title" className="text-xl font-semibold opacity-80">
+        <div className="flex items-center justify-between gap-3 p-4 sm:p-6 border-b border-[rgba(240,240,250,0.15)]">
+          <h2 id="repo-modal-title" className="text-lg sm:text-xl font-semibold opacity-80 break-words">
             {loading ? 'Loading...' : repoData?.fullName || 'Repository Details'}
           </h2>
           <button
             onClick={onClose}
-            className="p-2 hover: transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
+            className="p-2 rounded-full hover:bg-white/10 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
             aria-label="Close modal"
           >
             <X className="w-5 h-5 opacity-80" />
@@ -138,8 +138,8 @@ export function RepositoryDetailModal({ repoId, open, onClose }: RepositoryDetai
           ) : repoData ? (
             <>
               {/* Tabs */}
-              <div className="border-b border-[rgba(240,240,250,0.15)] px-6">
-                <div className="flex gap-6">
+              <div className="border-b border-[rgba(240,240,250,0.15)] px-4 sm:px-6 overflow-x-auto">
+                <div className="flex gap-4 sm:gap-6 min-w-max">
                   {(['overview', 'commits', 'activity'] as const).map((tab) => (
                     <button
                       key={tab}
@@ -159,7 +159,7 @@ export function RepositoryDetailModal({ repoId, open, onClose }: RepositoryDetai
               </div>
 
               {/* Tab Content */}
-              <div className="p-6">
+              <div className="p-4 sm:p-6">
                 {activeTab === 'overview' && (
                   <RepositoryOverview data={repoData} />
                 )}
@@ -190,7 +190,7 @@ function RepositoryOverview({ data }: { data: RepositoryData }) {
         </div>
       )}
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
         <StatBox
           icon={<Star className="w-4 h-4" />}
           label="Stars"
@@ -254,7 +254,7 @@ function CommitsList({ commits, totalCount }: { commits: RepositoryData['commits
               className="border border-[rgba(240,240,250,0.15)] p-4"
             >
               <p className="text-sm opacity-80 mb-1">{commit.message}</p>
-              <div className="flex items-center justify-between text-xs opacity-80">
+              <div className="flex items-center justify-between text-xs opacity-80 gap-3 flex-wrap">
                 <span>{commit.authorName}</span>
                 <span>{new Date(commit.authorDate).toLocaleDateString()}</span>
               </div>
@@ -272,17 +272,17 @@ function ActivityView({ data }: { data: RepositoryData }) {
       <div className="border border-[rgba(240,240,250,0.15)] p-4">
         <h4 className="text-sm font-medium opacity-80 mb-2">Repository Timeline</h4>
         <div className="space-y-2 text-sm opacity-80">
-          <div className="flex justify-between">
+          <div className="flex justify-between gap-3 flex-wrap">
             <span>Created</span>
             <span className="opacity-80">{new Date(data.createdAt).toLocaleDateString()}</span>
           </div>
           {data.lastPushedAt && (
-            <div className="flex justify-between">
+            <div className="flex justify-between gap-3 flex-wrap">
               <span>Last Push</span>
               <span className="opacity-80">{new Date(data.lastPushedAt).toLocaleDateString()}</span>
             </div>
           )}
-          <div className="flex justify-between">
+          <div className="flex justify-between gap-3 flex-wrap">
             <span>Total Commits</span>
             <span className="opacity-80">{data._count.commits.toLocaleString()}</span>
           </div>

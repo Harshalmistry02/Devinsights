@@ -334,7 +334,7 @@ export function SyncButtonComplete() {
                 <div
                   style={{
                     display: "grid",
-                    gridTemplateColumns: "repeat(3, 1fr)",
+                    gridTemplateColumns: "repeat(auto-fit, minmax(90px, 1fr))",
                     gap: "1px",
                     marginTop: "10px",
                     background: "rgba(240,240,250,0.05)",

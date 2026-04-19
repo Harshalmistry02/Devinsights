@@ -54,7 +54,7 @@ export function StatsGrid({ analytics: initialAnalytics, previousAnalytics }: St
   return (
     <div>
       {/* Section header */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px", gap: "10px", flexWrap: "wrap" }}>
         <p className="text-micro uppercase tracking-widest" style={{ letterSpacing: "1.5px" }}>STATISTICS</p>
         <button
           onClick={refreshStats}
@@ -85,7 +85,7 @@ export function StatsGrid({ analytics: initialAnalytics, previousAnalytics }: St
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(2, 1fr)",
+          gridTemplateColumns: "1fr",
           gap: "24px",
           background: "transparent",
           border: "none",
@@ -94,6 +94,12 @@ export function StatsGrid({ analytics: initialAnalytics, previousAnalytics }: St
         className="stats-responsive"
       >
         <style>{`
+          @media (min-width: 640px) {
+            .stats-responsive {
+              grid-template-columns: repeat(2, 1fr) !important;
+            }
+          }
+
           @media (min-width: 1024px) {
             .stats-responsive {
               grid-template-columns: repeat(4, 1fr) !important;
@@ -179,7 +185,7 @@ function StatCard({
       aria-label={`${title} statistics`}
       className="brutalist-glass"
       style={{
-        padding: "24px",
+        padding: "clamp(16px, 3vw, 24px)",
         position: "relative",
       }}
       

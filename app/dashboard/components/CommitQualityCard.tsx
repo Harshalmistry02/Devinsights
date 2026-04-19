@@ -4,8 +4,6 @@ import { FileText, TrendingUp, TrendingDown, Minus, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   CommitQualityMetrics,
-  getGradeColor,
-  getGradeBgColor,
   getGradeDescription,
 } from "@/lib/analytics/commit-quality-analyzer";
 
@@ -68,7 +66,7 @@ export function CommitQualityCard({ metrics, className }: CommitQualityCardProps
 
   return (
     <div
-      className="brutalist-glass"
+      className={cn("brutalist-glass", className)}
       style={{
         padding: "32px",
         borderRadius: "2px",
@@ -173,7 +171,6 @@ export function CommitQualityCard({ metrics, className }: CommitQualityCardProps
             <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
               {metrics.insights.map((insight, i) => {
                 const chars = [...insight];
-                const emoji = chars[0];
                 const text = chars.slice(1).join('').trim();
                 return (
                   <div
@@ -306,6 +303,7 @@ export function CommitQualityCardCompact({ metrics, className }: CommitQualityCa
 
   return (
     <div
+      className={className}
       style={{
         background: "transparent",
         border: "none",

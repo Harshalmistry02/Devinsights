@@ -101,28 +101,24 @@ export function HourlyActivity({ data, className = '' }: HourlyActivityProps) {
               </ResponsiveContainer>
             </div>
 
-            <div className="mt-8 grid grid-cols-4 gap-4">
+            <div className="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-4">
               <TimePeriodStat
                 label="NIGHT"
-                sublabel="00-06"
                 value={nightCommits}
                 total={total}
               />
               <TimePeriodStat
                 label="MORNING"
-                sublabel="06-12"
                 value={morningCommits}
                 total={total}
               />
               <TimePeriodStat
                 label="AFTERNOON"
-                sublabel="12-18"
                 value={afternoonCommits}
                 total={total}
               />
               <TimePeriodStat
                 label="EVENING"
-                sublabel="18-00"
                 value={eveningCommits}
                 total={total}
               />
@@ -144,12 +140,10 @@ export function HourlyActivity({ data, className = '' }: HourlyActivityProps) {
 
 function TimePeriodStat({
   label,
-  sublabel,
   value,
   total,
 }: {
   label: string;
-  sublabel: string;
   value: number;
   total: number;
 }) {
@@ -178,16 +172,6 @@ function formatPeakTime(hour: number): string {
   const period = hour >= 12 ? 'PM' : 'AM';
   const displayHour = hour % 12 || 12;
   return `${displayHour}:00 ${period}`;
-}
-
-function getHourColor(hour: number, isPeak: boolean): string {
-  if (isPeak) return '#06b6d4'; // cyan for peak
-  
-  // Color by time period
-  if (hour < 6) return '#6366f1'; // indigo for night
-  if (hour < 12) return '#f59e0b'; // amber for morning
-  if (hour < 18) return '#0ea5e9'; // sky for afternoon
-  return '#a855f7'; // purple for evening
 }
 
 function getCodingStyle(morning: number, afternoon: number, evening: number, night: number): string {

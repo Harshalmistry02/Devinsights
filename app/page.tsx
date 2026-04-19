@@ -1,33 +1,33 @@
 "use client";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function Home() {
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const isAuthenticated = status === "authenticated";
 
   return (
-    <main
-      className="relative w-full overflow-hidden"
-      style={{ height: "100vh" }}
-    >
+    <main className="section-cinematic">
       <section
-        className="relative w-full h-full flex flex-col justify-end"
+        className="relative w-full min-h-svh flex flex-col justify-end"
         aria-label="Hero: DevInsight analytics platform"
       >
         {/* Photography layer */}
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+        <Image
           src="/space-hero.png"
           alt="Earth from low orbit — the void of space"
           className="section-photo"
+          fill
+          priority
+          sizes="100vw"
         />
 
         {/* Dark gradient overlay for legibility */}
         <div className="section-overlay" aria-hidden="true" />
 
         {/* Content Container */}
-        <div className="relative z-20 w-full px-[clamp(24px,6vw,80px)] pb-[8vh] flex flex-col justify-between h-full pt-[20vh]">
+        <div className="relative z-20 w-full min-h-svh px-[clamp(24px,6vw,80px)] pb-8 sm:pb-[8vh] flex flex-col justify-between pt-[calc(var(--nav-height)+24px)] sm:pt-[20vh] gap-10">
           {/* Top Block: Hero Headline & CTA */}
           <div>
             {/* Mission label */}
@@ -67,10 +67,7 @@ export default function Home() {
           </div>
 
           {/* Bottom Block: Three Capabilities */}
-          <div
-            className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-[60px] w-full"
-            style={{ marginTop: "auto" }}
-          >
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-[60px] w-full" style={{ marginTop: "auto" }}>
             <div>
               <p className="text-micro" style={{ marginBottom: "12px" }}>Analytics</p>
               <h2 className="text-section-head" style={{ fontSize: "1.25rem", marginBottom: "12px" }}>

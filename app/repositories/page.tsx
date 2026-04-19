@@ -1,6 +1,7 @@
 import { requireAuth } from "@/lib/auth-helpers";
 import prisma from "@/lib/prisma";
 import Link from "next/link";
+import type { Prisma } from "@prisma/client";
 import { 
   ArrowLeft, 
   Code, 
@@ -13,6 +14,10 @@ import {
   Globe,
   RefreshCw,
 } from "lucide-react";
+
+type RepositoryWithCommitCount = Prisma.RepositoryGetPayload<{
+  include: { _count: { select: { commits: true } } };
+}>;
 
 /**
  * Repositories Page
@@ -49,21 +54,20 @@ export default async function RepositoriesPage() {
   });
 
   return (
-    <div className="section-cinematic bg-black">
+    <div className="section-cinematic bg-black items-start">
       <div 
         className="section-photo" 
         style={{ 
           backgroundImage: "url('/space-hero.png')", 
           backgroundSize: "cover", 
-          backgroundPosition: "center",
-          position: "fixed"
+          backgroundPosition: "center"
         }} 
       />
-      <div className="section-overlay" style={{ position: "fixed" }} />
-      <div className="section-content relative z-20 w-full" style={{ padding: "120px clamp(24px, 6vw, 80px) 40px" }}>
+      <div className="section-overlay" />
+      <div className="section-content relative z-20 w-full" style={{ padding: "clamp(88px, 14vh, 120px) clamp(24px, 6vw, 80px) 40px" }}>
         {/* Header */}
         <div style={{ marginBottom: "40px" }}>
-          <div style={{ display: "flex", alignItems: "flex-start", gap: "24px" }}>
+          <div style={{ display: "flex", alignItems: "flex-start", gap: "16px", flexWrap: "wrap" }}>
             <Link
               href="/dashboard"
               className="p-3 brutalist-glass hover:bg-white/5 transition-all opacity-40 hover:opacity-100"
@@ -84,7 +88,7 @@ export default async function RepositoriesPage() {
         </div>
 
         {/* Summary Stats Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6 mb-10 sm:mb-12">
           <SummaryCard
             label="TOTAL REPOS"
             value={totalRepos}
@@ -160,11 +164,11 @@ function RepositoryCard({
   repo,
   commitCount,
 }: {
-  repo: any;
+  repo: RepositoryWithCommitCount;
   commitCount: number;
 }) {
   return (
-    <div className="brutalist-glass p-8 hover:bg-white/[0.02] transition-all group flex flex-col justify-between h-some min-h-[220px]">
+    <div className="brutalist-glass p-5 sm:p-8 hover:bg-white/[0.02] transition-all group flex flex-col justify-between min-h-[220px]">
       {/* Header */}
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-2 min-w-0">
@@ -181,7 +185,7 @@ function RepositoryCard({
           href={`https://github.com/${repo.fullName}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="p-1.5 opacity-80 hover:text-[#f0f0fa] hover: transition-all"
+          className="p-1.5 opacity-80 hover:text-[#f0f0fa] transition-all"
         >
           <ExternalLink className="w-4 h-4" />
         </a>
@@ -195,7 +199,7 @@ function RepositoryCard({
       )}
 
       {/* Stats */}
-      <div className="flex items-center gap-4 text-sm opacity-80 mb-4">
+      <div className="flex items-center gap-4 text-sm opacity-80 mb-4 flex-wrap">
         <div className="flex items-center gap-1">
           <GitCommit className="w-4 h-4" />
           <span>{commitCount}</span>
@@ -211,7 +215,7 @@ function RepositoryCard({
       </div>
 
       {/* Footer */}
-      <div className="flex items-center justify-between pt-3 border-t border-[rgba(240,240,250,0.15)]">
+      <div className="flex items-center justify-between pt-3 border-t border-[rgba(240,240,250,0.15)] gap-3 flex-wrap">
         {repo.language && (
           <span className="px-2 py-1 text-xs opacity-80">
             {repo.language}
@@ -235,9 +239,9 @@ function RepositoryCard({
 
 function EmptyState() {
   return (
-    <div className="border border-[rgba(240,240,250,0.15)] p-12 backdrop-blur-sm text-center">
+    <div className="border border-[rgba(240,240,250,0.15)] p-8 sm:p-12 backdrop-blur-sm text-center">
       <div className="max-w-md mx-auto">
-        <div className="w-16 h-16 bg-cyan-500/10 border border-cyan-500/30 -full flex items-center justify-center mx-auto mb-6">
+        <div className="w-16 h-16 bg-white/5 border border-[rgba(240,240,250,0.2)] rounded-full flex items-center justify-center mx-auto mb-6">
           <Code className="w-8 h-8 text-[#f0f0fa]" />
         </div>
         <h2 className="text-xl font-semibold opacity-80 mb-3">
@@ -248,7 +252,7 @@ function EmptyState() {
         </p>
         <Link
           href="/dashboard"
-          className="inline-flex items-center gap-2 px-6 py-3 bg-cyan-500/20 border border-cyan-500/30 text-[#f0f0fa] hover:bg-cyan-500/30 hover:border-cyan-500/50 transition-all font-medium"
+          className="inline-flex items-center gap-2 px-6 py-3 bg-white/10 border border-[rgba(240,240,250,0.35)] text-[#f0f0fa] hover:bg-white/20 transition-all font-medium"
         >
           <RefreshCw className="w-5 h-5" />
           Go to Dashboard

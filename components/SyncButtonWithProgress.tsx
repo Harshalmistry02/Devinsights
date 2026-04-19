@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useSyncStream } from '@/lib/hooks/useSyncStream';
-import { RefreshCw, Loader2, CheckCircle, AlertCircle, Zap, ChevronDown, ChevronUp } from 'lucide-react';
+import { RefreshCw, Loader2, AlertCircle, Zap, ChevronDown, ChevronUp } from 'lucide-react';
 import { toast } from 'sonner';
 
 export function SyncButtonWithProgress() {
@@ -60,9 +60,9 @@ export function SyncButtonWithProgress() {
             <span className="text-xs opacity-80">{progress.percentage}%</span>
           </div>
 
-          <div className="relative h-2 -full overflow-hidden">
+          <div className="relative h-2 rounded-full overflow-hidden">
             <div
-              className="absolute inset-y-0 left-0 bg-gradient-to-r from-cyan-500 via-blue-500 to-cyan-500 -full transition-all duration-300"
+              className="absolute inset-y-0 left-0 bg-linear-to-r from-cyan-500 via-blue-500 to-cyan-500 rounded-full transition-all duration-300"
               style={{ width: `${progress.percentage}%` }}
             />
           </div>
@@ -76,7 +76,7 @@ export function SyncButtonWithProgress() {
         )}
 
         {/* Phase Indicators */}
-        <div className="grid grid-cols-5 gap-2 text-xs">
+        <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 text-xs">
           {['repos', 'commits', 'stats', 'analytics', 'complete'].map((phase) => {
             const phaseOrder: Record<string, number> = { 
               init: 0, repos: 1, commits: 2, stats: 3, analytics: 4, complete: 5 
@@ -118,7 +118,7 @@ export function SyncButtonWithProgress() {
         </button>
 
         {showDetails && (
-          <div className="grid grid-cols-2 gap-2 text-xs p-3 border border-[rgba(240,240,250,0.15)]">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs p-3 border border-[rgba(240,240,250,0.15)]">
             <div>
               <p className="opacity-80">Repos</p>
               <p className="opacity-80 font-semibold">
@@ -168,7 +168,7 @@ export function SyncButtonWithProgress() {
     <button
       onClick={handleSync}
       disabled={isStreaming}
-      className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-cyan-500/20 border border-cyan-500/30 hover:bg-cyan-500/30 text-[#f0f0fa] hover:text-[#f0f0fa] transition-all font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+      className="w-full min-h-11 flex items-center justify-center gap-2 px-4 py-3 bg-cyan-500/20 border border-cyan-500/30 hover:bg-cyan-500/30 text-[#f0f0fa] hover:text-[#f0f0fa] transition-all font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed"
     >
       <Zap className="w-4 h-4" />
       Sync GitHub Data

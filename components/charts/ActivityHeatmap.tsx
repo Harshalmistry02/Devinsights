@@ -39,19 +39,19 @@ export function ActivityHeatmap({ data, className = '' }: ActivityHeatmapProps) 
       {/* Legend */}
       <div className="flex items-center justify-end gap-3 text-micro opacity-40 mb-4 px-2 tracking-widest">
         <span>LESS</span>
-        <div className="flex gap-[2px]">
-          <div className="w-[10px] h-[10px] bg-[rgba(240,240,250,0.05)]" />
-          <div className="w-[10px] h-[10px] bg-[rgba(240,240,250,0.2)]" />
-          <div className="w-[10px] h-[10px] bg-[rgba(240,240,250,0.4)]" />
-          <div className="w-[10px] h-[10px] bg-[rgba(240,240,250,0.7)]" />
-          <div className="w-[10px] h-[10px] bg-[rgba(240,240,250,0.9)]" />
+        <div className="flex gap-0.5">
+          <div className="w-2.5 h-2.5 bg-[rgba(240,240,250,0.05)]" />
+          <div className="w-2.5 h-2.5 bg-[rgba(240,240,250,0.2)]" />
+          <div className="w-2.5 h-2.5 bg-[rgba(240,240,250,0.4)]" />
+          <div className="w-2.5 h-2.5 bg-[rgba(240,240,250,0.7)]" />
+          <div className="w-2.5 h-2.5 bg-[rgba(240,240,250,0.9)]" />
         </div>
         <span>MORE</span>
       </div>
 
       {/* Heatmap Grid */}
-      <div className="p-4 sm:p-6 overflow-x-auto">
-        <div className="min-w-[750px]">
+      <div className="p-4 sm:p-6 overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
+        <div className="min-w-[640px]">
           {/* Month Labels */}
           <div className="flex mb-2 ml-8">
             {months.map((month, index) => (
@@ -71,7 +71,7 @@ export function ActivityHeatmap({ data, className = '' }: ActivityHeatmapProps) 
           {/* Grid */}
           <div className="flex">
             {/* Day Labels */}
-            <div className="flex flex-col gap-[2px] mr-2 text-xs opacity-80">
+            <div className="flex flex-col gap-0.5 mr-2 text-xs opacity-80">
               {DAYS.map((day, index) => (
                 <div 
                   key={day} 
@@ -84,9 +84,9 @@ export function ActivityHeatmap({ data, className = '' }: ActivityHeatmapProps) 
             </div>
 
             {/* Calendar Grid */}
-            <div className="flex gap-[2px]">
+            <div className="flex gap-0.5">
               {calendar.map((week, weekIndex) => (
-                <div key={weekIndex} className="flex flex-col gap-[2px]">
+                <div key={weekIndex} className="flex flex-col gap-0.5">
                   {week.map((day, dayIndex) => (
                     <div
                       key={`${weekIndex}-${dayIndex}`}
@@ -150,7 +150,7 @@ function generateCalendarData(data: Record<string, number>) {
   const startDate = new Date(oneYearAgo);
   startDate.setDate(startDate.getDate() - startDate.getDay());
   
-  let currentDate = new Date(startDate);
+  const currentDate = new Date(startDate);
   let currentMonth = -1;
   let monthWeeks = 0;
   let totalCommits = 0;

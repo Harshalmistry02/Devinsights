@@ -12,7 +12,6 @@ import {
   Trophy,
   Brain,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { AIInsightsHero } from "./AIInsightsHero";
 import { InsightsChartsSection } from "./InsightsChartsSection";
 import { DataQualityIndicator } from "@/components/DataQualityIndicator";
@@ -45,7 +44,7 @@ export default async function InsightsPage() {
 
   const hasData = analytics !== null;
   const isDataStale = analytics?.calculatedAt 
-    ? (Date.now() - new Date(analytics.calculatedAt).getTime()) > (24 * 60 * 60 * 1000)
+    ? (new Date().getTime() - new Date(analytics.calculatedAt).getTime()) > (24 * 60 * 60 * 1000)
     : false;
 
   const outlierCount = await prisma.commit.count({
@@ -71,39 +70,38 @@ export default async function InsightsPage() {
   const persona = analytics ? detectPersona(personaContext) : null;
 
   return (
-    <div className="section-cinematic bg-black">
+    <div className="section-cinematic bg-black items-start">
       <div 
         className="section-photo grayscale opacity-40 transition-opacity duration-1000" 
         style={{ 
           backgroundImage: "url('/insights-hero.png')", 
           backgroundSize: "cover", 
-          backgroundPosition: "center",
-          position: "fixed"
+          backgroundPosition: "center"
         }} 
       />
-      <div className="section-overlay" style={{ position: "fixed" }} />
+      <div className="section-overlay" />
       
-      <div className="section-content relative z-20 w-full" style={{ padding: "120px clamp(24px, 6vw, 80px) 40px" }}>
+      <div className="section-content relative z-20 w-full" style={{ padding: "clamp(88px, 14vh, 120px) clamp(24px, 6vw, 80px) 40px" }}>
         {/* Header */}
-        <header className="mb-12">
+        <header className="mb-8 sm:mb-12">
           <Link
             href="/dashboard"
-            className="text-micro uppercase tracking-[4px] opacity-40 hover:opacity-100 transition-all inline-flex items-center gap-4 mb-10"
+            className="text-micro uppercase tracking-[4px] opacity-40 hover:opacity-100 transition-all inline-flex items-center gap-3 sm:gap-4 mb-6 sm:mb-10"
           >
             <ArrowLeft size={11} />
             BACK TO MISSION CONTROL
           </Link>
 
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-8 border-b border-white/10 pb-10">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 sm:gap-8 border-b border-white/10 pb-8 sm:pb-10">
             <div>
               <p className="text-micro uppercase tracking-[5px] opacity-20 mb-4 font-bold">ARCHIVE ANALYSIS</p>
-              <h1 className="text-display-hero text-6xl font-bold opacity-80 tracking-tighter">CODING INSIGHTS</h1>
+              <h1 className="text-display-hero font-bold opacity-80 tracking-tighter">CODING INSIGHTS</h1>
               <p className="text-micro uppercase tracking-[3px] opacity-20 mt-4 leading-relaxed">
                 DEEP SYSTEM ANALYTICS / COGNITIVE PATTERN RECOGNITION
               </p>
             </div>
 
-            <div className="flex flex-col items-end gap-3">
+            <div className="flex flex-col md:items-end gap-3">
               {analytics?.calculatedAt && (
                 <div className="flex items-center gap-3 opacity-20 text-micro uppercase tracking-widest font-mono">
                   <Clock size={11} />
@@ -123,7 +121,7 @@ export default async function InsightsPage() {
         </header>
 
         {hasData ? (
-          <div className="space-y-12">
+          <div className="space-y-8 sm:space-y-12">
             {/* AI Insights Hero */}
             <AIInsightsHero 
               analytics={{
@@ -155,10 +153,10 @@ export default async function InsightsPage() {
             )}
 
             {/* Quality & Impact Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
               <CodeImpactCard metrics={codeImpactMetrics} />
               
-              <div className="brutalist-glass p-8 border-l-2 border-l-white/10">
+              <div className="brutalist-glass p-5 sm:p-8 border-l-2 border-l-white/10 min-w-0">
                 <div className="mb-10 border-l-2 border-white/20 pl-6">
                   <h3 className="text-caption-bold text-sm tracking-widest uppercase opacity-80">CODE QUALITY SUMMARY</h3>
                   <p className="text-micro opacity-20 uppercase tracking-widest mt-2 font-bold">COMMIT LOG ANALYSIS</p>
@@ -174,7 +172,7 @@ export default async function InsightsPage() {
                           QUALITATIVE RANKing
                         </div>
                     </div>
-                    <div className="grid grid-cols-2 gap-8">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-8">
                       <div className="brutalist-glass p-6 border-l-2 border-l-white/10">
                         <p className="text-micro opacity-20 mb-3 tracking-[2px] uppercase">CONVENTIONAL</p>
                         <p className="text-3xl font-bold opacity-80 tabular-nums font-mono">{commitQualityMetrics.conventionalCommitScore}%</p>
@@ -190,7 +188,7 @@ export default async function InsightsPage() {
                         <div className="text-micro opacity-20 uppercase tracking-[2px] mb-2">SYSTEM NOTES:</div>
                         {commitQualityMetrics.insights.slice(0, 3).map((insight, index) => (
                            <div key={index} className="flex items-start gap-4 text-micro opacity-40 hover:opacity-100 transition-opacity uppercase tracking-widest leading-relaxed">
-                            <span className="shrink-0 w-8 h-[1px] bg-white/20 mt-2" />
+                            <span className="shrink-0 w-8 h-px bg-white/20 mt-2" />
                             <span>{insight.toUpperCase()}</span>
                           </div>
                         ))}
@@ -257,13 +255,13 @@ async function AIStatsBanner({ analytics, userId, persona }: {
   ];
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-8 sm:space-y-10">
       {/* Developer Persona Badge */}
       {persona && (
-        <div className="flex flex-col sm:flex-row items-center sm:items-end justify-between gap-10 border-b border-white/5 pb-10">
+        <div className="flex flex-col sm:flex-row items-center sm:items-end justify-between gap-6 sm:gap-10 border-b border-white/5 pb-8 sm:pb-10">
           <div>
             <div className="flex items-center gap-4 mb-4">
-              <span className="text-display-hero text-3xl font-bold opacity-80 uppercase tracking-widest">
+              <span className="text-display-hero text-2xl sm:text-3xl font-bold opacity-80 uppercase tracking-widest">
                 {persona.primary.name}
               </span>
               <span className="px-3 py-1 border border-white/10 text-micro uppercase tracking-[3px] opacity-40">
@@ -282,7 +280,7 @@ async function AIStatsBanner({ analytics, userId, persona }: {
       )}
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 sm:gap-8">
         {stats.map((stat, index) => (
           <div key={index} className="space-y-4 group cursor-default">
             <div className="flex items-center gap-3 opacity-20 group-hover:opacity-40 transition-opacity">
@@ -300,7 +298,7 @@ async function AIStatsBanner({ analytics, userId, persona }: {
 
 function EmptyState() {
   return (
-    <div className="brutalist-glass p-32 text-center border-l-2 border-l-white/10">
+    <div className="brutalist-glass p-8 sm:p-16 lg:p-32 text-center border-l-2 border-l-white/10">
         <div className="w-24 h-24 border border-white/10 flex items-center justify-center mx-auto mb-10 opacity-20">
            <BarChart3 size={40} className="text-[#f0f0fa]" />
         </div>

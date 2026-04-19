@@ -1,4 +1,4 @@
-import { Github, ExternalLink, User, Settings, Flame, Loader2 } from "lucide-react";
+import { Github, User, Settings, Loader2 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { SyncButtonComplete } from "@/components/SyncButtonComplete";
@@ -31,8 +31,8 @@ export function UserProfileCard({ session, githubStatus, lastSync, analytics }: 
   return (
     <aside
       aria-label="User profile and actions"
-      style={{ alignSelf: "start", position: "sticky", top: "120px" }}
-      className="brutalist-glass p-8"
+      style={{ alignSelf: "start" }}
+      className="brutalist-glass p-5 sm:p-8 lg:sticky lg:top-30"
     >
       <div
         style={{
@@ -174,6 +174,9 @@ export function UserProfileCard({ session, githubStatus, lastSync, analytics }: 
           {/* Data Sync Section */}
           <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
             <p className="text-micro uppercase tracking-widest opacity-40">SYSTEM SYNC</p>
+            <p className="text-micro uppercase tracking-widest opacity-25">
+              PROVIDER: {(githubStatus.provider || "GITHUB").toUpperCase()}
+            </p>
             <SyncButtonComplete />
 
             {/* Sync Status */}

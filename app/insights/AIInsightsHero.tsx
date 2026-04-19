@@ -74,7 +74,7 @@ export function AIInsightsHero({ analytics }: AIInsightsHeroProps) {
             setGeneratedAt(data.generatedAt ? new Date(data.generatedAt) : null);
           }
         }
-      } catch (err) {
+      } catch {
         console.log('No existing insights found');
       }
     };
@@ -163,6 +163,11 @@ export function AIInsightsHero({ analytics }: AIInsightsHeroProps) {
         
         {/* Status row */}
         <div className="flex flex-wrap items-center gap-4 mt-4">
+          {analytics && (
+            <div className="flex items-center gap-1.5 text-micro uppercase tracking-widest opacity-30">
+              <span>{analytics.totalCommits.toLocaleString()} commits indexed</span>
+            </div>
+          )}
           {generatedAt && (
             <div className="flex items-center gap-2 text-xs opacity-80">
               <Clock className="w-3.5 h-3.5" />
@@ -280,7 +285,7 @@ function InsightPanel({
   items: string[]; 
 }) {
   return (
-    <div className="brutalist-glass p-8 hover:bg-white/[0.02] transition-all group flex flex-col h-full border-l-2 border-l-white/5">
+    <div className="brutalist-glass p-5 sm:p-8 hover:bg-white/[0.02] transition-all group flex flex-col h-full border-l-2 border-l-white/5">
       <div className="flex items-center gap-4 mb-6">
         <div className="p-3 bg-white/5 opacity-50">
           <span className="text-[#f0f0fa]">{icon}</span>
@@ -290,7 +295,7 @@ function InsightPanel({
       <ul className="space-y-4">
         {items.map((item, index) => (
           <li key={index} className="flex items-start gap-3 text-micro uppercase tracking-widest leading-relaxed opacity-40 group-hover:opacity-100 transition-opacity">
-            <span className="w-1.5 h-[1px] bg-white/40 mt-2 shrink-0" />
+            <span className="w-1.5 h-px bg-white/40 mt-2 shrink-0" />
             <span>{item}</span>
           </li>
         ))}

@@ -8,7 +8,6 @@ import {
   Calendar,
   Clock,
   GitBranch,
-  ChevronDown,
 } from 'lucide-react';
 import {
   DynamicCommitTimeline,
@@ -132,7 +131,7 @@ export function InsightsChartsSection({
       )}
 
       {/* Two Column Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         {/* Language Breakdown */}
         {topLanguages && topLanguages.length > 0 && (
           <ChartCard
@@ -199,7 +198,7 @@ function ChartCard({
   children: React.ReactNode;
 }) {
   return (
-    <div className="brutalist-glass p-8">
+    <div className="brutalist-glass p-5 sm:p-8">
       {/* Header */}
       <div className="mb-8 border-l-2 border-[rgba(240,240,250,0.35)] pl-4">
         <div className="flex items-center gap-3 mb-2">

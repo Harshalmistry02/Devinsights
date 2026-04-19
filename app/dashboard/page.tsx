@@ -63,36 +63,20 @@ export default async function DashboardPage() {
   };
 
   return (
-    <div className="section-cinematic bg-black">
+    <div className="section-cinematic bg-black items-start">
       <div 
         className="section-photo" 
         style={{ 
           backgroundImage: "url('/space-hero.png')", 
           backgroundSize: "cover", 
-          backgroundPosition: "center",
-          position: "fixed"
+          backgroundPosition: "center"
         }} 
       />
-      <div className="section-overlay" style={{ position: "fixed" }} />
+      <div className="section-overlay" />
       
-      <div className="section-content relative z-20 w-full" style={{ padding: "120px clamp(24px, 6vw, 80px) 40px" }}>
+      <div className="section-content relative z-20 w-full" style={{ padding: "clamp(88px, 14vh, 120px) clamp(24px, 6vw, 80px) 40px" }}>
        
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr",
-            gap: "32px",
-          }}
-          className="dashboard-grid"
-        >
-          {/* Responsive grid via style tag */}
-          <style>{`
-            @media (min-width: 1024px) {
-              .dashboard-grid {
-                grid-template-columns: 280px 1fr !important;
-              }
-            }
-          `}</style>
+        <div className="grid grid-cols-1 gap-6 lg:gap-8 lg:grid-cols-[280px_minmax(0,1fr)]">
 
           {/* Step 1: User Profile Card */}
           <UserProfileCard
@@ -105,12 +89,12 @@ export default async function DashboardPage() {
           {/* Main Content Area */}
           <main
             id="main-content"
-            style={{ display: "flex", flexDirection: "column", gap: "24px" }}
+            style={{ display: "flex", flexDirection: "column", gap: "24px", minWidth: 0 }}
             role="main"
             aria-label="Dashboard overview"
           >
             {/* Welcome Header */}
-            <div className="brutalist-glass" style={{ padding: "32px", borderRadius: "2px", borderBottom: "1px solid rgba(240,240,250,0.06)" }}>
+            <div className="brutalist-glass" style={{ padding: "clamp(20px, 4vw, 32px)", borderRadius: "2px", borderBottom: "1px solid rgba(240,240,250,0.06)" }}>
               <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", flexWrap: "wrap", gap: "12px" }}>
                 <div>
                   <p className="text-micro uppercase tracking-widest" style={{ marginBottom: "8px" }}>DASHBOARD</p>

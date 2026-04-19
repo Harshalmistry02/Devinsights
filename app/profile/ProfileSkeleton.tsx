@@ -24,7 +24,7 @@ export function ProfileSkeleton() {
           <div className="bg-linear-to-r from-cyan-500/10 to-blue-500/10 border-b border-[rgba(240,240,250,0.15)] p-6 sm:p-8">
             <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
               {/* Avatar Skeleton */}
-              <div className="w-24 h-24 sm:w-32 sm:h-32 -full border-4 border-[rgba(240,240,250,0.15)]" />
+              <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full border-4 border-[rgba(240,240,250,0.15)]" />
               
               {/* User Info Skeleton */}
               <div className="flex-1 text-center sm:text-left space-y-3">

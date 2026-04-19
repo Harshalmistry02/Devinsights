@@ -11,7 +11,7 @@ export function ActivityOverview({ analytics, hasSyncedData }: ActivityOverviewP
     <div
       className="brutalist-glass"
       style={{
-        padding: "32px",
+        padding: "clamp(20px, 4vw, 32px)",
         borderRadius: "2px",
       }}
     >
@@ -36,13 +36,19 @@ export function ActivityOverview({ analytics, hasSyncedData }: ActivityOverviewP
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(2, 1fr)",
+              gridTemplateColumns: "1fr",
               gap: "24px",
               background: "transparent",
             }}
             className="activity-responsive"
           >
             <style>{`
+              @media (min-width: 480px) {
+                .activity-responsive {
+                  grid-template-columns: repeat(2, 1fr) !important;
+                }
+              }
+
               @media (min-width: 640px) {
                 .activity-responsive {
                   grid-template-columns: repeat(4, 1fr) !important;

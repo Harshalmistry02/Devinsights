@@ -43,7 +43,7 @@ export function RateLimitWarning() {
   const resetTime = new Date(rateLimitStatus.reset * 1000);
   const minutesUntilReset = Math.max(
     0,
-    Math.floor((resetTime.getTime() - Date.now()) / 60000)
+    Math.floor((resetTime.getTime() - new Date().getTime()) / 60000)
   );
 
   return (
@@ -61,9 +61,9 @@ export function RateLimitWarning() {
             <Clock className="w-3 h-3" />
             <span>Resets in {minutesUntilReset} minutes</span>
           </div>
-          <div className="mt-3 h-2 -full overflow-hidden">
+          <div className="mt-3 h-2 rounded-full overflow-hidden">
             <div
-              className="h-full bg-amber-500 -full transition-all"
+              className="h-full bg-amber-500 rounded-full transition-all"
               style={{ width: `${percentRemaining}%` }}
             />
           </div>

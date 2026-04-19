@@ -16,6 +16,7 @@ import {
   ArrowLeft,
 } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import type { Session } from "next-auth";
 import { cn } from "@/lib/utils";
 
@@ -84,51 +85,50 @@ export function ProfileContent({ session }: ProfileContentProps) {
   };
 
   return (
-    <div className="section-cinematic bg-black">
+    <div className="section-cinematic bg-black items-start">
       <div 
         className="section-photo grayscale opacity-40 transition-opacity duration-1000" 
         style={{ 
           backgroundImage: "url('/profile-hero.png')", 
           backgroundSize: "cover", 
-          backgroundPosition: "center",
-          position: "fixed"
+          backgroundPosition: "center"
         }} 
       />
-      <div className="section-overlay" style={{ position: "fixed" }} />
+      <div className="section-overlay" />
       
-      <div className="section-content relative z-20 w-full" style={{ padding: "120px clamp(24px, 6vw, 80px) 40px", maxWidth: "900px", margin: "0 auto" }}>
+      <div className="section-content relative z-20 w-full" style={{ padding: "clamp(88px, 14vh, 120px) clamp(24px, 6vw, 80px) 40px", maxWidth: "900px", margin: "0 auto" }}>
         {/* Header */}
-        <header className="mb-12">
+        <header className="mb-8 sm:mb-12">
           <Link
             href="/dashboard"
-            className="text-micro uppercase tracking-[4px] opacity-40 hover:opacity-100 transition-all inline-flex items-center gap-4 mb-10"
+            className="text-micro uppercase tracking-[4px] opacity-40 hover:opacity-100 transition-all inline-flex items-center gap-3 sm:gap-4 mb-6 sm:mb-10"
           >
             <ArrowLeft size={11} />
             BACK TO MISSION CONTROL
           </Link>
 
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-8 border-b border-white/10 pb-10">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 sm:gap-8 border-b border-white/10 pb-8 sm:pb-10">
             <div>
               <p className="text-micro uppercase tracking-[5px] opacity-20 mb-4 font-bold">PERSONNEL ARCHIVE</p>
-              <h1 className="text-display-hero text-6xl font-bold opacity-80 tracking-tighter">PROFILE</h1>
+              <h1 className="text-display-hero font-bold opacity-80 tracking-tighter">PROFILE</h1>
             </div>
             <LogoutButton />
           </div>
         </header>
 
         {/* Profile identity & Information */}
-        <div className="brutalist-glass p-10 space-y-16">
+        <div className="brutalist-glass p-5 sm:p-10 space-y-10 sm:space-y-16">
           {/* Identity row */}
-          <div className="flex items-center gap-10 flex-wrap sm:flex-nowrap border-b border-white/5 pb-12">
+          <div className="flex items-center gap-6 sm:gap-10 flex-wrap sm:flex-nowrap border-b border-white/5 pb-8 sm:pb-12">
             {/* Avatar block */}
             <div className="relative group">
               {user.image ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
+                <Image
                   src={user.image}
                   alt={user.name || "User avatar"}
-                  className="w-24 h-24  grayscale border border-white/20 group-hover:grayscale-0 transition-all duration-500"
-                  loading="lazy"
+                  width={96}
+                  height={96}
+                  className="w-24 h-24 grayscale border border-white/20 group-hover:grayscale-0 transition-all duration-500"
                 />
               ) : (
                 <div className="w-24 h-24 border border-white/10 bg-white/5 flex items-center justify-center">
@@ -159,7 +159,7 @@ export function ProfileContent({ session }: ProfileContentProps) {
           </div>
 
           {/* Detailed Info Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-16">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 sm:gap-16">
             <section>
               <div className="flex items-center gap-3 mb-8 opacity-20 group">
                 <Shield size={12} />
@@ -220,7 +220,7 @@ export function ProfileContent({ session }: ProfileContentProps) {
           </div>
           
           {/* Hardware/System Status */}
-          <section className="pt-8 border-t border-white/5">
+          <section className="pt-6 sm:pt-8 border-t border-white/5">
              <div className="flex items-center gap-4 text-micro uppercase tracking-[3px] opacity-20 mb-6 font-bold">
                SYSTEM VALIDATION
              </div>
@@ -237,10 +237,10 @@ export function ProfileContent({ session }: ProfileContentProps) {
         </div>
 
         {/* Action Controls */}
-        <div className="mt-12 flex gap-4 flex-wrap">
+        <div className="mt-8 sm:mt-12 flex gap-3 sm:gap-4 flex-wrap">
           <Link
             href="/settings"
-            className="btn-ghost flex items-center gap-4 px-8 py-3 text-micro uppercase tracking-[3px]"
+            className="btn-ghost flex items-center justify-center gap-4 px-8 py-3 text-micro uppercase tracking-[3px] w-full sm:w-auto"
           >
             <Settings size={13} className="opacity-40" />
             PROTOCOL_SETTINGS
@@ -250,7 +250,7 @@ export function ProfileContent({ session }: ProfileContentProps) {
             <button
               onClick={handleReconnectGitHub}
               disabled={isReconnecting}
-              className="btn-ghost flex items-center gap-4 px-8 py-3 text-micro uppercase tracking-[3px]"
+              className="btn-ghost flex items-center justify-center gap-4 px-8 py-3 text-micro uppercase tracking-[3px] w-full sm:w-auto"
             >
               <RefreshCw
                 size={13}

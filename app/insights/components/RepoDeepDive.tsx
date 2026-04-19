@@ -3,8 +3,6 @@
 import React, { useState, useMemo } from 'react';
 import { 
   GitBranch,
-  Star,
-  GitFork,
   ExternalLink,
   ChevronUp,
   ChevronDown,
@@ -222,7 +220,7 @@ function TreemapView({ repos, onRepoClick, selectedRepoId }: {
   }, [repos, totalCommits]);
 
   return (
-    <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-12 gap-3 auto-rows-fr" style={{ minHeight: '320px' }}>
+    <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-8 xl:grid-cols-12 gap-3 auto-rows-fr" style={{ minHeight: '320px' }}>
       {treemapData.map((repo) => {
         const span = repo.size > 20 ? 3 : repo.size > 10 ? 2 : 1;
         const isSelected = selectedRepoId === repo.id;
@@ -278,6 +276,16 @@ function TreemapView({ repos, onRepoClick, selectedRepoId }: {
 // Table View
 // ===========================================
 
+function renderSortIcon(field: SortField, sortField: SortField, sortDirection: SortDirection) {
+  if (sortField !== field) {
+    return <ArrowUpDown className="w-3 h-3 opacity-20" />;
+  }
+
+  return sortDirection === 'desc'
+    ? <ChevronDown className="w-3.5 h-3.5 opacity-80" />
+    : <ChevronUp className="w-3.5 h-3.5 opacity-80" />;
+}
+
 function TableView({ 
   repos, 
   sortField, 
@@ -293,15 +301,6 @@ function TableView({
   onRepoClick?: (repoId: string) => void;
   selectedRepoId?: string | null;
 }) {
-  const SortIcon = ({ field }: { field: SortField }) => {
-    if (sortField !== field) {
-      return <ArrowUpDown className="w-3 h-3 opacity-20" />;
-    }
-    return sortDirection === 'desc' 
-      ? <ChevronDown className="w-3.5 h-3.5 opacity-80" />
-      : <ChevronUp className="w-3.5 h-3.5 opacity-80" />;
-  };
-
   return (
     <div className="overflow-x-auto brutalist-glass">
       <table className="w-full text-left">
@@ -311,19 +310,19 @@ function TableView({
               className="py-5 px-6 opacity-30 text-micro font-bold tracking-widest cursor-pointer hover:opacity-100 transition-all uppercase"
               onClick={() => onSort('name')}
             >
-              <div className="flex items-center gap-2">REPOSITORY <SortIcon field="name" /></div>
+              <div className="flex items-center gap-2">REPOSITORY {renderSortIcon('name', sortField, sortDirection)}</div>
             </th>
             <th 
               className="py-5 px-6 opacity-30 text-micro font-bold tracking-widest cursor-pointer hover:opacity-100 transition-all uppercase"
               onClick={() => onSort('language')}
             >
-              <div className="flex items-center gap-2">LANGUAGE <SortIcon field="language" /></div>
+              <div className="flex items-center gap-2">LANGUAGE {renderSortIcon('language', sortField, sortDirection)}</div>
             </th>
             <th 
               className="py-5 px-6 opacity-30 text-micro font-bold tracking-widest text-right cursor-pointer hover:opacity-100 transition-all uppercase"
               onClick={() => onSort('commits')}
             >
-              <div className="flex items-center justify-end gap-2">ACTIVITY <SortIcon field="commits" /></div>
+              <div className="flex items-center justify-end gap-2">ACTIVITY {renderSortIcon('commits', sortField, sortDirection)}</div>
             </th>
             <th className="py-5 px-6 opacity-30 text-micro font-bold tracking-widest text-right uppercase">ACTION</th>
           </tr>
@@ -336,7 +335,7 @@ function TableView({
                 key={repo.id}
                 className={cn(
                   "hover:bg-white/[0.02] transition-colors cursor-pointer group",
-                  isSelected && "bg-white/[0.05]"
+                  isSelected && "bg-white/5"
                 )}
                 onClick={() => onRepoClick?.(repo.id)}
               >

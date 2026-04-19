@@ -16,7 +16,6 @@ import {
   ResponsiveContainer,
   Cell,
 } from 'recharts';
-import { GitBranch, Star, GitFork } from 'lucide-react';
 
 interface RepoStat {
   id: string;
@@ -32,12 +31,9 @@ interface RepoStatsChartProps {
   data: RepoStat[];
   className?: string;
   limit?: number;
-  showViewAll?: boolean;
 }
 
-const COLORS = ['#06b6d4', '#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981'];
-
-export function RepoStatsChart({ data, className = '', limit = 6, showViewAll = true }: RepoStatsChartProps) {
+export function RepoStatsChart({ data, className = '', limit = 6 }: RepoStatsChartProps) {
   // Get top repos by commits
   const topRepos = data
     .sort((a, b) => b.commits - a.commits)
@@ -47,8 +43,6 @@ export function RepoStatsChart({ data, className = '', limit = 6, showViewAll = 
   const totalCommits = data.reduce((sum, r) => sum + r.commits, 0);
   const totalStars = data.reduce((sum, r) => sum + r.stars, 0);
   const totalForks = data.reduce((sum, r) => sum + r.forks, 0);
-
-  const hiddenRepos = data.length - topRepos.length;
 
   return (
     <div className={` bg-transparent border-none ${className}`}>
@@ -77,7 +71,7 @@ export function RepoStatsChart({ data, className = '', limit = 6, showViewAll = 
               <BarChart
                 data={topRepos}
                 layout="vertical"
-                margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                margin={{ top: 5, right: 16, left: 0, bottom: 5 }}
               >
                 <CartesianGrid strokeDasharray="0" stroke="rgba(240,240,250,0.05)" horizontal={false} />
                 <XAxis
@@ -89,11 +83,11 @@ export function RepoStatsChart({ data, className = '', limit = 6, showViewAll = 
                 <YAxis
                   dataKey="name"
                   type="category"
-                  tick={{ fill: 'rgba(240,240,250,0.6)', fontSize: 10, letterSpacing: '1px' }}
+                  tick={{ fill: 'rgba(240,240,250,0.6)', fontSize: 9, letterSpacing: '1px' }}
                   tickLine={false}
                   axisLine={false}
-                  width={140}
-                  tickFormatter={(val) => val.toUpperCase()}
+                  width={100}
+                  tickFormatter={(val) => val.slice(0, 12).toUpperCase()}
                 />
                 <Tooltip content={<CustomTooltip totalCommits={totalCommits} />} cursor={{ fill: 'rgba(240, 240, 250, 0.05)' }} />
                 <Bar dataKey="commits" radius={[0, 0, 0, 0]} maxBarSize={30}>
@@ -122,7 +116,13 @@ export function RepoStatsChart({ data, className = '', limit = 6, showViewAll = 
 // Custom Tooltip Component
 // ===========================================
 
-function CustomTooltip({ active, payload, totalCommits }: any) {
+type CustomTooltipProps = {
+  active?: boolean;
+  payload?: Array<{ payload: RepoStat }>;
+  totalCommits: number;
+};
+
+function CustomTooltip({ active, payload, totalCommits }: CustomTooltipProps) {
   if (!active || !payload || !payload.length) return null;
 
   const data = payload[0].payload;

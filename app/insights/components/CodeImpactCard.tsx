@@ -24,7 +24,7 @@ export function CodeImpactCard({ metrics, className }: CodeImpactCardProps) {
   if (!metrics) {
     return (
       <div className={cn(
-        "brutalist-glass p-16 text-center border-white/5",
+        "brutalist-glass p-8 sm:p-16 text-center border-white/5",
         className
       )}>
         <Gauge className="w-16 h-16 opacity-10 mx-auto mb-8" />
@@ -38,7 +38,7 @@ export function CodeImpactCard({ metrics, className }: CodeImpactCardProps) {
 
   return (
     <div className={cn(
-      "brutalist-glass p-8 border-l-2 border-l-white/10",
+      "brutalist-glass p-5 sm:p-8 border-l-2 border-l-white/10",
       className
     )}>
       {/* Header */}
@@ -57,11 +57,11 @@ export function CodeImpactCard({ metrics, className }: CodeImpactCardProps) {
       {/* Main Content */}
       <div className="py-2">
         {/* Impact Score & Gauge Row */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-12 items-center">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 sm:gap-12 mb-10 sm:mb-12 items-center">
           {/* Impact Score */}
           <div className="text-center md:text-left">
              <div className="text-micro opacity-30 uppercase tracking-[4px] mb-4">IMPACT COEFFICIENT</div>
-            <div className="text-display-hero text-7xl font-bold opacity-80 mb-6 font-mono tracking-tighter">
+            <div className="text-display-hero text-6xl sm:text-7xl font-bold opacity-80 mb-6 font-mono tracking-tighter">
               {metrics.impactScore}
             </div>
             <div className={cn(
@@ -108,7 +108,7 @@ export function CodeImpactCard({ metrics, className }: CodeImpactCardProps) {
                 key={index}
                 className="flex items-start gap-4 text-micro opacity-40 hover:opacity-100 transition-opacity uppercase tracking-widest leading-relaxed"
               >
-                <span className="shrink-0 w-8 h-[1px] bg-white/20 mt-2" />
+                <span className="shrink-0 w-8 h-px bg-white/20 mt-2" />
                 <span>{insight.toUpperCase()}</span>
               </div>
             ))}
@@ -205,7 +205,6 @@ function ChurnGauge({ productive, refactoring, churn }: { productive: number, re
 
 export function CodeImpactCardCompact({ metrics, className }: CodeImpactCardProps) {
   if (!metrics) return null;
-  const impactRating = getImpactRating(metrics.impactScore);
 
   return (
     <div className={cn("py-6 border-t border-white/5", className)}>
