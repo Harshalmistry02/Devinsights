@@ -18,6 +18,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import prisma from '@/lib/prisma';
 import { createSyncOrchestrator } from '@/lib/github/sync-orchestrator';
+import {
+  getValidGitHubAccessToken,
+  isGitHubAuthError,
+  isGitHubAuthenticationFailure,
+  toGitHubAuthErrorPayload,
+} from '@/lib/github/auth-token';
 
 /**
  * POST /api/sync/advanced
@@ -44,23 +50,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Get user's GitHub access token from the database
-    const account = await prisma.account.findFirst({
-      where: {
-        userId: session.user.id,
-        provider: 'github',
-      },
-      select: {
-        access_token: true,
-      },
-    });
-
-    if (!account?.access_token) {
-      return NextResponse.json(
-        { error: 'GitHub account not linked or token missing' },
-        { status: 401 }
-      );
-    }
+    const { accessToken } = await getValidGitHubAccessToken(session.user.id);
 
     // Parse request options
     let options = {
@@ -88,7 +78,7 @@ export async function POST(req: NextRequest) {
 
     // Create orchestrator and run sync
     const orchestrator = createSyncOrchestrator(
-      account.access_token,
+      accessToken,
       session.user.id
     );
 
@@ -129,6 +119,24 @@ export async function POST(req: NextRequest) {
       );
     }
   } catch (error: unknown) {
+    if (isGitHubAuthError(error)) {
+      return NextResponse.json(
+        toGitHubAuthErrorPayload(error),
+        { status: error.status }
+      );
+    }
+
+    if (isGitHubAuthenticationFailure(error)) {
+      return NextResponse.json(
+        {
+          error: 'GitHub authentication required',
+          message: 'Your GitHub token has expired. Please log out and log back in to reconnect your GitHub account.',
+          requiresReauth: true,
+        },
+        { status: 401 }
+      );
+    }
+
     console.error('Advanced sync error:', error);
     const message = error instanceof Error ? error.message : 'Unknown error';
 
@@ -144,7 +152,7 @@ export async function POST(req: NextRequest) {
  * 
  * Returns sync status and statistics for the authenticated user
  */
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
     const session = await auth();
 

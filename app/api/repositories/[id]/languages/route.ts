@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import prisma from '@/lib/prisma';
+import {
+  getValidGitHubAccessToken,
+  isGitHubAuthError,
+  isGitHubAuthenticationFailure,
+  toGitHubAuthErrorPayload,
+} from '@/lib/github/auth-token';
 
 /**
  * GET /api/repositories/[id]/languages
@@ -32,18 +38,7 @@ export async function GET(
       return NextResponse.json({ error: 'Not found' }, { status: 404 });
     }
 
-    // Get GitHub access token
-    const account = await prisma.account.findFirst({
-      where: {
-        userId: session.user.id,
-        provider: 'github',
-      },
-      select: { access_token: true },
-    });
-
-    if (!account?.access_token) {
-      return NextResponse.json({ error: 'GitHub not connected' }, { status: 401 });
-    }
+    const { accessToken } = await getValidGitHubAccessToken(session.user.id);
 
     // Fetch language data from GitHub API
     const [owner, repo] = repository.fullName.split('/');
@@ -51,30 +46,60 @@ export async function GET(
       `https://api.github.com/repos/${owner}/${repo}/languages`,
       {
         headers: {
-          Authorization: `Bearer ${account.access_token}`,
+          Authorization: `Bearer ${accessToken}`,
           Accept: 'application/vnd.github.v3+json',
         },
       }
     );
 
+    if (response.status === 401) {
+      return NextResponse.json(
+        {
+          error: 'GitHub authentication required',
+          message: 'Your GitHub token has expired. Please log out and log back in to reconnect your GitHub account.',
+          requiresReauth: true,
+        },
+        { status: 401 }
+      );
+    }
+
     if (!response.ok) {
       throw new Error(`GitHub API error: ${response.status}`);
     }
 
-    const languages = await response.json();
-    const total = Object.values(languages).reduce((sum: number, bytes: any) => sum + bytes, 0);
+    const languages = (await response.json()) as Record<string, number>;
+    const total = Object.values(languages).reduce((sum, bytes) => sum + bytes, 0);
 
-    const breakdown = Object.entries(languages).map(([language, bytes]: [string, any]) => ({
+    const breakdown = Object.entries(languages).map(([language, bytes]) => ({
       language,
       bytes,
       percentage: total > 0 ? Math.round((bytes / total) * 1000) / 10 : 0,
     })).sort((a, b) => b.bytes - a.bytes);
 
     return NextResponse.json({ languages: breakdown });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    if (isGitHubAuthError(error)) {
+      return NextResponse.json(
+        toGitHubAuthErrorPayload(error),
+        { status: error.status }
+      );
+    }
+
+    if (isGitHubAuthenticationFailure(error)) {
+      return NextResponse.json(
+        {
+          error: 'GitHub authentication required',
+          message: 'Your GitHub token has expired. Please log out and log back in to reconnect your GitHub account.',
+          requiresReauth: true,
+        },
+        { status: 401 }
+      );
+    }
+
     console.error('Language breakdown error:', error);
+    const message = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
-      { error: 'Failed to fetch languages', message: error.message },
+      { error: 'Failed to fetch languages', message },
       { status: 500 }
     );
   }

@@ -1,14 +1,19 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { GitHubSyncService } from '@/lib/github/sync-service';
-import prisma from '@/lib/prisma';
 import { SyncProgressEvent } from '@/lib/sync/sync-stream';
+import {
+  getValidGitHubAccessToken,
+  isGitHubAuthError,
+  isGitHubAuthenticationFailure,
+  toGitHubAuthErrorPayload,
+} from '@/lib/github/auth-token';
 
 /**
  * POST /api/sync/stream
  * Server-Sent Events endpoint for real-time sync progress
  */
-export async function POST(req: NextRequest) {
+export async function POST() {
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -16,17 +21,20 @@ export async function POST(req: NextRequest) {
 
   const userId = session.user.id;
 
-  // Get GitHub token
-  const account = await prisma.account.findFirst({
-    where: { userId, provider: 'github' },
-    select: { access_token: true },
-  });
+  let accessToken: string;
+  try {
+    const tokenResult = await getValidGitHubAccessToken(userId);
+    accessToken = tokenResult.accessToken;
+  } catch (error) {
+    if (isGitHubAuthError(error)) {
+      return NextResponse.json(
+        toGitHubAuthErrorPayload(error),
+        { status: error.status }
+      );
+    }
 
-  if (!account?.access_token) {
-    return NextResponse.json({ error: 'GitHub not connected' }, { status: 401 });
+    throw error;
   }
-
-  const accessToken = account.access_token;
 
   // Create SSE stream
   const stream = new ReadableStream({
@@ -44,11 +52,6 @@ export async function POST(req: NextRequest) {
           accessToken,
           userId
         );
-
-        const startTime = Date.now();
-        let processedRepos = 0;
-        let totalRepos = 0;
-        let processedCommits = 0;
 
         // Initialize
         sendEvent({
@@ -90,12 +93,19 @@ export async function POST(req: NextRequest) {
         controller.enqueue(encoder.encode('data: [DONE]\n\n'));
       } catch (error) {
         console.error('Sync stream error:', error);
+
+        const message = isGitHubAuthenticationFailure(error)
+          ? 'GitHub authentication required. Please log out and log back in.'
+          : error instanceof Error
+            ? error.message
+            : 'Sync failed';
+
         controller.enqueue(
           encoder.encode(
             `data: ${JSON.stringify({
               phase: 'error',
               percentage: 0,
-              message: error instanceof Error ? error.message : 'Sync failed',
+              message,
               stats: {
                 reposProcessed: 0,
                 totalRepos: 0,

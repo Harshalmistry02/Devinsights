@@ -15,9 +15,22 @@ export function RateLimitWarning() {
   } | null>(null);
 
   useEffect(() => {
+    let shouldStopPolling = false;
+
     const checkRateLimit = async () => {
+      if (shouldStopPolling) {
+        return;
+      }
+
       try {
         const response = await fetch('/api/github/rate-limit');
+
+        if (response.status === 401) {
+          shouldStopPolling = true;
+          setRateLimitStatus(null);
+          return;
+        }
+
         if (response.ok) {
           const data = await response.json();
           setRateLimitStatus(data);

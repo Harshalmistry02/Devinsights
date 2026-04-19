@@ -1,13 +1,18 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { GitHubSyncService } from '@/lib/github/sync-service';
-import prisma from '@/lib/prisma';
+import {
+  getValidGitHubAccessToken,
+  isGitHubAuthError,
+  isGitHubAuthenticationFailure,
+  toGitHubAuthErrorPayload,
+} from '@/lib/github/auth-token';
 
 /**
  * POST /api/sync
  * Triggers a full GitHub data sync for the authenticated user
  */
-export async function POST(req: NextRequest) {
+export async function POST() {
   try {
     const session = await auth();
 
@@ -15,28 +20,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Get user's GitHub access token from the database
-    const account = await prisma.account.findFirst({
-      where: {
-        userId: session.user.id,
-        provider: 'github',
-      },
-      select: {
-        access_token: true,
-      },
-    });
-
-    if (!account?.access_token) {
-      return NextResponse.json(
-        { error: 'GitHub account not linked or token missing' },
-        { status: 401 }
-      );
-    }
+    const { accessToken } = await getValidGitHubAccessToken(session.user.id);
 
     // For now, sync runs synchronously
     // Later: Move to background queue (BullMQ, Inngest, etc.)
     const syncService = new GitHubSyncService(
-      account.access_token,
+      accessToken,
       session.user.id
     );
 
@@ -46,11 +35,30 @@ export async function POST(req: NextRequest) {
       success: true,
       data: result,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    if (isGitHubAuthError(error)) {
+      return NextResponse.json(
+        toGitHubAuthErrorPayload(error),
+        { status: error.status }
+      );
+    }
+
+    if (isGitHubAuthenticationFailure(error)) {
+      return NextResponse.json(
+        {
+          error: 'GitHub authentication required',
+          message: 'Your GitHub token has expired. Please log out and log back in to reconnect your GitHub account.',
+          requiresReauth: true,
+        },
+        { status: 401 }
+      );
+    }
+
     console.error('Sync error:', error);
+    const message = error instanceof Error ? error.message : 'Unknown error';
 
     return NextResponse.json(
-      { error: 'Sync failed', message: error.message },
+      { error: 'Sync failed', message },
       { status: 500 }
     );
   }
@@ -60,7 +68,7 @@ export async function POST(req: NextRequest) {
  * GET /api/sync
  * Returns the latest sync job status for the authenticated user
  */
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
     const session = await auth();
 
@@ -75,11 +83,12 @@ export async function GET(req: NextRequest) {
     });
 
     return NextResponse.json({ job: job || null });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching sync status:', error);
+    const message = error instanceof Error ? error.message : 'Unknown error';
 
     return NextResponse.json(
-      { error: 'Failed to fetch sync status', message: error.message },
+      { error: 'Failed to fetch sync status', message },
       { status: 500 }
     );
   }

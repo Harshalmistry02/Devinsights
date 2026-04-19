@@ -13,12 +13,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import prisma from '@/lib/prisma';
+import {
+  getValidGitHubAccessToken,
+  isGitHubAuthError,
+  isGitHubAuthenticationFailure,
+  toGitHubAuthErrorPayload,
+} from '@/lib/github/auth-token';
 import { 
   AdvancedGitHubSyncService,
-  type ProcessedCommit,
 } from '@/lib/github/advanced-sync-service';
 import { 
-  CommitDataPipeline,
   createCommitPipeline,
 } from '@/lib/data-pipeline/commit-pipeline';
 import { refreshUserAnalytics } from '@/lib/analytics';
@@ -68,27 +72,24 @@ export async function POST(req: NextRequest) {
     // ============================================
     console.log('📋 Step 1: Retrieving GitHub credentials...');
 
-    const account = await prisma.account.findFirst({
-      where: {
-        userId,
-        provider: 'github',
-      },
-      select: { access_token: true },
-    });
+    let accessToken: string;
+    try {
+      const tokenResult = await getValidGitHubAccessToken(userId);
+      accessToken = tokenResult.accessToken;
+    } catch (tokenError) {
+      if (isGitHubAuthError(tokenError)) {
+        return NextResponse.json(
+          toGitHubAuthErrorPayload(tokenError),
+          { status: tokenError.status }
+        );
+      }
 
-    if (!account?.access_token) {
-      return NextResponse.json(
-        { 
-          error: 'GitHub account not linked',
-          message: 'Please reconnect your GitHub account',
-        },
-        { status: 401 }
-      );
+      throw tokenError;
     }
 
     // Initialize sync service with throttling
     const syncService = new AdvancedGitHubSyncService(
-      account.access_token,
+      accessToken,
       userId
     );
 
@@ -100,9 +101,9 @@ export async function POST(req: NextRequest) {
     let rateLimitBefore;
     try {
       rateLimitBefore = await syncService.getRateLimit();
-    } catch (rateLimitError: any) {
+    } catch (rateLimitError: unknown) {
       // Handle authentication errors
-      if (rateLimitError.message?.includes('authentication')) {
+      if (isGitHubAuthenticationFailure(rateLimitError)) {
         return NextResponse.json(
           {
             error: 'GitHub authentication required',
@@ -382,6 +383,24 @@ export async function POST(req: NextRequest) {
       },
     });
   } catch (error: unknown) {
+    if (isGitHubAuthError(error)) {
+      return NextResponse.json(
+        toGitHubAuthErrorPayload(error),
+        { status: error.status }
+      );
+    }
+
+    if (isGitHubAuthenticationFailure(error)) {
+      return NextResponse.json(
+        {
+          error: 'GitHub authentication required',
+          message: 'Your GitHub token has expired. Please log out and log back in to reconnect your GitHub account.',
+          requiresReauth: true,
+        },
+        { status: 401 }
+      );
+    }
+
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     console.error('❌ Fatal sync error:', error);
 
@@ -414,7 +433,7 @@ export async function POST(req: NextRequest) {
  * 
  * Returns the status of the latest sync job with comprehensive stats
  */
-export async function GET(req: NextRequest) {
+export async function GET() {
   const session = await auth();
 
   if (!session?.user?.id) {

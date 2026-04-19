@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { Loader2, RefreshCw, CheckCircle, XCircle, Github, AlertCircle } from 'lucide-react';
 
 interface SyncResponse {
@@ -23,6 +23,16 @@ interface SyncResponse {
     };
   };
   error?: string;
+  requiresReauth?: boolean;
+  code?: string;
+}
+
+interface SyncErrorData {
+  message: string;
+  error?: string;
+  status?: number;
+  requiresReauth?: boolean;
+  code?: string;
 }
 
 interface SyncStatus {
@@ -106,11 +116,25 @@ export function SyncButtonComplete() {
       const data: SyncResponse = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || data.message || `HTTP ${response.status}`);
+        const syncError: SyncErrorData = {
+          message: data.message || data.error || `HTTP ${response.status}`,
+          error: data.error,
+          status: response.status,
+          requiresReauth: data.requiresReauth === true || response.status === 401,
+          code: data.code,
+        };
+        throw syncError;
       }
 
       if (!data.success) {
-        throw new Error(data.message || 'Sync failed');
+        const syncError: SyncErrorData = {
+          message: data.message || 'Sync failed',
+          error: data.error,
+          status: response.status,
+          requiresReauth: data.requiresReauth,
+          code: data.code,
+        };
+        throw syncError;
       }
 
       // Success
@@ -143,20 +167,14 @@ export function SyncButtonComplete() {
       console.error('❌ Sync error:', err);
 
       let errorMessage = 'Sync failed. Please try again.';
-      let errorData: any = null;
-      const errorStr = err instanceof Error ? err.message : String(err);
-
-      // Try to extract structured error data from response
-      try {
-        if (err instanceof Error && err.message) {
-          errorData = JSON.parse(err.message);
-        }
-      } catch {
-        // Not JSON, continue with string parsing
-      }
+      const errorData =
+        typeof err === 'object' && err !== null && 'message' in err
+          ? (err as SyncErrorData)
+          : null;
+      const errorStr = errorData?.message || (err instanceof Error ? err.message : String(err));
 
       // Check for authentication requirement flag
-      if (errorData?.requiresReauth) {
+      if (errorData?.requiresReauth || errorData?.status === 401) {
         errorMessage = errorData.message || 'GitHub authentication required. Please log out and log back in.';
         setStatus({
           status: 'error',
@@ -175,6 +193,8 @@ export function SyncButtonComplete() {
         errorMessage = 'GitHub authentication failed. Please reconnect your account by logging out and back in.';
       } else if (errorStr.includes('not linked')) {
         errorMessage = 'GitHub account not linked. Please connect your GitHub account first.';
+      } else if (errorData?.message) {
+        errorMessage = errorData.message;
       } else if (err instanceof Error) {
         errorMessage = err.message;
       }

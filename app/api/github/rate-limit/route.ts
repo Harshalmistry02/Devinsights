@@ -1,7 +1,12 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { Octokit } from '@octokit/rest';
-import prisma from '@/lib/prisma';
+import {
+  getValidGitHubAccessToken,
+  isGitHubAuthError,
+  isGitHubAuthenticationFailure,
+  toGitHubAuthErrorPayload,
+} from '@/lib/github/auth-token';
 
 /**
  * GET /api/github/rate-limit
@@ -14,19 +19,9 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const account = await prisma.account.findFirst({
-      where: {
-        userId: session.user.id,
-        provider: 'github',
-      },
-      select: { access_token: true },
-    });
+    const { accessToken } = await getValidGitHubAccessToken(session.user.id);
 
-    if (!account?.access_token) {
-      return NextResponse.json({ error: 'GitHub not connected' }, { status: 401 });
-    }
-
-    const octokit = new Octokit({ auth: account.access_token });
+    const octokit = new Octokit({ auth: accessToken });
     const { data } = await octokit.rateLimit.get();
 
     return NextResponse.json({
@@ -35,7 +30,25 @@ export async function GET() {
       reset: data.rate.reset,
       used: data.rate.used,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    if (isGitHubAuthError(error)) {
+      return NextResponse.json(
+        toGitHubAuthErrorPayload(error),
+        { status: error.status }
+      );
+    }
+
+    if (isGitHubAuthenticationFailure(error)) {
+      return NextResponse.json(
+        {
+          error: 'GitHub authentication required',
+          message: 'Your GitHub token has expired. Please log out and log back in to reconnect your GitHub account.',
+          requiresReauth: true,
+        },
+        { status: 401 }
+      );
+    }
+
     console.error('Rate limit check error:', error);
     return NextResponse.json(
       { error: 'Failed to check rate limit' },
