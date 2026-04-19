@@ -1,36 +1,66 @@
 import { Octokit } from '@octokit/rest';
+import { getValidGitHubAccessToken, isGitHubAuthenticationFailure } from './auth-token';
 
 export class GitHubClient {
   private octokit: Octokit;
+  private accessToken: string;
+  private userId: string;
   private rateLimit = {
     remaining: 5000,
     reset: Date.now(),
   };
 
-  constructor(accessToken: string) {
+  constructor(accessToken: string, userId: string) {
+    this.accessToken = accessToken;
+    this.userId = userId;
     this.octokit = new Octokit({ auth: accessToken });
+  }
+
+  private async refreshAuth(): Promise<void> {
+    const { accessToken } = await getValidGitHubAccessToken(this.userId, { forceRefresh: true });
+    this.accessToken = accessToken;
+    this.octokit = new Octokit({ auth: accessToken });
+  }
+
+  private async withAuthRetry<T>(operation: () => Promise<T>): Promise<T> {
+    try {
+      return await operation();
+    } catch (error) {
+      if (isGitHubAuthenticationFailure(error)) {
+        await this.refreshAuth();
+        return await operation();
+      }
+
+      throw error;
+    }
   }
 
   /**
    * Check rate limit before making requests
    */
   async checkRateLimit(): Promise<boolean> {
-    try {
-      const { data } = await this.octokit.rateLimit.get();
-      this.rateLimit = {
-        remaining: data.rate.remaining,
-        reset: data.rate.reset * 1000, // Convert to milliseconds
-      };
+    return await this.withAuthRetry(async () => {
+      try {
+        const { data } = await this.octokit.rateLimit.get();
+        this.rateLimit = {
+          remaining: data.rate.remaining,
+          reset: data.rate.reset * 1000, // Convert to milliseconds
+        };
 
-      if (this.rateLimit.remaining < 100) {
-        console.warn(`Low rate limit: ${this.rateLimit.remaining} remaining`);
+        if (this.rateLimit.remaining < 100) {
+          console.warn(`Low rate limit: ${this.rateLimit.remaining} remaining`);
+          return false;
+        }
+        return true;
+      } catch (error) {
+        if (isGitHubAuthenticationFailure(error)) {
+          throw error;
+        }
+
+        console.error('Rate limit check failed:', error);
         return false;
       }
-      return true;
-    } catch (error) {
-      console.error('Rate limit check failed:', error);
-      return false;
-    }
+    });
   }
 
   /**
@@ -47,146 +77,158 @@ export class GitHubClient {
     includeArchived?: boolean;
     includeOrgRepos?: boolean;
   } = {}) {
-    const {
-      includePrivate = true,
-      includeForks = false,
-      includeArchived = false,
-      includeOrgRepos = true,
-    } = options;
+    return await this.withAuthRetry(async () => {
+      const {
+        includePrivate = true,
+        includeForks = false,
+        includeArchived = false,
+        includeOrgRepos = true,
+      } = options;
 
-    await this.checkRateLimit();
+      await this.checkRateLimit();
 
-    const repos = [];
-    let page = 1;
-    const perPage = 100;
+      const repos = [];
+      let page = 1;
+      const perPage = 100;
 
-    // Build affiliation string based on options
-    // 'owner' = repos you own
-    // 'collaborator' = repos you're a collaborator on
-    // 'organization_member' = org repos you have access to
-    const affiliations = ['owner'];
-    if (includeOrgRepos) {
-      affiliations.push('collaborator', 'organization_member');
-    }
-    const affiliation = affiliations.join(',');
+      // Build affiliation string based on options
+      // 'owner' = repos you own
+      // 'collaborator' = repos you're a collaborator on
+      // 'organization_member' = org repos you have access to
+      const affiliations = ['owner'];
+      if (includeOrgRepos) {
+        affiliations.push('collaborator', 'organization_member');
+      }
+      const affiliation = affiliations.join(',');
 
-    console.log(`📦 Fetching repositories with affiliation: ${affiliation}`);
+      console.log(`📦 Fetching repositories with affiliation: ${affiliation}`);
 
-    while (true) {
-      const { data } = await this.octokit.repos.listForAuthenticatedUser({
-        visibility: includePrivate ? 'all' : 'public',
-        affiliation: affiliation as 'owner' | 'collaborator' | 'organization_member',
-        sort: 'updated',
-        per_page: perPage,
-        page,
-      });
-
-      if (data.length === 0) break;
-
-      // Filter based on options
-      const filtered = data.filter(repo => {
-        if (!includeArchived && repo.archived) return false;
-        if (!includeForks && repo.fork) return false;
-        return true;
-      });
-
-      repos.push(...filtered);
-      
-      console.log(`   📄 Page ${page}: Found ${data.length} repos (${repos.length} total after filtering)`);
-      
-      if (data.length < perPage) break; // Last page
-      page++;
-    }
-
-    console.log(`✅ Total repositories fetched: ${repos.length}`);
-
-    return repos.map(repo => ({
-      githubId: repo.id,
-      name: repo.name,
-      fullName: repo.full_name,
-      description: repo.description,
-      language: repo.language,
-      stars: repo.stargazers_count,
-      forks: repo.forks_count,
-      isPrivate: repo.private,
-      isFork: repo.fork,
-      isArchived: repo.archived,
-      defaultBranch: repo.default_branch,
-    }));
-  }
-
-  /**
-   * Fetch commits for a specific repository
-   */
-  async fetchCommits(owner: string, repo: string, options = { since: null, maxCommits: 100 }) {
-    await this.checkRateLimit();
-
-    const commits = [];
-    let page = 1;
-    const perPage = 100;
-
-    // Calculate 'since' date (last 3 months by default)
-    const sinceDate = options.since || new Date(Date.now() - 90 * 24 * 60 * 60 * 1000);
-
-    while (commits.length < options.maxCommits) {
-      try {
-        const { data } = await this.octokit.repos.listCommits({
-          owner,
-          repo,
-          since: sinceDate.toISOString(),
+      while (true) {
+        const { data } = await this.octokit.repos.listForAuthenticatedUser({
+          visibility: includePrivate ? 'all' : 'public',
+          affiliation: affiliation as 'owner' | 'collaborator' | 'organization_member',
+          sort: 'updated',
           per_page: perPage,
           page,
         });
 
         if (data.length === 0) break;
 
-        // Fetch detailed commit info (to get file changes)
-        const detailedCommits = await Promise.all(
-          data.map(async (commit) => {
-            try {
-              const { data: detail } = await this.octokit.repos.getCommit({
-                owner,
-                repo,
-                ref: commit.sha,
-              });
+        // Filter based on options
+        const filtered = data.filter(repo => {
+          if (!includeArchived && repo.archived) return false;
+          if (!includeForks && repo.fork) return false;
+          return true;
+        });
 
-              // Extract file information for language detection and outlier analysis
-              const files = detail.files?.map(file => ({
-                filename: file.filename,
-                additions: file.additions || 0,
-                deletions: file.deletions || 0,
-                status: file.status,
-              })) || [];
-
-              return {
-                sha: commit.sha,
-                message: commit.commit.message,
-                authorName: commit.commit.author?.name,
-                authorEmail: commit.commit.author?.email,
-                authorDate: new Date(commit.commit.author?.date || Date.now()),
-                additions: detail.stats?.additions || 0,
-                deletions: detail.stats?.deletions || 0,
-                filesChanged: detail.files?.length || 0,
-                files, // Include file info for language detection
-              };
-            } catch (error) {
-              console.error(`Failed to fetch commit ${commit.sha}:`, error);
-              return null;
-            }
-          })
-        );
-
-        commits.push(...detailedCommits.filter(Boolean));
-
-        if (data.length < perPage) break;
+        repos.push(...filtered);
+        
+        console.log(`   📄 Page ${page}: Found ${data.length} repos (${repos.length} total after filtering)`);
+        
+        if (data.length < perPage) break; // Last page
         page++;
-      } catch (error) {
-        console.error(`Error fetching commits for ${owner}/${repo}:`, error);
-        break;
       }
-    }
 
-    return commits;
+      console.log(`✅ Total repositories fetched: ${repos.length}`);
+
+      return repos.map(repo => ({
+        githubId: repo.id,
+        name: repo.name,
+        fullName: repo.full_name,
+        description: repo.description,
+        language: repo.language,
+        stars: repo.stargazers_count,
+        forks: repo.forks_count,
+        isPrivate: repo.private,
+        isFork: repo.fork,
+        isArchived: repo.archived,
+        defaultBranch: repo.default_branch,
+      }));
+    });
+  }
+
+  /**
+   * Fetch commits for a specific repository
+   */
+  async fetchCommits(owner: string, repo: string, options = { since: null, maxCommits: 100 }) {
+    return await this.withAuthRetry(async () => {
+      await this.checkRateLimit();
+
+      const commits = [];
+      let page = 1;
+      const perPage = 100;
+
+      // Calculate 'since' date (last 3 months by default)
+      const sinceDate = options.since || new Date(Date.now() - 90 * 24 * 60 * 60 * 1000);
+
+      while (commits.length < options.maxCommits) {
+        try {
+          const { data } = await this.octokit.repos.listCommits({
+            owner,
+            repo,
+            since: sinceDate.toISOString(),
+            per_page: perPage,
+            page,
+          });
+
+          if (data.length === 0) break;
+
+          // Fetch detailed commit info (to get file changes)
+          const detailedCommits = await Promise.all(
+            data.map(async (commit) => {
+              try {
+                const { data: detail } = await this.octokit.repos.getCommit({
+                  owner,
+                  repo,
+                  ref: commit.sha,
+                });
+
+                // Extract file information for language detection and outlier analysis
+                const files = detail.files?.map(file => ({
+                  filename: file.filename,
+                  additions: file.additions || 0,
+                  deletions: file.deletions || 0,
+                  status: file.status,
+                })) || [];
+
+                return {
+                  sha: commit.sha,
+                  message: commit.commit.message,
+                  authorName: commit.commit.author?.name,
+                  authorEmail: commit.commit.author?.email,
+                  authorDate: new Date(commit.commit.author?.date || Date.now()),
+                  additions: detail.stats?.additions || 0,
+                  deletions: detail.stats?.deletions || 0,
+                  filesChanged: detail.files?.length || 0,
+                  files, // Include file info for language detection
+                };
+              } catch (error) {
+                if (isGitHubAuthenticationFailure(error)) {
+                  throw error;
+                }
+
+                console.error(`Failed to fetch commit ${commit.sha}:`, error);
+                return null;
+              }
+            })
+          );
+
+          commits.push(...detailedCommits.filter(Boolean));
+
+          if (data.length < perPage) break;
+          page++;
+        } catch (error) {
+          if (isGitHubAuthenticationFailure(error)) {
+            throw error;
+          }
+
+          console.error(`Error fetching commits for ${owner}/${repo}:`, error);
+          break;
+        }
+      }
+
+      return commits;
+    });
   }
 
   /**

@@ -66,8 +66,8 @@ export function RepoStatsChart({ data, className = '', limit = 6 }: RepoStatsCha
       {/* Chart */}
       <div className="p-4 sm:p-6">
         {topRepos.length > 0 ? (
-          <div className="h-72">
-            <ResponsiveContainer width="100%" height="100%">
+          <div className="h-72 min-h-72 min-w-0">
+            <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={288}>
               <BarChart
                 data={topRepos}
                 layout="vertical"

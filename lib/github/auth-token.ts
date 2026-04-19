@@ -169,13 +169,14 @@ export function toGitHubAuthErrorPayload(error: GitHubAuthError) {
  */
 export async function withGitHubAuth<T>(
   userId: string,
-  fn: (accessToken: string) => Promise<T>
+  fn: (accessToken: string) => Promise<T>,
+  options: { retryOnAuthFailure?: boolean } = {}
 ): Promise<T> {
   const { accessToken } = await getValidGitHubAccessToken(userId);
   try {
     return await fn(accessToken);
   } catch (err: unknown) {
-    if (isGitHubAuthenticationFailure(err)) {
+    if (options.retryOnAuthFailure !== false && isGitHubAuthenticationFailure(err)) {
       const { accessToken: refreshed } = await getValidGitHubAccessToken(userId, { forceRefresh: true });
       return await fn(refreshed);
     }

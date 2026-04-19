@@ -198,7 +198,7 @@ function ChartCard({
   children: React.ReactNode;
 }) {
   return (
-    <div className="brutalist-glass p-5 sm:p-8">
+    <div className="brutalist-glass p-5 sm:p-8 min-w-0">
       {/* Header */}
       <div className="mb-8 border-l-2 border-[rgba(240,240,250,0.35)] pl-4">
         <div className="flex items-center gap-3 mb-2">
@@ -209,7 +209,7 @@ function ChartCard({
       </div>
       
       {/* Chart Content */}
-      <div className="mt-4">
+      <div className="mt-4 min-w-0">
         {children}
       </div>
     </div>

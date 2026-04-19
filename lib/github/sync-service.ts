@@ -10,7 +10,7 @@ export class GitHubSyncService {
   private syncJobId: string = '';
 
   constructor(accessToken: string, userId: string) {
-    this.client = new GitHubClient(accessToken);
+    this.client = new GitHubClient(accessToken, userId);
     this.userId = userId;
   }
 
@@ -27,37 +27,79 @@ export class GitHubSyncService {
     });
 
     this.syncJobId = job.id;
+    let totalCommitsProcessed = 0;
 
     try {
       // Step 1: Fetch repositories
-      onProgress?.({ step: 'repos', progress: 0, message: 'Fetching repositories...' });
+      onProgress?.({
+        step: 'repos',
+        progress: 0,
+        message: 'Fetching repositories...',
+        reposProcessed: 0,
+        totalRepos: 0,
+        commitsProcessed: 0,
+        totalCommits: 0,
+        apiRequests: 0,
+        rateLimitResets: 0,
+        errors: 0,
+      });
       const repos = await this.client.fetchRepositories();
 
       await this.updateSyncJob({ totalRepos: repos.length });
-      onProgress?.({ step: 'repos', progress: 100, message: `Found ${repos.length} repositories` });
+      onProgress?.({
+        step: 'repos',
+        progress: 100,
+        message: `Found ${repos.length} repositories`,
+        reposProcessed: 0,
+        totalRepos: repos.length,
+        commitsProcessed: 0,
+        totalCommits: 0,
+        apiRequests: 0,
+        rateLimitResets: 0,
+        errors: 0,
+      });
 
       // Step 2: Store repositories
       for (let i = 0; i < repos.length; i++) {
         const repo = repos[i];
 
         // Upsert repository
-        const storedRepo = await prisma.repository.upsert({
-          where: { githubId: repo.githubId },
-          update: {
-            ...repo,
-            lastSyncedAt: new Date(),
-          },
-          create: {
-            ...repo,
-            userId: this.userId,
-          },
-        });
+        let storedRepo;
+        try {
+          storedRepo = await prisma.repository.upsert({
+            where: {
+              userId_githubId: {
+                userId: this.userId,
+                githubId: repo.githubId,
+              },
+            },
+            update: {
+              ...repo,
+              lastSyncedAt: new Date(),
+            },
+            create: {
+              ...repo,
+              userId: this.userId,
+            },
+          });
+        } catch (error) {
+          console.error(`Failed to upsert repository ${repo.fullName}:`, error);
+          await this.updateSyncJob({ processedRepos: i + 1 });
+          continue;
+        }
 
         // Step 3: Fetch commits for this repo
         onProgress?.({
           step: 'commits',
           progress: (i / repos.length) * 100,
           message: `Syncing ${repo.name}...`,
+          reposProcessed: i,
+          totalRepos: repos.length,
+          commitsProcessed: totalCommitsProcessed,
+          totalCommits: totalCommitsProcessed,
+          apiRequests: 0,
+          rateLimitResets: 0,
+          errors: 0,
         });
 
         const [owner, repoName] = repo.fullName.split('/');
@@ -111,6 +153,8 @@ export class GitHubSyncService {
           }
         }
 
+        totalCommitsProcessed += repoCommits.length;
+
         await this.updateSyncJob({ processedRepos: i + 1 });
       }
 
@@ -121,7 +165,18 @@ export class GitHubSyncService {
       });
 
       // Refresh analytics after successful sync
-      onProgress?.({ step: 'done', progress: 95, message: 'Calculating analytics...' });
+      onProgress?.({
+        step: 'done',
+        progress: 95,
+        message: 'Calculating analytics...',
+        reposProcessed: repos.length,
+        totalRepos: repos.length,
+        commitsProcessed: totalCommitsProcessed,
+        totalCommits: totalCommitsProcessed,
+        apiRequests: 0,
+        rateLimitResets: 0,
+        errors: 0,
+      });
       try {
         await refreshUserAnalytics(this.userId);
         console.log('Analytics refreshed successfully for user:', this.userId);
@@ -130,7 +185,18 @@ export class GitHubSyncService {
         console.error('Failed to refresh analytics:', analyticsError);
       }
 
-      onProgress?.({ step: 'done', progress: 100, message: 'Sync completed!' });
+      onProgress?.({
+        step: 'done',
+        progress: 100,
+        message: 'Sync completed!',
+        reposProcessed: repos.length,
+        totalRepos: repos.length,
+        commitsProcessed: totalCommitsProcessed,
+        totalCommits: totalCommitsProcessed,
+        apiRequests: 0,
+        rateLimitResets: 0,
+        errors: 0,
+      });
 
       return { success: true, repos: repos.length };
     } catch (error: any) {
@@ -162,4 +228,11 @@ export interface SyncProgress {
   step: 'repos' | 'commits' | 'done';
   progress: number; // 0-100
   message: string;
+  reposProcessed?: number;
+  totalRepos?: number;
+  commitsProcessed?: number;
+  totalCommits?: number;
+  apiRequests?: number;
+  rateLimitResets?: number;
+  errors?: number;
 }

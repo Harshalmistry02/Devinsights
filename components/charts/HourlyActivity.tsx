@@ -63,8 +63,8 @@ export function HourlyActivity({ data, className = '' }: HourlyActivityProps) {
       <div className="p-4 sm:p-6">
         {total > 0 ? (
           <>
-            <div className="h-48">
-              <ResponsiveContainer width="100%" height="100%">
+            <div className="h-48 min-h-48 min-w-0">
+              <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={192}>
                 <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="0" stroke="rgba(240,240,250,0.05)" vertical={false} />
                   <XAxis

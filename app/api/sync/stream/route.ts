@@ -23,7 +23,11 @@ export async function POST() {
 
   let accessToken: string;
   try {
-    accessToken = await withGitHubAuth(userId, async (token) => token);
+    accessToken = await withGitHubAuth(
+      userId,
+      async (token) => token,
+      { retryOnAuthFailure: false }
+    );
   } catch (error) {
     if (isGitHubAuthError(error)) {
       return NextResponse.json(
@@ -39,6 +43,15 @@ export async function POST() {
   const stream = new ReadableStream({
     async start(controller) {
       const encoder = new TextEncoder();
+      let latestStats = {
+        reposProcessed: 0,
+        totalRepos: 0,
+        commitsProcessed: 0,
+        totalCommits: 0,
+        apiRequests: 0,
+        rateLimitResets: 0,
+        errors: 0,
+      };
 
       const sendEvent = (event: SyncProgressEvent) => {
         controller.enqueue(
@@ -57,21 +70,30 @@ export async function POST() {
           phase: 'init',
           percentage: 0,
           message: 'Initializing sync...',
-          stats: {
-            reposProcessed: 0,
-            totalRepos: 0,
-            commitsProcessed: 0,
-            totalCommits: 0,
-            apiRequests: 0,
-            rateLimitResets: 0,
-            errors: 0,
-          },
+          stats: latestStats,
         });
 
         // Perform sync with progress callbacks
-        // Note: This is a basic implementation
-        // You'll need to modify GitHubSyncService to support progress callbacks
-        const result = await syncService.syncUserData();
+        const result = await syncService.syncUserData((progress) => {
+          latestStats = {
+            reposProcessed: progress.reposProcessed ?? latestStats.reposProcessed,
+            totalRepos: progress.totalRepos ?? latestStats.totalRepos,
+            commitsProcessed: progress.commitsProcessed ?? latestStats.commitsProcessed,
+            totalCommits: progress.totalCommits ?? latestStats.totalCommits,
+            apiRequests: progress.apiRequests ?? latestStats.apiRequests,
+            rateLimitResets: progress.rateLimitResets ?? latestStats.rateLimitResets,
+            errors: progress.errors ?? latestStats.errors,
+          };
+
+          sendEvent({
+            phase: progress.step === 'done'
+              ? (progress.progress >= 100 ? 'complete' : 'analytics')
+              : progress.step,
+            percentage: progress.progress,
+            message: progress.message,
+            stats: latestStats,
+          });
+        });
 
         // Complete
         sendEvent({
@@ -79,13 +101,9 @@ export async function POST() {
           percentage: 100,
           message: 'Sync complete!',
           stats: {
-            reposProcessed: result.repos || 0,
-            totalRepos: result.repos || 0,
-            commitsProcessed: 0, // Not available in current implementation
-            totalCommits: 0, // Not available in current implementation
-            apiRequests: 0,
-            rateLimitResets: 0,
-            errors: 0,
+            ...latestStats,
+            reposProcessed: result.repos || latestStats.reposProcessed,
+            totalRepos: result.repos || latestStats.totalRepos,
           },
         });
 

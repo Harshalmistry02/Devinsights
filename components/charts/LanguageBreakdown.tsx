@@ -45,8 +45,8 @@ export function LanguageBreakdown({ data, className = '' }: LanguageBreakdownPro
         {chartData.length > 0 ? (
           <div className="flex flex-col lg:flex-row items-center gap-6">
             {/* Donut Chart */}
-            <div className="w-full lg:w-1/2 h-64">
-              <ResponsiveContainer width="100%" height="100%">
+            <div className="w-full lg:w-1/2 h-64 min-h-64 min-w-0">
+              <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={256}>
                 <PieChart>
                   <Pie
                     data={chartData}

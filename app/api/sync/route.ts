@@ -21,10 +21,14 @@ export async function POST() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const result = await withGitHubAuth(session.user.id, async (accessToken) => {
+    const result = await withGitHubAuth(
+      session.user.id,
+      async (accessToken) => {
       const syncService = new GitHubSyncService(accessToken, session.user.id!);
       return syncService.syncUserData();
-    });
+      },
+      { retryOnAuthFailure: false }
+    );
 
     return NextResponse.json({
       success: true,

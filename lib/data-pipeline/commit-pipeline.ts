@@ -321,7 +321,12 @@ export class RepositoryDataPipeline {
     for (const repo of repositories) {
       try {
         const upserted = await prisma.repository.upsert({
-          where: { githubId: repo.githubId },
+          where: {
+            userId_githubId: {
+              userId,
+              githubId: repo.githubId,
+            },
+          },
           update: {
             name: repo.name,
             fullName: repo.fullName,

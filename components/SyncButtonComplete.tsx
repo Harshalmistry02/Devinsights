@@ -2,6 +2,7 @@
 
 import { useState, useRef } from 'react';
 import { Loader2, RefreshCw, CheckCircle, XCircle, Github, AlertCircle } from 'lucide-react';
+import { signOut } from 'next-auth/react';
 
 interface SyncResponse {
   success: boolean;
@@ -62,11 +63,51 @@ export function SyncButtonComplete() {
     message: 'Ready to sync GitHub data',
     progress: 0,
   });
+  const [requiresReauth, setRequiresReauth] = useState(false);
   
   // Reference for screen reader announcements
   const announcementRef = useRef<HTMLDivElement>(null);
 
+  const getErrorMessage = (error: unknown): string => {
+    if (error instanceof Error) {
+      return error.message;
+    }
+
+    if (typeof error === 'object' && error !== null && 'message' in error) {
+      const msg = (error as { message?: unknown }).message;
+      if (typeof msg === 'string') {
+        return msg;
+      }
+    }
+
+    if (typeof error === 'string') {
+      return error;
+    }
+
+    return 'Unknown sync error';
+  };
+
+  const handleReauth = async () => {
+    setStatus({
+      status: 'error',
+      message: 'Redirecting to sign out. Please sign back in to reconnect GitHub.',
+      progress: 0,
+    });
+
+    try {
+      await signOut({ callbackUrl: '/login', redirect: true });
+    } catch (error) {
+      console.error('Failed to sign out for GitHub reauthentication:', error);
+      setStatus({
+        status: 'error',
+        message: 'Please use Sign out, then sign back in to reconnect GitHub.',
+        progress: 0,
+      });
+    }
+  };
+
   const handleSync = async (forceFullSync: boolean = false) => {
+    setRequiresReauth(false);
     setStatus({
       status: 'syncing',
       message: forceFullSync 
@@ -113,7 +154,12 @@ export function SyncButtonComplete() {
 
       clearInterval(progressInterval);
 
-      const data: SyncResponse = await response.json();
+      let data: Partial<SyncResponse> = {};
+      try {
+        data = (await response.json()) as Partial<SyncResponse>;
+      } catch {
+        data = {};
+      }
 
       if (!response.ok) {
         const syncError: SyncErrorData = {
@@ -138,7 +184,14 @@ export function SyncButtonComplete() {
       }
 
       // Success
-      const syncData = data.data!;
+      const syncData = data.data;
+
+      if (!syncData) {
+        throw {
+          message: 'Sync succeeded but no sync payload was returned.',
+          status: response.status,
+        } as SyncErrorData;
+      }
 
       console.log('Sync completed!', {
         totalRepos: syncData.totalRepos,
@@ -148,9 +201,10 @@ export function SyncButtonComplete() {
 
       setStatus({
         status: syncData.syncErrors > 0 ? 'warning' : 'success',
-        message: syncData.syncErrors > 0
-          ? `Sync completed with ${syncData.syncErrors} errors. Most data synced successfully.`
-          : `Successfully synced ${syncData.totalCommits.toLocaleString()} commits from ${syncData.totalRepos} repositories`,
+        message:
+          syncData.syncErrors > 0
+            ? `Sync completed with ${syncData.syncErrors} errors. Most data synced successfully.`
+            : `Successfully synced ${syncData.totalCommits.toLocaleString()} commits from ${syncData.totalRepos} repositories`,
         progress: 100,
         details: {
           totalRepos: syncData.totalRepos,
@@ -168,39 +222,46 @@ export function SyncButtonComplete() {
       setTimeout(() => window.location.reload(), 2500);
     } catch (err: unknown) {
       clearInterval(progressInterval);
-      console.error('Sync error:', err instanceof Error ? err.message : String(err));
+      console.error('Sync error:', getErrorMessage(err), err);
 
       let errorMessage = 'Sync failed. Please try again.';
       const errorData =
         typeof err === 'object' && err !== null && 'message' in err
           ? (err as SyncErrorData)
           : null;
-      const errorStr = errorData?.message || (err instanceof Error ? err.message : String(err));
+      const errorStr = errorData?.message || getErrorMessage(err);
+      const normalizedError = errorStr.toLowerCase();
 
       // Check for authentication requirement flag
       if (errorData?.requiresReauth || errorData?.status === 401) {
-        errorMessage = errorData.message || 'GitHub authentication required. Please log out and log back in.';
+        setRequiresReauth(true);
+        errorMessage =
+          errorData.message ||
+          'GitHub authentication required. Please log out and log back in.';
         setStatus({
           status: 'error',
-          message: `🔐 ${errorMessage}`,
+          message: errorMessage,
           progress: 0,
         });
         
-        // Optionally redirect to sign out after delay
         console.log('Tip: Log out and log back in to refresh your GitHub connection');
         return;
       }
 
-      if (errorStr.includes('Rate limit') || errorStr.includes('429')) {
+      setRequiresReauth(false);
+
+      if (normalizedError.includes('rate limit') || normalizedError.includes('429')) {
         errorMessage = 'GitHub rate limit exceeded. Please wait a few minutes and try again.';
-      } else if (errorStr.includes('authentication') || errorStr.includes('401') || errorStr.includes('Unauthorized')) {
+      } else if (
+        normalizedError.includes('authentication') ||
+        normalizedError.includes('401') ||
+        normalizedError.includes('unauthorized')
+      ) {
         errorMessage = 'GitHub authentication failed. Please reconnect your account by logging out and back in.';
-      } else if (errorStr.includes('not linked')) {
+      } else if (normalizedError.includes('not linked')) {
         errorMessage = 'GitHub account not linked. Please connect your GitHub account first.';
       } else if (errorData?.message) {
         errorMessage = errorData.message;
-      } else if (err instanceof Error) {
-        errorMessage = err.message;
       }
 
       setStatus({
@@ -390,6 +451,18 @@ export function SyncButtonComplete() {
             </p>
           )}
         </div>
+      )}
+
+      {requiresReauth && status.status === 'error' && (
+        <button
+          onClick={handleReauth}
+          className="btn-ghost btn-ghost-sm"
+          style={{ width: '100%', justifyContent: 'center' }}
+          aria-label="Sign out and reconnect GitHub"
+        >
+          <Github size={13} aria-hidden="true" />
+          <span className="uppercase tracking-widest">LOG OUT & RECONNECT GITHUB</span>
+        </button>
       )}
     </div>
   );

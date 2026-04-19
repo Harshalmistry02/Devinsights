@@ -75,7 +75,9 @@ export async function POST(req: NextRequest) {
       // No body or invalid JSON, use defaults
     }
 
-    const result = await withGitHubAuth(session.user.id, async (accessToken) => {
+    const result = await withGitHubAuth(
+      session.user.id,
+      async (accessToken) => {
       const orchestrator = createSyncOrchestrator(accessToken, session.user.id!);
       return orchestrator.sync({
         ...options,
@@ -83,7 +85,9 @@ export async function POST(req: NextRequest) {
           console.log(`[${sanitizeLog(progress.phase)}] ${sanitizeLog(progress.message)} (${progress.percentage}%)`);
         },
       });
-    });
+      },
+      { retryOnAuthFailure: false }
+    );
 
     if (result.success) {
       return NextResponse.json({

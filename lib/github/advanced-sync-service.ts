@@ -22,6 +22,7 @@
 
 import { Octokit } from '@octokit/rest';
 import { throttling } from '@octokit/plugin-throttling';
+import { getValidGitHubAccessToken, isGitHubAuthenticationFailure } from './auth-token';
 
 const sanitizeLog = (val: unknown): string =>
   String(val).replace(/[\r\n]/g, ' ').slice(0, 200);
@@ -126,6 +127,7 @@ export interface AdvancedSyncProgress {
  */
 export class AdvancedGitHubSyncService {
   private octokit: InstanceType<typeof OctokitWithThrottling>;
+  private accessToken: string;
   private userId: string;
   private metrics: SyncMetrics = {
     reposProcessed: 0,
@@ -138,9 +140,14 @@ export class AdvancedGitHubSyncService {
 
   constructor(accessToken: string, userId: string) {
     this.userId = userId;
+    this.accessToken = accessToken;
     
     // Initialize with throttling plugin for automatic rate limit handling
-    this.octokit = new OctokitWithThrottling({
+    this.octokit = this.createOctokit(accessToken);
+  }
+
+  private createOctokit(accessToken: string): InstanceType<typeof OctokitWithThrottling> {
+    return new OctokitWithThrottling({
       auth: accessToken,
       throttle: {
         onRateLimit: (retryAfter, options, octokit, retryCount) => {
@@ -168,6 +175,15 @@ export class AdvancedGitHubSyncService {
     });
   }
 
+  private async ensureFreshAuth(): Promise<void> {
+    const { accessToken } = await getValidGitHubAccessToken(this.userId);
+
+    if (accessToken !== this.accessToken) {
+      this.accessToken = accessToken;
+      this.octokit = this.createOctokit(accessToken);
+    }
+  }
+
   /**
    * Get the user ID this service is associated with
    */
@@ -182,6 +198,8 @@ export class AdvancedGitHubSyncService {
    * NOTE: Requires 'repo' OAuth scope for private repository access
    */
   async fetchAllRepositories(options?: FetchOptions): Promise<EnhancedRepository[]> {
+    await this.ensureFreshAuth();
+
     const repos: EnhancedRepository[] = [];
     const includeArchived = options?.includeArchived ?? false;
     const includeForks = options?.includeForks ?? false;
@@ -277,6 +295,8 @@ export class AdvancedGitHubSyncService {
     lastSyncDate?: Date,
     maxCommits?: number
   ): Promise<ProcessedCommit[]> {
+    await this.ensureFreshAuth();
+
     const commits: ProcessedCommit[] = [];
     const since = lastSyncDate?.toISOString();
 
@@ -328,6 +348,10 @@ export class AdvancedGitHubSyncService {
       console.log(`Fetched ${commits.length} commits from ${sanitizeLog(owner)}/${sanitizeLog(repo)}`);
       return commits;
     } catch (error) {
+      if (isGitHubAuthenticationFailure(error)) {
+        throw error;
+      }
+
       this.metrics.errorsEncountered++;
       console.error(`Error fetching commits from ${sanitizeLog(owner)}/${sanitizeLog(repo)}:`, error);
       console.log(`Returning ${commits.length} partial commits from ${sanitizeLog(owner)}/${sanitizeLog(repo)}`);
@@ -359,6 +383,8 @@ export class AdvancedGitHubSyncService {
       includeRecentDays?: number;
     }
   ): Promise<Map<string, CommitStats>> {
+    await this.ensureFreshAuth();
+
     const stats = new Map<string, CommitStats>();
     const maxApiCalls = options?.maxApiCalls ?? 100;
     const recentDays = options?.includeRecentDays ?? 30;
@@ -409,6 +435,10 @@ export class AdvancedGitHubSyncService {
           // Small delay to be respectful to the API
           await this.delay(25);
         } catch (error) {
+          if (isGitHubAuthenticationFailure(error)) {
+            throw error;
+          }
+
           console.warn(`Could not fetch stats for commit ${sanitizeLog(commit.sha.slice(0, 7))}:`, error);
         }
       }
@@ -416,6 +446,10 @@ export class AdvancedGitHubSyncService {
       console.log(`Fetched stats for ${stats.size} commits`);
       return stats;
     } catch (error) {
+      if (isGitHubAuthenticationFailure(error)) {
+        throw error;
+      }
+
       this.metrics.errorsEncountered++;
       console.error('Error fetching commit stats:', error);
       return stats;
@@ -430,6 +464,8 @@ export class AdvancedGitHubSyncService {
     owner: string,
     repo: string
   ): Promise<LanguageBreakdown[]> {
+    await this.ensureFreshAuth();
+
     try {
       const response = await this.octokit.repos.listLanguages({
         owner,
@@ -451,6 +487,10 @@ export class AdvancedGitHubSyncService {
         }))
         .sort((a, b) => b.bytes - a.bytes);
     } catch (error) {
+      if (isGitHubAuthenticationFailure(error)) {
+        throw error;
+      }
+
       console.warn(`Could not fetch languages for ${sanitizeLog(owner)}/${sanitizeLog(repo)}:`, error);
       return [];
     }
@@ -464,6 +504,8 @@ export class AdvancedGitHubSyncService {
     repo: string,
     maxContributors: number = 100
   ): Promise<ContributorData[]> {
+    await this.ensureFreshAuth();
+
     const contributors: ContributorData[] = [];
 
     try {
@@ -495,6 +537,10 @@ export class AdvancedGitHubSyncService {
 
       return contributors;
     } catch (error) {
+      if (isGitHubAuthenticationFailure(error)) {
+        throw error;
+      }
+
       console.warn(`Could not fetch contributors for ${sanitizeLog(owner)}/${sanitizeLog(repo)}:`, error);
       return [];
     }
@@ -507,6 +553,8 @@ export class AdvancedGitHubSyncService {
     owner: string,
     repo: string
   ): Promise<string[]> {
+    await this.ensureFreshAuth();
+
     const branches: string[] = [];
 
     try {
@@ -527,6 +575,10 @@ export class AdvancedGitHubSyncService {
 
       return branches;
     } catch (error) {
+      if (isGitHubAuthenticationFailure(error)) {
+        throw error;
+      }
+
       console.warn(`Could not fetch branches for ${sanitizeLog(owner)}/${sanitizeLog(repo)}:`, error);
       return [];
     }
@@ -536,6 +588,8 @@ export class AdvancedGitHubSyncService {
    * Get current rate limit status
    */
   async getRateLimit(): Promise<RateLimitState> {
+    await this.ensureFreshAuth();
+
     try {
       const response = await this.octokit.rateLimit.get();
       return {

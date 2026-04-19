@@ -57,19 +57,21 @@ export const authConfig: NextAuthConfig = {
         
         if (shouldRefresh && token.refreshToken) {
           try {
+            const body = new URLSearchParams({
+              client_id: process.env.GITHUB_CLIENT_ID || '',
+              client_secret: process.env.GITHUB_CLIENT_SECRET || '',
+              grant_type: 'refresh_token',
+              refresh_token: token.refreshToken,
+            });
+
             // Refresh GitHub token
             const response = await fetch('https://github.com/login/oauth/access_token', {
               method: 'POST',
               headers: {
-                'Content-Type': 'application/json',
+                'Content-Type': 'application/x-www-form-urlencoded',
                 'Accept': 'application/json',
               },
-              body: JSON.stringify({
-                client_id: process.env.GITHUB_CLIENT_ID,
-                client_secret: process.env.GITHUB_CLIENT_SECRET,
-                grant_type: 'refresh_token',
-                refresh_token: token.refreshToken,
-              }),
+              body,
             });
             
             const tokens = await response.json();
@@ -80,6 +82,8 @@ export const authConfig: NextAuthConfig = {
               token.expiresAt = tokens.expires_in 
                 ? Math.floor(Date.now() / 1000) + tokens.expires_in
                 : token.expiresAt;
+            } else {
+              console.warn('GitHub token refresh returned no access token');
             }
           } catch (error) {
             console.error('Error refreshing access token:', error);

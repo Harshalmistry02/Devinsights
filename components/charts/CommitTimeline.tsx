@@ -60,8 +60,8 @@ export function CommitTimeline({ data, className = '' }: CommitTimelineProps) {
       {/* Chart */}
       <div className="p-4 sm:p-6">
         {chartData.length > 0 ? (
-          <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%" minHeight={256}>
+          <div className="h-64 min-h-64 min-w-0">
+            <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={256}>
               <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <defs>
                   <linearGradient id="commitGradient" x1="0" y1="0" x2="0" y2="1">

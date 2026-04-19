@@ -13,6 +13,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import prisma from '@/lib/prisma';
+import { SyncStatus } from '@prisma/client';
 import {
   withGitHubAuth,
   isGitHubAuthError,
@@ -24,6 +25,7 @@ import {
 } from '@/lib/github/advanced-sync-service';
 import {
   createCommitPipeline,
+  RepositoryDataPipeline,
 } from '@/lib/data-pipeline/commit-pipeline';
 import { refreshUserAnalytics } from '@/lib/analytics';
 
@@ -54,6 +56,36 @@ export async function POST(req: NextRequest) {
   const userId = session.user.id;
   const syncStartTime = Date.now();
 
+  const syncJob = await prisma.syncJob.create({
+    data: {
+      userId,
+      status: SyncStatus.IN_PROGRESS,
+      totalRepos: 0,
+      processedRepos: 0,
+      totalCommits: 0,
+    },
+  });
+
+  const syncJobId = syncJob.id;
+
+  const updateSyncJob = async (updates: {
+    totalRepos?: number;
+    processedRepos?: number;
+    totalCommits?: number;
+    status?: SyncStatus;
+    errorMessage?: string;
+    completedAt?: Date;
+  }) => {
+    try {
+      await prisma.syncJob.update({
+        where: { id: syncJobId },
+        data: updates,
+      });
+    } catch (error) {
+      console.warn('Failed to update sync job:', error);
+    }
+  };
+
   // Parse request body for options
   let forceFullSync = false;
   try {
@@ -83,17 +115,32 @@ export async function POST(req: NextRequest) {
         const svc = new AdvancedGitHubSyncService(token, userId);
         const rl = await svc.getRateLimit();
         return { syncService: svc, rateLimitBefore: rl };
-      }));
+      }, { retryOnAuthFailure: false }));
     } catch (initError) {
       if (isGitHubAuthError(initError)) {
+        await updateSyncJob({
+          status: SyncStatus.FAILED,
+          errorMessage: initError.message,
+          completedAt: new Date(),
+        });
         return NextResponse.json(toGitHubAuthErrorPayload(initError), { status: initError.status });
       }
       if (isGitHubAuthenticationFailure(initError)) {
+        await updateSyncJob({
+          status: SyncStatus.FAILED,
+          errorMessage: 'Your GitHub token has expired. Please log out and log back in.',
+          completedAt: new Date(),
+        });
         return NextResponse.json(
           { error: 'GitHub authentication required', message: 'Your GitHub token has expired. Please log out and log back in.', requiresReauth: true },
           { status: 401 }
         );
       }
+      await updateSyncJob({
+        status: SyncStatus.FAILED,
+        errorMessage: 'Unable to verify GitHub API status. Please try again later.',
+        completedAt: new Date(),
+      });
       return NextResponse.json(
         { error: 'Failed to connect to GitHub', message: 'Unable to verify GitHub API status. Please try again later.' },
         { status: 503 }
@@ -156,42 +203,9 @@ export async function POST(req: NextRequest) {
     // ============================================
     console.log('💾 Step 4: Storing repositories in database...');
 
-    const storedRepos = await Promise.all(
-      repos.map((repo) =>
-        prisma.repository.upsert({
-          where: { githubId: repo.githubId },
-          update: {
-            name: repo.name,
-            fullName: repo.fullName,
-            description: repo.description,
-            language: repo.language,
-            stars: repo.stars,
-            forks: repo.forks,
-            isPrivate: repo.isPrivate,
-            isFork: repo.isFork,
-            isArchived: repo.isArchived,
-            defaultBranch: repo.defaultBranch,
-            lastSyncedAt: new Date(),
-          },
-          create: {
-            userId,
-            githubId: repo.githubId,
-            name: repo.name,
-            fullName: repo.fullName,
-            description: repo.description,
-            language: repo.language,
-            stars: repo.stars,
-            forks: repo.forks,
-            isPrivate: repo.isPrivate,
-            isFork: repo.isFork,
-            isArchived: repo.isArchived,
-            defaultBranch: repo.defaultBranch,
-          },
-        })
-      )
-    );
+    const repoIdMap = await RepositoryDataPipeline.upsertRepositories(userId, repos);
 
-    console.log(`   ✅ Stored ${storedRepos.length} repositories`);
+    console.log(`   ✅ Stored ${repoIdMap.size} repositories`);
 
     // ============================================
     // STEP 5: Fetch Commits for Each Repository
@@ -205,11 +219,18 @@ export async function POST(req: NextRequest) {
       errors: 0,
     };
 
-    for (let i = 0; i < storedRepos.length; i++) {
-      const storedRepo = storedRepos[i];
-      const sourceRepo = repos[i];
+    let processedRepoCount = 0;
 
-      console.log(`   Processing ${i + 1}/${storedRepos.length}: ${sanitizeLog(sourceRepo.fullName)}`);
+    for (let i = 0; i < repos.length; i++) {
+      const sourceRepo = repos[i];
+      const storedRepoId = repoIdMap.get(sourceRepo.githubId);
+
+      if (!storedRepoId) {
+        console.warn(`      Missing database ID for ${sanitizeLog(sourceRepo.fullName)}, skipping...`);
+        continue;
+      }
+
+      console.log(`   Processing ${i + 1}/${repos.length}: ${sanitizeLog(sourceRepo.fullName)}`);
 
       try {
         const [owner, repoName] = sourceRepo.fullName.split('/');
@@ -223,7 +244,7 @@ export async function POST(req: NextRequest) {
           // For incremental sync: get the latest commit date we already have for this repo
           // This is more accurate than using last sync job date
           const latestExistingCommit = await prisma.commit.findFirst({
-            where: { repositoryId: storedRepo.id },
+            where: { repositoryId: storedRepoId },
             orderBy: { authorDate: 'desc' },
             select: { authorDate: true },
           });
@@ -253,6 +274,16 @@ export async function POST(req: NextRequest) {
         commitStats.total += commits.length;
 
         if (commits.length === 0) {
+          await prisma.repository.update({
+            where: { id: storedRepoId },
+            data: { lastSyncedAt: new Date() },
+          });
+
+          processedRepoCount++;
+          await updateSyncJob({
+            processedRepos: processedRepoCount,
+            totalCommits: commitStats.total,
+          });
           continue;
         }
 
@@ -262,18 +293,34 @@ export async function POST(req: NextRequest) {
 
         if (validCommits.length === 0) {
           console.warn(`      No valid commits found for ${sanitizeLog(sourceRepo.fullName)}`);
+          await prisma.repository.update({
+            where: { id: storedRepoId },
+            data: { lastSyncedAt: new Date() },
+          });
+
+          processedRepoCount++;
+          await updateSyncJob({
+            processedRepos: processedRepoCount,
+            totalCommits: commitStats.total,
+          });
           continue;
         }
 
-        const insertResult = await pipeline.batchInsertCommits(storedRepo.id, validCommits);
+        const insertResult = await pipeline.batchInsertCommits(storedRepoId, validCommits);
         commitStats.processed += insertResult.inserted;
         commitStats.duplicates += insertResult.skipped;
 
         console.log(`      Inserted: ${insertResult.inserted}, Skipped: ${insertResult.skipped}`);
 
         await prisma.repository.update({
-          where: { id: storedRepo.id },
+          where: { id: storedRepoId },
           data: { lastSyncedAt: new Date() },
+        });
+
+        processedRepoCount++;
+        await updateSyncJob({
+          processedRepos: processedRepoCount,
+          totalCommits: commitStats.total,
         });
       } catch (error) {
         commitStats.errors++;
@@ -302,15 +349,12 @@ export async function POST(req: NextRequest) {
     const syncDurationMs = syncEndTime - syncStartTime;
     const syncDurationMin = (syncDurationMs / 60000).toFixed(1);
 
-    const syncJob = await prisma.syncJob.create({
-      data: {
-        userId,
-        status: 'COMPLETED',
-        totalRepos: storedRepos.length,
-        processedRepos: storedRepos.length,
-        totalCommits: commitStats.total,
-        completedAt: new Date(),
-      },
+    await updateSyncJob({
+      status: SyncStatus.COMPLETED,
+      totalRepos: repos.length,
+      processedRepos: processedRepoCount,
+      totalCommits: commitStats.total,
+      completedAt: new Date(),
     });
 
     console.log(`\n✨ Sync completed in ${syncDurationMin} minutes`);
@@ -321,8 +365,8 @@ export async function POST(req: NextRequest) {
       success: true,
       message: 'Sync completed successfully',
       data: {
-        syncJobId: syncJob.id,
-        totalRepos: storedRepos.length,
+        syncJobId,
+        totalRepos: repos.length,
         totalCommits: commitStats.total,
         processedCommits: commitStats.processed,
         duplicateCommits: commitStats.duplicates,
@@ -361,13 +405,10 @@ export async function POST(req: NextRequest) {
 
     // Log the failure
     try {
-      await prisma.syncJob.create({
-        data: {
-          userId,
-          status: 'FAILED',
-          errorMessage,
-          completedAt: new Date(),
-        },
+      await updateSyncJob({
+        status: SyncStatus.FAILED,
+        errorMessage,
+        completedAt: new Date(),
       });
     } catch (logError) {
       console.error('Could not log sync failure:', logError);

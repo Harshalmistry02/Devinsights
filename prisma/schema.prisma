@@ -92,7 +92,7 @@ enum SyncStatus {
 model Repository {
   id            String    @id @default(cuid())
   userId        String
-  githubId      Int       @unique
+  githubId      Int
   name          String
   fullName      String // owner/repo format
   description   String?
@@ -114,6 +114,7 @@ model Repository {
   // Indexes
   @@index([userId])
   @@index([githubId])
+  @@unique([userId, githubId])
   @@map("repositories")
 }
 
