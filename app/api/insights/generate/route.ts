@@ -58,7 +58,12 @@ export async function POST(request: NextRequest) {
 
     // 4. Check cache (most important optimization!)
     const cached = await prisma.insightCache.findUnique({
-      where: { dataHash },
+      where: {
+        userId_dataHash: {
+          userId,
+          dataHash,
+        },
+      },
       select: {
         insights: true,
         createdAt: true,
@@ -95,7 +100,10 @@ export async function POST(request: NextRequest) {
 
     await prisma.insightCache.upsert({
       where: {
-        dataHash,
+        userId_dataHash: {
+          userId,
+          dataHash,
+        },
       },
       create: {
         userId,

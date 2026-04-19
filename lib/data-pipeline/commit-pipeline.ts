@@ -11,6 +11,7 @@
  */
 
 import prisma from '@/lib/prisma';
+import { Prisma } from '@prisma/client';
 import type { ProcessedCommit, CommitStats } from '@/lib/github/advanced-sync-service';
 
 // ============================================
@@ -181,6 +182,7 @@ export class CommitDataPipeline {
             additions: commit.additions,
             deletions: commit.deletions,
             filesChanged: commit.filesChanged,
+            metadata: commit.metadata ? (commit.metadata as Prisma.InputJsonValue) : undefined,
           })),
           skipDuplicates: true, // Skip duplicates silently
         });
@@ -206,6 +208,7 @@ export class CommitDataPipeline {
                 additions: commit.additions,
                 deletions: commit.deletions,
                 filesChanged: commit.filesChanged,
+                metadata: commit.metadata ? (commit.metadata as Prisma.InputJsonValue) : undefined,
               },
             });
             inserted++;

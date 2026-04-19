@@ -77,6 +77,7 @@ export interface ProcessedCommit {
   additions: number;
   deletions: number;
   filesChanged: number;
+  metadata?: Record<string, any> | null;  // File analysis, language stats, outlier detection
 }
 
 export interface CommitStats {

@@ -68,7 +68,7 @@ export class QuotaManager {
     today.setHours(0, 0, 0, 0);
     
     // Upsert the usage record
-    await prisma.aIUsage.upsert({
+    await prisma.aiUsage.upsert({
       where: {
         userId_date: {
           userId,
@@ -96,7 +96,7 @@ export class QuotaManager {
    * Get usage record for today, creating if doesn't exist
    */
   private async getOrCreateUsage(userId: string, date: Date) {
-    const existing = await prisma.aIUsage.findUnique({
+    const existing = await prisma.aiUsage.findUnique({
       where: {
         userId_date: {
           userId,
@@ -126,7 +126,7 @@ export class QuotaManager {
     startDate.setDate(startDate.getDate() - days);
     startDate.setHours(0, 0, 0, 0);
 
-    return prisma.aIUsage.findMany({
+    return prisma.aiUsage.findMany({
       where: {
         userId,
         date: {
@@ -146,7 +146,7 @@ export class QuotaManager {
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - 30);
 
-    const result = await prisma.aIUsage.deleteMany({
+    const result = await prisma.aiUsage.deleteMany({
       where: {
         date: {
           lt: cutoffDate,

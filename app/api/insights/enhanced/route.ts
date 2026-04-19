@@ -96,7 +96,12 @@ export async function POST(request: NextRequest) {
 
     // Cache the insights
     await prisma.insightCache.upsert({
-      where: { dataHash },
+      where: {
+        userId_dataHash: {
+          userId,
+          dataHash,
+        },
+      },
       create: {
         userId,
         snapshotId: currentSnapshot.id,
