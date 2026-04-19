@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { GitHubSyncService } from '@/lib/github/sync-service';
+import prisma from '@/lib/prisma';
 import {
   getValidGitHubAccessToken,
   isGitHubAuthError,
