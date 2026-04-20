@@ -14,8 +14,23 @@ export interface RepositorySyncRecord {
   defaultBranch: string;
 }
 
+const toRepositoryWriteData = (repository: RepositorySyncRecord) => ({
+  githubId: repository.githubId,
+  name: repository.name,
+  fullName: repository.fullName,
+  description: repository.description,
+  language: repository.language,
+  stars: repository.stars,
+  forks: repository.forks,
+  isPrivate: repository.isPrivate,
+  isFork: repository.isFork,
+  isArchived: repository.isArchived,
+  defaultBranch: repository.defaultBranch,
+});
+
 export async function upsertRepositoryForUser(userId: string, repository: RepositorySyncRecord) {
   const now = new Date();
+  const repositoryData = toRepositoryWriteData(repository);
 
   const existingForUser = await prisma.repository.findFirst({
     where: {
@@ -29,7 +44,7 @@ export async function upsertRepositoryForUser(userId: string, repository: Reposi
     return prisma.repository.update({
       where: { id: existingForUser.id },
       data: {
-        ...repository,
+        ...repositoryData,
         lastSyncedAt: now,
       },
     });
@@ -39,7 +54,7 @@ export async function upsertRepositoryForUser(userId: string, repository: Reposi
     return await prisma.repository.create({
       data: {
         userId,
-        ...repository,
+        ...repositoryData,
         lastSyncedAt: now,
       },
     });
@@ -57,7 +72,7 @@ export async function upsertRepositoryForUser(userId: string, repository: Reposi
       return prisma.repository.update({
         where: { id: existingForUserAfterCreate.id },
         data: {
-          ...repository,
+          ...repositoryData,
           lastSyncedAt: now,
         },
       });
@@ -75,7 +90,7 @@ export async function upsertRepositoryForUser(userId: string, repository: Reposi
       return prisma.repository.update({
         where: { id: existingByGithubId.id },
         data: {
-          ...repository,
+          ...repositoryData,
           lastSyncedAt: now,
         },
       });
