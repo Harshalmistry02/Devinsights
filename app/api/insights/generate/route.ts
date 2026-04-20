@@ -2,6 +2,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
+import { resolveDatabaseUserId, getSessionReauthPayload } from '@/lib/auth-user';
 import prisma from '@/lib/prisma';
 import {
   generateInsights,
@@ -19,7 +20,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const userId = session.user.id;
+    const resolvedUser = await resolveDatabaseUserId({
+      sessionUserId: session.user.id,
+      email: session.user.email,
+    });
+
+    if (!resolvedUser) {
+      return NextResponse.json(getSessionReauthPayload(), { status: 401 });
+    }
+
+    const userId = resolvedUser.userId;
 
     // 2. Get latest analytics snapshot
     const snapshot = await prisma.analyticsSnapshot.findUnique({
@@ -172,9 +182,18 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const resolvedUser = await resolveDatabaseUserId({
+      sessionUserId: session.user.id,
+      email: session.user.email,
+    });
+
+    if (!resolvedUser) {
+      return NextResponse.json(getSessionReauthPayload(), { status: 401 });
+    }
+
     const latestInsight = await prisma.insightCache.findFirst({
       where: {
-        userId: session.user.id,
+        userId: resolvedUser.userId,
         expiresAt: { gt: new Date() }, // Not expired
       },
       orderBy: { createdAt: 'desc' },

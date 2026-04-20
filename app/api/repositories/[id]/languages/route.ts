@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
+import { resolveDatabaseUserId, getSessionReauthPayload } from '@/lib/auth-user';
 import prisma from '@/lib/prisma';
 import {
   withGitHubAuth,
@@ -22,6 +23,17 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const resolvedUser = await resolveDatabaseUserId({
+      sessionUserId: session.user.id,
+      email: session.user.email,
+    });
+
+    if (!resolvedUser) {
+      return NextResponse.json(getSessionReauthPayload(), { status: 401 });
+    }
+
+    const userId = resolvedUser.userId;
+
     // Await params for Next.js 15+ compatibility
     const { id } = await params;
 
@@ -29,7 +41,7 @@ export async function GET(
     const repository = await prisma.repository.findFirst({
       where: {
         id: id,
-        userId: session.user.id,
+        userId,
       },
       select: { fullName: true },
     });
@@ -39,7 +51,7 @@ export async function GET(
     }
 
     const [owner, repo] = repository.fullName.split('/');
-    const breakdown = await withGitHubAuth(session.user.id, async (accessToken) => {
+    const breakdown = await withGitHubAuth(userId, async (accessToken) => {
       const response = await fetch(
         `https://api.github.com/repos/${owner}/${repo}/languages`,
         {

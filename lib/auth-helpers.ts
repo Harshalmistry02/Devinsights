@@ -1,5 +1,30 @@
 import { auth } from "@/lib/auth";
+import { resolveDatabaseUserId } from "@/lib/auth-user";
+import type { Session } from "next-auth";
 import { redirect } from "next/navigation";
+
+async function normalizeSessionUserId(
+  session: Session | null
+) {
+  if (!session?.user?.id) {
+    return null;
+  }
+
+  const resolved = await resolveDatabaseUserId({
+    sessionUserId: session.user.id,
+    email: session.user.email,
+  });
+
+  if (!resolved) {
+    return null;
+  }
+
+  if (session.user.id !== resolved.userId) {
+    session.user.id = resolved.userId;
+  }
+
+  return session;
+}
 
 /**
  * Get the current authenticated user from the session
@@ -24,7 +49,7 @@ import { redirect } from "next/navigation";
  */
 export async function getCurrentUser() {
   const session = await auth();
-  return session;
+  return normalizeSessionUserId(session);
 }
 
 /**
@@ -46,7 +71,7 @@ export async function getCurrentUser() {
  * ```
  */
 export async function requireAuth(redirectTo?: string) {
-  const session = await auth();
+  const session = await getCurrentUser();
 
   if (!session) {
     const loginUrl = redirectTo
@@ -80,7 +105,7 @@ export async function requireAuth(redirectTo?: string) {
  * ```
  */
 export async function isAuthenticated() {
-  const session = await auth();
+  const session = await getCurrentUser();
   return !!session;
 }
 

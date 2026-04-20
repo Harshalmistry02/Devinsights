@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
+import { resolveDatabaseUserId, getSessionReauthPayload } from '@/lib/auth-user';
 import { quotaManager } from '@/lib/ai/quota-manager';
 
 export async function GET() {
@@ -13,7 +14,16 @@ export async function GET() {
       );
     }
 
-    const quotaStatus = await quotaManager.checkQuota(session.user.id);
+    const resolvedUser = await resolveDatabaseUserId({
+      sessionUserId: session.user.id,
+      email: session.user.email,
+    });
+
+    if (!resolvedUser) {
+      return NextResponse.json(getSessionReauthPayload(), { status: 401 });
+    }
+
+    const quotaStatus = await quotaManager.checkQuota(resolvedUser.userId);
     
     return NextResponse.json({
       tokensUsed: quotaStatus.tokensUsed,

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
+import { resolveDatabaseUserId, getSessionReauthPayload } from '@/lib/auth-user';
 import prisma from '@/lib/prisma';
 import { SyncStatus } from '@prisma/client';
 import {
@@ -31,7 +32,16 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const userId = session.user.id;
+  const resolvedUser = await resolveDatabaseUserId({
+    sessionUserId: session.user.id,
+    email: session.user.email,
+  });
+
+  if (!resolvedUser) {
+    return NextResponse.json(getSessionReauthPayload(), { status: 401 });
+  }
+
+  const userId = resolvedUser.userId;
   const syncStartTime = Date.now();
 
   const syncJob = await prisma.syncJob.create({
@@ -116,6 +126,12 @@ export async function POST(req: NextRequest) {
     }
 
     if (rateLimitBefore.remaining === -1) {
+      await updateSyncJob({
+        status: SyncStatus.FAILED,
+        errorMessage: 'GitHub API unavailable',
+        completedAt: new Date(),
+      });
+
       return NextResponse.json(
         { error: 'GitHub API unavailable', message: 'Unable to connect to GitHub API.' },
         { status: 503 }
@@ -123,6 +139,12 @@ export async function POST(req: NextRequest) {
     }
 
     if (rateLimitBefore.remaining < 50) {
+      await updateSyncJob({
+        status: SyncStatus.FAILED,
+        errorMessage: 'GitHub rate limit too low',
+        completedAt: new Date(),
+      });
+
       return NextResponse.json(
         {
           error: 'Rate limit too low',
@@ -138,8 +160,19 @@ export async function POST(req: NextRequest) {
       includeArchived: false,
     });
 
+    await updateSyncJob({ totalRepos: repos.length });
+
     if (repos.length === 0) {
       const syncDurationMs = Date.now() - syncStartTime;
+
+      await updateSyncJob({
+        status: SyncStatus.COMPLETED,
+        totalRepos: 0,
+        processedRepos: 0,
+        totalCommits: 0,
+        completedAt: new Date(),
+      });
+
       return NextResponse.json({
         success: true,
         message: 'No repositories to sync',
@@ -338,21 +371,32 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const resolvedUser = await resolveDatabaseUserId({
+      sessionUserId: session.user.id,
+      email: session.user.email,
+    });
+
+    if (!resolvedUser) {
+      return NextResponse.json(getSessionReauthPayload(), { status: 401 });
+    }
+
+    const userId = resolvedUser.userId;
+
     const latestSync = await prisma.syncJob.findFirst({
-      where: { userId: session.user.id },
+      where: { userId },
       orderBy: { startedAt: 'desc' },
     });
 
     const [repoCount, commitCount, oldestCommit, newestCommit] = await Promise.all([
-      prisma.repository.count({ where: { userId: session.user.id } }),
-      prisma.commit.count({ where: { repository: { userId: session.user.id } } }),
+      prisma.repository.count({ where: { userId } }),
+      prisma.commit.count({ where: { repository: { userId } } }),
       prisma.commit.findFirst({
-        where: { repository: { userId: session.user.id } },
+        where: { repository: { userId } },
         orderBy: { authorDate: 'asc' },
         select: { authorDate: true },
       }),
       prisma.commit.findFirst({
-        where: { repository: { userId: session.user.id } },
+        where: { repository: { userId } },
         orderBy: { authorDate: 'desc' },
         select: { authorDate: true },
       }),

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
+import { resolveDatabaseUserId, getSessionReauthPayload } from '@/lib/auth-user';
 import { GitHubSyncService } from '@/lib/github/sync-service';
 import { SyncProgressEvent } from '@/lib/sync/sync-stream';
 import {
@@ -19,7 +20,16 @@ export async function POST() {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const userId = session.user.id;
+  const resolvedUser = await resolveDatabaseUserId({
+    sessionUserId: session.user.id,
+    email: session.user.email,
+  });
+
+  if (!resolvedUser) {
+    return NextResponse.json(getSessionReauthPayload(), { status: 401 });
+  }
+
+  const userId = resolvedUser.userId;
 
   let accessToken: string;
   try {

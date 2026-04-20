@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
+import { resolveDatabaseUserId, getSessionReauthPayload } from '@/lib/auth-user';
 import { Octokit } from '@octokit/rest';
 import {
   withGitHubAuth,
@@ -19,7 +20,16 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const data = await withGitHubAuth(session.user.id, async (accessToken) => {
+    const resolvedUser = await resolveDatabaseUserId({
+      sessionUserId: session.user.id,
+      email: session.user.email,
+    });
+
+    if (!resolvedUser) {
+      return NextResponse.json(getSessionReauthPayload(), { status: 401 });
+    }
+
+    const data = await withGitHubAuth(resolvedUser.userId, async (accessToken) => {
       const octokit = new Octokit({ auth: accessToken });
       const { data } = await octokit.rateLimit.get();
       return data;

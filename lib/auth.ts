@@ -40,7 +40,9 @@ export const authConfig: NextAuthConfig = {
     async jwt({ token, user, account, profile, trigger }) {
       // Initial sign in - store user data and tokens
       if (user) {
-        token.id = user.id ?? "";
+        if (user.id) {
+          token.id = user.id;
+        }
         token.username = (user as { username?: string }).username;
       }
       
@@ -54,6 +56,10 @@ export const authConfig: NextAuthConfig = {
       // Store GitHub username from profile
       if (profile && typeof profile === "object" && "login" in profile) {
         token.username = profile.login as string;
+      }
+
+      if ((!token.id || token.id.length === 0) && typeof token.sub === "string") {
+        token.id = token.sub;
       }
       
       // Check if token needs refresh (expires in less than 1 hour)
@@ -107,8 +113,15 @@ export const authConfig: NextAuthConfig = {
      */
     async session({ session, token }) {
       if (session.user && token) {
+        const resolvedUserId =
+          typeof token.id === "string" && token.id.length > 0
+            ? token.id
+            : typeof token.sub === "string"
+              ? token.sub
+              : "";
+
         // Use token data (not user) since we're using JWT strategy
-        session.user.id = token.id as string;
+        session.user.id = resolvedUserId;
         session.user.username = token.username as string | undefined;
       }
       return session;

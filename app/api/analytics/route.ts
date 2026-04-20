@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
+import { resolveDatabaseUserId, getSessionReauthPayload } from '@/lib/auth-user';
 import { getUserAnalytics, refreshUserAnalytics, hasAnalyticsData } from '@/lib/analytics';
 
 /**
@@ -19,6 +20,17 @@ export async function GET(req: NextRequest) {
       );
     }
 
+    const resolvedUser = await resolveDatabaseUserId({
+      sessionUserId: session.user.id,
+      email: session.user.email,
+    });
+
+    if (!resolvedUser) {
+      return NextResponse.json(getSessionReauthPayload(), { status: 401 });
+    }
+
+    const userId = resolvedUser.userId;
+
     // Check for force refresh query param
     const { searchParams } = new URL(req.url);
     const forceRefresh = searchParams.get('refresh') === 'true';
@@ -27,10 +39,10 @@ export async function GET(req: NextRequest) {
     
     if (forceRefresh) {
       // Force recalculate
-      analytics = await refreshUserAnalytics(session.user.id);
+      analytics = await refreshUserAnalytics(userId);
     } else {
       // Use cached or calculate if stale
-      analytics = await getUserAnalytics(session.user.id);
+      analytics = await getUserAnalytics(userId);
     }
     
     return NextResponse.json({
@@ -67,8 +79,17 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const resolvedUser = await resolveDatabaseUserId({
+      sessionUserId: session.user.id,
+      email: session.user.email,
+    });
+
+    if (!resolvedUser) {
+      return NextResponse.json(getSessionReauthPayload(), { status: 401 });
+    }
+
     // Force recalculate and save
-    const analytics = await refreshUserAnalytics(session.user.id);
+    const analytics = await refreshUserAnalytics(resolvedUser.userId);
     
     return NextResponse.json({
       success: true,
@@ -102,7 +123,16 @@ export async function HEAD(req: NextRequest) {
       return new NextResponse(null, { status: 401 });
     }
 
-    const hasData = await hasAnalyticsData(session.user.id);
+    const resolvedUser = await resolveDatabaseUserId({
+      sessionUserId: session.user.id,
+      email: session.user.email,
+    });
+
+    if (!resolvedUser) {
+      return NextResponse.json(getSessionReauthPayload(), { status: 401 });
+    }
+
+    const hasData = await hasAnalyticsData(resolvedUser.userId);
     
     return new NextResponse(null, {
       status: hasData ? 200 : 204,

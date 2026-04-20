@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
+import { resolveDatabaseUserId, getSessionReauthPayload } from '@/lib/auth-user';
 import prisma from "@/lib/prisma";
 import {
   getValidGitHubAccessToken,
@@ -33,7 +34,16 @@ export async function GET() {
       );
     }
 
-    const userId = session.user.id;
+    const resolvedUser = await resolveDatabaseUserId({
+      sessionUserId: session.user.id,
+      email: session.user.email,
+    });
+
+    if (!resolvedUser) {
+      return NextResponse.json(getSessionReauthPayload(), { status: 401 });
+    }
+
+    const userId = resolvedUser.userId;
 
     // Fetch user's GitHub account from database
     const githubAccount = await prisma.account.findFirst({

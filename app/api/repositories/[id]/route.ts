@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
+import { resolveDatabaseUserId, getSessionReauthPayload } from '@/lib/auth-user';
 import prisma from '@/lib/prisma';
 
 /**
@@ -20,13 +21,22 @@ export async function GET(
       );
     }
 
+    const resolvedUser = await resolveDatabaseUserId({
+      sessionUserId: session.user.id,
+      email: session.user.email,
+    });
+
+    if (!resolvedUser) {
+      return NextResponse.json(getSessionReauthPayload(), { status: 401 });
+    }
+
     // Await params for Next.js 15+ compatibility
     const { id } = await params;
 
     const repository = await prisma.repository.findFirst({
       where: {
         id: id,
-        userId: session.user.id,
+        userId: resolvedUser.userId,
       },
       include: {
         commits: {
