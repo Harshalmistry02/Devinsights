@@ -1,337 +1,294 @@
-'use client';
+"use client";
 
-import { FileText, TrendingUp, TrendingDown, Minus, Info } from "lucide-react";
-import { cn } from "@/lib/utils";
-import {
-  CommitQualityMetrics,
-  getGradeDescription,
-} from "@/lib/analytics/commit-quality-analyzer";
+import { FileText, Info, Minus, TrendingDown, TrendingUp } from "lucide-react";
+import type { CommitQualityMetrics } from "@/lib/analytics/commit-quality-analyzer";
+import { getGradeDescription } from "@/lib/analytics/commit-quality-analyzer";
+import { Badge, Chip, type BadgeVariant } from "@/components/ui/badge";
+import { Card, CardHeader } from "@/components/ui/card";
+import { cn } from "@/components/ui/cn";
+import { EmptyState } from "@/components/ui/empty-state";
+import { IconTile } from "@/components/ui/icon-tile";
+import { MetricBar } from "@/components/ui/metric-bar";
+import { Tooltip, TooltipFocusable } from "@/components/ui/tooltip";
 
 interface CommitQualityCardProps {
   metrics: CommitQualityMetrics | null;
   className?: string;
 }
 
+const gradeStyles: Record<
+  string,
+  { panel: string; text: string; variant: BadgeVariant }
+> = {
+  A: {
+    panel: "border-success/30 bg-success-soft",
+    text: "text-success",
+    variant: "success",
+  },
+  B: {
+    panel: "border-accent/30 bg-accent-soft",
+    text: "text-accent",
+    variant: "accent",
+  },
+  C: {
+    panel: "border-warning/30 bg-warning-soft",
+    text: "text-warning",
+    variant: "warning",
+  },
+  D: {
+    panel: "border-danger/30 bg-danger-soft",
+    text: "text-danger",
+    variant: "danger",
+  },
+  F: {
+    panel: "border-danger/30 bg-danger-soft",
+    text: "text-danger",
+    variant: "danger",
+  },
+};
+
 /**
  * Commit Quality Card — SpaceX-inspired minimal aesthetic
  */
-export function CommitQualityCard({ metrics, className }: CommitQualityCardProps) {
+export function CommitQualityCard({
+  metrics,
+  className,
+}: CommitQualityCardProps) {
   if (!metrics || metrics.totalAnalyzed === 0) {
     return (
-      <div
-        style={{
-          background: "transparent",
-          border: "none",
-          padding: "0",
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "24px" }}>
-          <FileText size={14} style={{ opacity: 0.3 }} />
-          <p className="text-caption-bold" style={{ fontSize: "0.75rem" }}>Commit Quality</p>
-        </div>
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: "32px 0",
-            textAlign: "center",
-          }}
-        >
-          <Info size={24} style={{ opacity: 0.15, marginBottom: "12px" }} />
-          <p className="text-caption" style={{ opacity: 0.35 }}>No commit data available</p>
-          <p className="text-micro" style={{ marginTop: "4px", opacity: 0.2 }}>
-            Sync your repositories to see quality metrics
-          </p>
-        </div>
-      </div>
+      <Card className={className}>
+        <CardHeader
+          icon={<FileText className="size-4" />}
+          title="Commit quality"
+          description="No commits analyzed yet."
+        />
+        <EmptyState
+          variant="compact"
+          icon={<FileText className="size-4" />}
+          title="No commit quality data"
+          description="Sync your repositories to see how your commit messages score."
+        />
+      </Card>
     );
   }
 
-  // Map grade colors to spectral-appropriate opacity variants
-  const getSpectralGradeStyle = (grade: string) => {
-    const grades: Record<string, { text: string; border: string}> = {
-      A: { text: "rgba(134,239,172,0.8)", border: "rgba(134,239,172,0.2)" },
-      B: { text: "rgba(147,197,253,0.8)", border: "rgba(147,197,253,0.2)" },
-      C: { text: "rgba(251,191,36,0.8)", border: "rgba(251,191,36,0.2)" },
-      D: { text: "rgba(252,165,165,0.7)", border: "rgba(252,165,165,0.2)" },
-      F: { text: "rgba(252,165,165,0.6)", border: "rgba(252,165,165,0.15)" },
-    };
-    return grades[grade] || grades.F;
-  };
-
-  const gradeStyle = getSpectralGradeStyle(metrics.qualityGrade);
+  const grade = gradeStyles[metrics.qualityGrade] ?? gradeStyles.F;
   const gradeDesc = getGradeDescription(metrics.qualityGrade);
 
   return (
-    <div
-      className={cn("brutalist-glass", className)}
-      style={{
-        padding: "32px",
-        borderRadius: "2px",
-      }}
-    >
-      {/* Header */}
-      <div
-        style={{
-          padding: "16px 0",
-          borderBottom: "1px solid rgba(240,240,250,0.05)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          <div className="p-2 opacity-30">
-              <FileText size={16} className="text-[#f0f0fa]" aria-hidden="true" />
-          </div>
-          <div>
-            <p className="text-caption-bold text-sm uppercase tracking-widest text-[#f0f0fa]">COMMIT QUALITY</p>
-            <p className="text-micro pt-1 uppercase tracking-widest" style={{ opacity: 0.3 }}>
-              {metrics.totalAnalyzed} COMMITS ANALYZED
+    <Card padding="none" className={cn("overflow-hidden", className)}>
+      <div className="flex flex-wrap items-start justify-between gap-4 border-b border-border-subtle p-5 sm:p-6">
+        <div className="flex min-w-0 flex-1 items-start gap-3">
+          <IconTile>
+            <FileText className="size-4" />
+          </IconTile>
+          <div className="min-w-0">
+            <h2 className="text-card-title">Commit quality</h2>
+            <p className="mt-1 text-caption">
+              Based on {metrics.totalAnalyzed.toLocaleString("en-US")}{" "}
+              analyzed commits.
             </p>
           </div>
         </div>
 
-        {/* Grade badge */}
-        <div style={{ textAlign: "center" }}>
+        <div className="shrink-0 text-center">
           <div
-            style={{
-              width: "52px",
-              height: "52px",
-              borderRadius: "var(--radius-sharp)",
-              border: `1px solid ${gradeStyle.border}`,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              background: `${gradeStyle.border}`,
-            }}
+            className={cn(
+              "flex size-14 items-center justify-center rounded-card border",
+              grade.panel
+            )}
+            aria-label={`Commit quality grade ${metrics.qualityGrade}: ${gradeDesc}`}
           >
-            <span
-              className="text-section-head"
-              style={{ fontSize: "1.5rem", color: gradeStyle.text }}
-            >
+            <span className={cn("text-section-head text-3xl", grade.text)}>
               {metrics.qualityGrade}
             </span>
           </div>
-          <p className="text-micro" style={{ marginTop: "4px", color: gradeStyle.text, opacity: 0.8 }}>
+          <Badge variant={grade.variant} size="sm" className="mt-2">
             {gradeDesc}
-          </p>
+          </Badge>
         </div>
       </div>
 
-      {/* Content */}
-      <div style={{ padding: "20px 0" }}>
-        {/* Score Breakdown */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "12px", marginBottom: "20px" }}>
-          <MetricBar label="Conventional Commits" value={metrics.conventionalCommitScore} tooltip="% of commits following conventional format" />
-          <MetricBar label="Ticket References" value={metrics.hasTicketReferences} tooltip="% of commits linking to issues" />
-          <MetricBar label="Subject Quality" value={metrics.subjectLineScore} tooltip="% of commits with good subject length" />
-          <MetricBar label="Multi-line Messages" value={metrics.hasBodyText} tooltip="% of commits with detailed body text" />
+      <div className="space-y-5 p-5 sm:p-6">
+        <div>
+          <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
+            <p className="text-label">Score breakdown</p>
+            <p className="text-caption">
+              Share of analyzed commits meeting each criterion
+            </p>
+          </div>
+
+          <div className="space-y-3">
+            <Tooltip
+              content="Percentage of commits following the conventional commits format"
+              className="block w-full"
+            >
+              <TooltipFocusable className="block w-full">
+                <MetricBar
+                  label="Conventional commits"
+                  value={metrics.conventionalCommitScore}
+                />
+              </TooltipFocusable>
+            </Tooltip>
+            <Tooltip
+              content="Percentage of commits that reference an issue or ticket"
+              className="block w-full"
+            >
+              <TooltipFocusable className="block w-full">
+                <MetricBar
+                  label="Ticket references"
+                  value={metrics.hasTicketReferences}
+                />
+              </TooltipFocusable>
+            </Tooltip>
+            <Tooltip
+              content="Percentage of commits with a well-sized subject line"
+              className="block w-full"
+            >
+              <TooltipFocusable className="block w-full">
+                <MetricBar
+                  label="Subject quality"
+                  value={metrics.subjectLineScore}
+                />
+              </TooltipFocusable>
+            </Tooltip>
+            <Tooltip
+              content="Percentage of commits with a multi-line message body"
+              className="block w-full"
+            >
+              <TooltipFocusable className="block w-full">
+                <MetricBar
+                  label="Multi-line messages"
+                  value={metrics.hasBodyText}
+                />
+              </TooltipFocusable>
+            </Tooltip>
+          </div>
         </div>
 
-        {/* Common Prefixes */}
-        {metrics.commonPrefixes.length > 0 && (
-          <div style={{ marginBottom: "16px" }}>
-            <p className="text-micro" style={{ opacity: 0.35, marginBottom: "8px", letterSpacing: "1px" }}>
-              Common Prefixes
-            </p>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
-              {metrics.commonPrefixes.map((prefix, i) => (
-                <span
-                  key={i}
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: "6px",
-                    padding: "4px 10px",
-                    background: "rgba(240,240,250,0.03)",
-                    border: "1px solid rgba(240,240,250,0.08)",
-                    borderRadius: "2px",
-                  }}
-                >
-                  <span
-                    className="text-micro"
-                    style={{ color: "var(--spectral-white)", opacity: 0.7, fontFamily: "monospace", letterSpacing: 0 }}
-                  >
-                    {prefix.prefix}
+        {metrics.commonPrefixes.length > 0 ? (
+          <div className="border-t border-border-subtle pt-4">
+            <p className="text-label">Common prefixes</p>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {metrics.commonPrefixes.map((prefix) => (
+                <Chip key={prefix.prefix} mono>
+                  {prefix.prefix}
+                  <span className="text-text-3">
+                    {prefix.count.toLocaleString("en-US")}{" "}
+                    {prefix.count === 1 ? "use" : "uses"}
                   </span>
-                  <span className="text-micro" style={{ opacity: 0.3 }}>×{prefix.count}</span>
-                </span>
+                </Chip>
               ))}
             </div>
           </div>
-        )}
+        ) : null}
 
-        {/* Insights */}
-        {metrics.insights.length > 0 && (
-          <div style={{ borderTop: "1px solid rgba(240,240,250,0.05)", paddingTop: "16px" }}>
-            <p className="text-micro" style={{ opacity: 0.35, marginBottom: "10px", letterSpacing: "1px" }}>Insights</p>
-            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-              {metrics.insights.map((insight, i) => {
-                const chars = [...insight];
-                const text = chars.slice(1).join('').trim();
+        {metrics.insights.length > 0 ? (
+          <div className="border-t border-border-subtle pt-4">
+            <p className="text-label">Insights</p>
+            <ul className="mt-2 space-y-2">
+              {metrics.insights.map((insight, index) => {
+                const text = [...insight].slice(1).join("").trim();
+
                 return (
-                  <div
-                    key={i}
-                    style={{
-                      display: "flex",
-                      alignItems: "flex-start",
-                      gap: "8px",
-                    }}
+                  <li
+                    key={`${index}-${text}`}
+                    className="flex items-start gap-2 text-caption"
                   >
-                    <span style={{ flexShrink: 0, fontSize: "0.875rem", opacity: 0.3 }}><Info size={14}/></span>
-                    <span className="text-caption uppercase tracking-widest" style={{ opacity: 0.55 }}>{text}</span>
-                  </div>
+                    <Info
+                      className="mt-0.5 size-3.5 shrink-0 text-text-3"
+                      aria-hidden="true"
+                    />
+                    <span>{text}</span>
+                  </li>
                 );
               })}
-            </div>
+            </ul>
           </div>
-        )}
+        ) : null}
 
-        {/* Trend */}
-        {metrics.trend && (
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              marginTop: "16px",
-              paddingTop: "14px",
-              borderTop: "1px solid rgba(240,240,250,0.05)",
-            }}
-          >
-            {metrics.trend.direction === 'improving' ? (
+        {metrics.trend ? (
+          <div className="flex items-center gap-2 border-t border-border-subtle pt-4">
+            {metrics.trend.direction === "improving" ? (
               <>
-                <TrendingUp size={14} style={{ color: "rgba(134,239,172,0.6)" }} />
-                <span className="text-caption" style={{ color: "rgba(134,239,172,0.6)" }}>
-                  Improving from {metrics.trend.previousGrade}
-                </span>
+                <TrendingUp
+                  className="size-3.5 text-success"
+                  aria-hidden="true"
+                />
+                <p className="text-caption text-success">
+                  Improving from grade {metrics.trend.previousGrade}
+                </p>
               </>
-            ) : metrics.trend.direction === 'declining' ? (
+            ) : metrics.trend.direction === "declining" ? (
               <>
-                <TrendingDown size={14} style={{ color: "rgba(252,165,165,0.6)" }} />
-                <span className="text-caption" style={{ color: "rgba(252,165,165,0.6)" }}>
-                  Declining from {metrics.trend.previousGrade}
-                </span>
+                <TrendingDown
+                  className="size-3.5 text-danger"
+                  aria-hidden="true"
+                />
+                <p className="text-caption text-danger">
+                  Declining from grade {metrics.trend.previousGrade}
+                </p>
               </>
             ) : (
               <>
-                <Minus size={14} style={{ opacity: 0.3 }} />
-                <span className="text-caption" style={{ opacity: 0.3 }}>Stable quality</span>
+                <Minus className="size-3.5 text-text-3" aria-hidden="true" />
+                <p className="text-caption">Stable quality</p>
               </>
             )}
           </div>
-        )}
+        ) : null}
       </div>
-    </div>
-  );
-}
-
-function MetricBar({
-  label,
-  value,
-  tooltip,
-}: {
-  label: string;
-  value: number;
-  tooltip?: string;
-}) {
-  const getStatusColor = () => {
-    if (value >= 70) return "rgba(134,239,172,0.6)";
-    if (value >= 40) return "rgba(251,191,36,0.6)";
-    return "rgba(252,165,165,0.5)";
-  };
-
-  return (
-    <div title={tooltip}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
-        <p className="text-micro" style={{ opacity: 0.4 }}>{label}</p>
-        <span
-          className="text-micro"
-          style={{ color: getStatusColor(), opacity: 1 }}
-        >
-          {value}%
-        </span>
-      </div>
-      <div className="progress-bar-track">
-        <div
-          className="progress-bar-fill"
-          style={{
-            width: `${Math.min(100, Math.max(0, value))}%`,
-            background: getStatusColor(),
-          }}
-        />
-      </div>
-    </div>
+    </Card>
   );
 }
 
 /**
  * Compact version for dashboard grid
  */
-export function CommitQualityCardCompact({ metrics, className }: CommitQualityCardProps) {
+export function CommitQualityCardCompact({
+  metrics,
+  className,
+}: CommitQualityCardProps) {
   if (!metrics || metrics.totalAnalyzed === 0) {
     return (
-      <div
-        style={{
-          background: "transparent",
-          border: "none",
-          padding: "14px 0",
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "6px" }}>
-          <FileText size={12} style={{ opacity: 0.3 }} />
-          <span className="text-caption" style={{ opacity: 0.5 }}>Commit Quality</span>
+      <div className={cn("py-4", className)}>
+        <div className="flex items-center gap-2">
+          <FileText className="size-3.5 text-text-3" aria-hidden="true" />
+          <span className="text-caption">Commit quality</span>
         </div>
-        <p className="text-micro" style={{ opacity: 0.25 }}>No data</p>
+        <p className="mt-1 text-caption">No data</p>
       </div>
     );
   }
 
-  const getGradeColorStyle = (grade: string): string => {
-    const map: Record<string, string> = {
-      A: "rgba(134,239,172,0.8)",
-      B: "rgba(147,197,253,0.8)",
-      C: "rgba(251,191,36,0.8)",
-      D: "rgba(252,165,165,0.7)",
-      F: "rgba(252,165,165,0.5)",
-    };
-    return map[grade] || "var(--spectral-white)";
-  };
+  const grade = gradeStyles[metrics.qualityGrade] ?? gradeStyles.F;
 
   return (
-    <div
-      className={className}
-      style={{
-        background: "transparent",
-        border: "none",
-        padding: "14px 0",
-      }}
-    >
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          <FileText size={12} style={{ opacity: 0.3 }} />
-          <span className="text-caption" style={{ opacity: 0.6 }}>Commit Quality</span>
+    <div className={cn("py-4", className)}>
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <FileText className="size-3.5 text-text-3" aria-hidden="true" />
+          <span className="text-caption">Commit quality</span>
         </div>
-        <span
-          className="text-section-head"
-          style={{ fontSize: "1.25rem", color: getGradeColorStyle(metrics.qualityGrade) }}
-        >
+        <Badge variant={grade.variant} size="sm" mono>
           {metrics.qualityGrade}
-        </span>
+        </Badge>
       </div>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px" }}>
-        <div style={{ display: "flex", justifyContent: "space-between" }}>
-          <span className="text-micro" style={{ opacity: 0.3 }}>Conventional</span>
-          <span className="text-micro" style={{ opacity: 0.6 }}>{metrics.conventionalCommitScore}%</span>
+
+      <dl className="mt-3 grid grid-cols-2 gap-2">
+        <div className="flex items-center justify-between gap-2">
+          <dt className="text-caption">Conventional</dt>
+          <dd className="font-mono text-[11px] tabular-nums text-text">
+            {metrics.conventionalCommitScore}%
+          </dd>
         </div>
-        <div style={{ display: "flex", justifyContent: "space-between" }}>
-          <span className="text-micro" style={{ opacity: 0.3 }}>Tickets</span>
-          <span className="text-micro" style={{ opacity: 0.6 }}>{metrics.hasTicketReferences}%</span>
+        <div className="flex items-center justify-between gap-2">
+          <dt className="text-caption">Tickets</dt>
+          <dd className="font-mono text-[11px] tabular-nums text-text">
+            {metrics.hasTicketReferences}%
+          </dd>
         </div>
-      </div>
+      </dl>
     </div>
   );
 }

@@ -1,15 +1,14 @@
 import { Code } from "lucide-react";
+import type { LanguageDetail } from "@/lib/analytics/types";
+import type { DashboardAnalytics } from "./types";
 
 interface LanguageSectionProps {
-  analytics: any;
+  analytics: DashboardAnalytics | null;
 }
 
 export function LanguageSection({ analytics }: LanguageSectionProps) {
-  const topLanguages = (analytics?.topLanguages as unknown as Array<{
-    language: string;
-    count: number;
-    percentage: number;
-  }>) || [];
+  const topLanguages =
+    (analytics?.topLanguages as LanguageDetail[] | null) || [];
 
   if (topLanguages.length === 0) return null;
 

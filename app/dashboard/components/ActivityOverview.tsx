@@ -1,113 +1,85 @@
 import { TrendingUp } from "lucide-react";
 import { ActivityEmptyState } from "@/components/ui/empty-states";
+import { Card } from "@/components/ui/card";
+import { IconTile } from "@/components/ui/icon-tile";
+import type { DashboardAnalytics } from "./types";
 
 interface ActivityOverviewProps {
-  analytics: any;
+  analytics: DashboardAnalytics | null;
   hasSyncedData: boolean;
 }
 
-export function ActivityOverview({ analytics, hasSyncedData }: ActivityOverviewProps) {
+export function ActivityOverview({
+  analytics,
+  hasSyncedData,
+}: ActivityOverviewProps) {
   return (
-    <div
-      className="brutalist-glass"
-      style={{
-        padding: "clamp(20px, 4vw, 32px)",
-        borderRadius: "2px",
-      }}
-    >
-      {/* Header */}
-      <div
-        style={{
-          padding: "16px 0",
-          borderBottom: "1px solid rgba(240,240,250,0.05)",
-          display: "flex",
-          alignItems: "center",
-          gap: "10px",
-        }}
-      >
-        <div className="p-2 opacity-30">
-            <TrendingUp size={16} className="text-[#f0f0fa]" aria-hidden="true" />
+    <Card padding="none" className="overflow-hidden">
+      <div className="flex flex-wrap items-start gap-3 border-b border-border-subtle p-5 sm:p-6">
+        <IconTile>
+          <TrendingUp className="size-4" />
+        </IconTile>
+        <div className="min-w-0">
+          <h2 className="text-card-title">Activity overview</h2>
+          <p className="mt-1 text-caption">
+            Code volume and engagement across your synced repositories.
+          </p>
         </div>
-        <p className="text-caption-bold text-sm uppercase tracking-widest text-[#f0f0fa]">ACTIVITY OVERVIEW</p>
       </div>
 
-      <div style={{ padding: "20px 0" }}>
+      <div className="p-5 sm:p-6">
         {hasSyncedData ? (
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr",
-              gap: "24px",
-              background: "transparent",
-            }}
-            className="activity-responsive"
-          >
-            <style>{`
-              @media (min-width: 480px) {
-                .activity-responsive {
-                  grid-template-columns: repeat(2, 1fr) !important;
-                }
-              }
-
-              @media (min-width: 640px) {
-                .activity-responsive {
-                  grid-template-columns: repeat(4, 1fr) !important;
-                }
-              }
-            `}</style>
+          <dl className="grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-4">
             <MiniStat
-              label="LINES ADDED"
-              value={formatNumber(analytics?.totalAdditions || 0)}
+              label="Lines added"
+              value={(analytics?.totalAdditions ?? 0).toLocaleString("en-US")}
+              scope="All synced commits"
             />
             <MiniStat
-              label="LINES DELETED"
-              value={formatNumber(analytics?.totalDeletions || 0)}
+              label="Lines deleted"
+              value={(analytics?.totalDeletions ?? 0).toLocaleString("en-US")}
+              scope="All synced commits"
             />
             <MiniStat
-              label="TOTAL FORKS"
-              value={formatNumber(analytics?.totalForks || 0)}
+              label="Total forks"
+              value={(analytics?.totalForks ?? 0).toLocaleString("en-US")}
+              scope="Across synced repositories"
             />
             <MiniStat
-              label="AVG/DAY"
-              value={analytics?.averageCommitsPerDay?.toFixed(1) || "0"}
+              label="Average per day"
+              value={(analytics?.averageCommitsPerDay ?? 0).toFixed(1)}
+              scope="Per active day"
             />
-          </div>
+          </dl>
         ) : (
           <ActivityEmptyState />
         )}
       </div>
-    </div>
+    </Card>
   );
 }
 
 function MiniStat({
   label,
   value,
+  scope,
 }: {
   label: string;
   value: string;
+  scope: string;
 }) {
   return (
-    <div
-      style={{
-        background: "transparent",
-        padding: "0",
-      }}
-    >
-      <p className="text-micro font-medium uppercase tracking-widest" style={{ opacity: 0.5, marginBottom: "8px" }}>{label}</p>
-      <div className="flex flex-col items-start">
-         <p
-            className="text-section-head text-4xl font-bold tracking-widest text-[#f0f0fa] opacity-80"
-          >
-            {value}
-          </p>
-      </div>
+    <div className="min-w-0">
+      <dt className="text-label">{label}</dt>
+      <dd>
+        <span
+          className="mt-1.5 block break-words text-value"
+          title={value}
+        >
+          {value}
+        </span>
+        <span className="mt-2 block text-caption">{scope}</span>
+      </dd>
     </div>
   );
-}
-
-function formatNumber(num: number): string {
-  if (num >= 1000000) return (num / 1000000).toFixed(1) + "M";
-  if (num >= 1000) return (num / 1000).toFixed(1) + "K";
-  return num.toString();
 }

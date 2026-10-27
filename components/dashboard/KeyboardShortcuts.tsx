@@ -1,23 +1,35 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { X, Keyboard } from 'lucide-react';
+import { Keyboard, X } from 'lucide-react';
+import { Tooltip } from '@/components/ui/tooltip';
+import { Card } from '@/components/ui/card';
+
+const SHORTCUTS = [
+  { keys: ['G', 'D'], description: 'Go to dashboard' },
+  { keys: ['G', 'I'], description: 'Go to insights' },
+  { keys: ['G', 'P'], description: 'Go to profile' },
+  { keys: ['G', 'R'], description: 'Go to repositories' },
+  { keys: ['G', 'S'], description: 'Go to settings' },
+  { keys: ['CMD/CTRL', 'S'], description: 'Trigger sync' },
+  { keys: ['CMD/CTRL', 'K'], description: 'Search (coming soon)' },
+  { keys: ['?'], description: 'Show this help' },
+  { keys: ['ESC'], description: 'Close modals' },
+];
 
 /**
- * Keyboard Shortcuts Handler
- * Implements global keyboard shortcuts for the application
+ * Global keyboard shortcuts.
  */
 export function KeyboardShortcuts() {
   const router = useRouter();
   const [pressedKey, setPressedKey] = useState<string | null>(null);
 
   useEffect(() => {
-    let timeoutId: NodeJS.Timeout;
+    let timeoutId: ReturnType<typeof setTimeout>;
 
-    const handleKeyPress = (e: KeyboardEvent) => {
-      // Ignore if typing in input/textarea/contenteditable
-      const target = e.target as HTMLElement;
+    const handleKeyPress = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement;
       if (
         target.tagName === 'INPUT' ||
         target.tagName === 'TEXTAREA' ||
@@ -26,28 +38,21 @@ export function KeyboardShortcuts() {
         return;
       }
 
-      // Cmd/Ctrl + K: Search (future feature)
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-        e.preventDefault();
+      if ((event.metaKey || event.ctrlKey) && event.key === 'k') {
+        event.preventDefault();
         console.log('Search shortcut triggered (feature coming soon)');
-        // TODO: Open search modal
         return;
       }
 
-      // Cmd/Ctrl + S: Trigger sync
-      if ((e.metaKey || e.ctrlKey) && e.key === 's') {
-        e.preventDefault();
-        const syncButton = document.getElementById('sync-button');
-        if (syncButton) {
-          syncButton.click();
-        }
+      if ((event.metaKey || event.ctrlKey) && event.key === 's') {
+        event.preventDefault();
+        document.getElementById('sync-button')?.click();
         return;
       }
 
-      // G then [key] navigation shortcuts
-      if (e.key === 'g') {
+      if (event.key === 'g') {
         setPressedKey('g');
-        
+
         const handleNextKey = (nextEvent: KeyboardEvent) => {
           const nextTarget = nextEvent.target as HTMLElement;
           if (
@@ -59,18 +64,12 @@ export function KeyboardShortcuts() {
             return;
           }
 
-          if (nextEvent.key === 'd') {
-            router.push('/dashboard');
-          } else if (nextEvent.key === 'i') {
-            router.push('/insights');
-          } else if (nextEvent.key === 'p') {
-            router.push('/profile');
-          } else if (nextEvent.key === 'r') {
-            router.push('/repositories');
-          } else if (nextEvent.key === 's') {
-            router.push('/settings');
-          }
-          
+          if (nextEvent.key === 'd') router.push('/dashboard');
+          else if (nextEvent.key === 'i') router.push('/insights');
+          else if (nextEvent.key === 'p') router.push('/profile');
+          else if (nextEvent.key === 'r') router.push('/repositories');
+          else if (nextEvent.key === 's') router.push('/settings');
+
           cleanup();
         };
 
@@ -81,40 +80,31 @@ export function KeyboardShortcuts() {
         };
 
         window.addEventListener('keydown', handleNextKey);
-        
-        // Clear the waiting state after 1 second
         timeoutId = setTimeout(cleanup, 1000);
       }
 
-      // ? key: Show shortcuts help
-      if (e.key === '?') {
-        e.preventDefault();
-        const helpButton = document.getElementById('shortcuts-help-button');
-        if (helpButton) {
-          helpButton.click();
-        }
+      if (event.key === '?') {
+        event.preventDefault();
+        document.getElementById('shortcuts-help-button')?.click();
       }
     };
 
     window.addEventListener('keydown', handleKeyPress);
-    
+
     return () => {
       window.removeEventListener('keydown', handleKeyPress);
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
+      if (timeoutId) clearTimeout(timeoutId);
     };
   }, [router]);
 
-  // Visual indicator when waiting for second key
   if (pressedKey === 'g') {
     return (
-      <div 
-        className="fixed z-50 px-4 sm:px-6 py-3 sm:py-4 border border-[rgba(240,240,250,0.35)] bg-[rgba(0,0,0,0.85)] backdrop-blur animate-in slide-in-from-bottom-2 duration-200"
-        style={{ borderRadius: 0, left: 'clamp(12px, 3vw, 32px)', bottom: 'max(12px, env(safe-area-inset-bottom))' }}
+      <div
+        className="fixed bottom-6 left-6 z-40 rounded-card border border-border bg-surface-2 px-4 py-3 shadow-[0_16px_50px_rgba(0,0,0,0.55)] backdrop-blur-xl"
+        role="status"
       >
-        <p className="text-micro" style={{ opacity: 0.8, display: "flex", alignItems: "center", gap: "8px", margin: 0 }}>
-          PRESS D FOR DASHBOARD, I FOR INSIGHTS, P FOR PROFILE
+        <p className="text-caption text-text">
+          Press D, I, R, P or S to navigate.
         </p>
       </div>
     );
@@ -124,146 +114,145 @@ export function KeyboardShortcuts() {
 }
 
 /**
- * Keyboard Shortcuts Help Modal
- * Displays available keyboard shortcuts
+ * Keyboard shortcuts help button and modal.
  */
 export function KeyboardShortcutsHelp() {
   const [isOpen, setIsOpen] = useState(false);
+  const helpButtonRef = useRef<HTMLButtonElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
 
-  // Close on Escape
+  const close = useCallback(() => {
+    setIsOpen(false);
+    helpButtonRef.current?.focus();
+  }, []);
+
   useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isOpen) {
-        setIsOpen(false);
+    if (!isOpen) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    const focusFrame = requestAnimationFrame(() => {
+      closeButtonRef.current?.focus();
+    });
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        close();
+        return;
+      }
+
+      if (event.key !== 'Tab') return;
+      const focusable = Array.from(
+        dialogRef.current?.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        ) ?? []
+      );
+      if (focusable.length === 0) return;
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
       }
     };
 
-    if (isOpen) {
-      document.addEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'hidden';
-    }
+    document.addEventListener('keydown', handleKeyDown);
 
     return () => {
-      document.removeEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'unset';
+      cancelAnimationFrame(focusFrame);
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [isOpen]);
-
-  const shortcuts = [
-    { keys: ['G', 'D'], description: 'GO TO DASHBOARD' },
-    { keys: ['G', 'I'], description: 'GO TO INSIGHTS' },
-    { keys: ['G', 'P'], description: 'GO TO PROFILE' },
-    { keys: ['G', 'R'], description: 'GO TO REPOSITORIES' },
-    { keys: ['G', 'S'], description: 'GO TO SETTINGS' },
-    { keys: ['CMD/CTRL', 'S'], description: 'TRIGGER SYNC' },
-    { keys: ['CMD/CTRL', 'K'], description: 'SEARCH (COMING SOON)' },
-    { keys: ['?'], description: 'SHOW THIS HELP' },
-    { keys: ['ESC'], description: 'CLOSE MODALS' },
-  ];
+  }, [isOpen, close]);
 
   return (
     <>
-      {/* Help Button - Ghost Floating Button */}
-      <button
-        id="shortcuts-help-button"
-        onClick={() => setIsOpen(true)}
-        className="fixed z-40 group transition-all"
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          width: "52px",
-          height: "52px",
-          background: "rgba(240, 240, 250, 0.1)",
-          border: "1px solid rgba(240, 240, 250, 0.35)",
-          borderRadius: "50%",
-          color: "#f0f0fa",
-          backdropFilter: "blur(4px)",
-          right: 'clamp(12px, 3vw, 32px)',
-          bottom: 'max(12px, env(safe-area-inset-bottom))',
-        }}
-        title="Keyboard shortcuts (press ?)"
-        aria-label="Show keyboard shortcuts"
+      <Tooltip
+        content="Keyboard shortcuts (?)"
+        className="fixed bottom-6 right-6 z-40 hidden sm:inline-flex"
       >
-        <Keyboard size={20} />
-      </button>
+        <button
+          ref={helpButtonRef}
+          id="shortcuts-help-button"
+          type="button"
+          onClick={() => setIsOpen(true)}
+          className="focus-ring flex size-10 items-center justify-center rounded-full border border-border bg-surface-1 text-text-2 shadow-[var(--shadow-card)] backdrop-blur-xl transition-colors duration-150 hover:border-border-strong hover:bg-surface-2 hover:text-text"
+          aria-label="Show keyboard shortcuts"
+        >
+          <Keyboard className="size-[18px]" aria-hidden="true" />
+        </button>
+      </Tooltip>
 
-      {/* Help Modal */}
-      {isOpen && (
+      {isOpen ? (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm"
-          onClick={() => setIsOpen(false)}
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="shortcuts-modal-title"
+          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
+          onClick={close}
+          role="presentation"
         >
           <div
-            style={{
-              background: "#000",
-              border: "1px solid rgba(240, 240, 250, 0.35)",
-              borderRadius: "0",
-            }}
-            className="max-w-lg w-full relative pt-6 sm:pt-8 pb-4 max-h-[calc(100dvh-2rem)] overflow-hidden"
-            onClick={(e) => e.stopPropagation()}
+            ref={dialogRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="shortcuts-modal-title"
+            className="w-full max-w-lg"
+            onClick={(event) => event.stopPropagation()}
           >
-            {/* Modal Header */}
-            <div className="flex items-center justify-between px-8 pb-4 border-b border-[rgba(240,240,250,0.1)]">
-              <h2 id="shortcuts-modal-title" className="text-section-head" style={{ fontSize: "1.25rem", margin: 0 }}>
-                KEYBOARD SHORTCUTS
-              </h2>
-              <button
-                onClick={() => setIsOpen(false)}
-                className="transition-opacity opacity-50 hover:opacity-100"
-                style={{ color: "#f0f0fa", background: "transparent", border: "none" }}
-                aria-label="Close shortcuts help"
-              >
-                <X size={20} />
-              </button>
-            </div>
-
-            {/* Shortcuts List */}
-            <div className="px-4 sm:px-8 py-4 sm:py-6 space-y-4 max-h-[calc(100dvh-200px)] sm:max-h-[60vh] overflow-y-auto">
-              {shortcuts.map((shortcut, index) => (
-                <div
-                  key={index}
-                  className="flex items-center justify-between py-2 border-b border-[rgba(240,240,250,0.05)] last:border-0 gap-3"
+            <Card padding="none" className="max-h-[calc(100dvh-32px)] overflow-hidden">
+              <div className="flex items-center justify-between gap-4 border-b border-border-subtle px-5 py-4 sm:px-6">
+                <h2 id="shortcuts-modal-title" className="text-card-title">
+                  Keyboard shortcuts
+                </h2>
+                <button
+                  ref={closeButtonRef}
+                  type="button"
+                  onClick={close}
+                  className="focus-ring inline-flex size-11 items-center justify-center rounded-pill text-text-3 transition-colors hover:bg-surface-hover hover:text-text"
+                  aria-label="Close keyboard shortcuts"
                 >
-                  <span className="text-body text-dim" style={{ fontSize: "0.875rem" }}>
-                    {shortcut.description}
-                  </span>
-                  <div className="flex items-center gap-1">
-                    {shortcut.keys.map((key, keyIndex) => (
-                      <span key={keyIndex} className="flex items-center gap-1">
-                        <kbd 
-                          className="text-caption"
-                          style={{
-                            padding: "4px 8px",
-                            background: "rgba(240, 240, 250, 0.05)",
-                            border: "1px solid rgba(240, 240, 250, 0.35)",
-                          }}
-                        >
-                          {key}
-                        </kbd>
-                        {keyIndex < shortcut.keys.length - 1 && (
-                          <span className="text-micro text-dim mx-1">THEN</span>
-                        )}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
+                  <X className="size-4" aria-hidden="true" />
+                </button>
+              </div>
 
-            {/* Footer */}
-            <div className="px-8 pt-4 pb-2 text-center border-t border-[rgba(240,240,250,0.1)]">
-              <p className="text-micro text-dim">
-                PRESS ESC TO CLOSE
-              </p>
-            </div>
+              <div className="max-h-[60vh] space-y-1 overflow-y-auto px-5 py-4 sm:px-6">
+                {SHORTCUTS.map((shortcut) => (
+                  <div
+                    key={shortcut.description}
+                    className="flex items-center justify-between gap-4 border-b border-border-subtle py-2.5 last:border-0"
+                  >
+                    <span className="text-sm text-text-2">
+                      {shortcut.description}
+                    </span>
+                    <span className="flex shrink-0 items-center gap-1.5">
+                      {shortcut.keys.map((key, index) => (
+                        <span key={key} className="flex items-center gap-1.5">
+                          <kbd className="rounded-[4px] border border-border bg-white/[0.06] px-2 py-1 font-mono text-[11px] leading-none text-text">
+                            {key}
+                          </kbd>
+                          {index < shortcut.keys.length - 1 ? (
+                            <span className="text-[11px] text-text-3">then</span>
+                          ) : null}
+                        </span>
+                      ))}
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="border-t border-border-subtle px-5 py-3 text-center sm:px-6">
+                <p className="text-caption">Press Esc to close</p>
+              </div>
+            </Card>
           </div>
         </div>
-      )}
+      ) : null}
     </>
   );
 }
-

@@ -1,60 +1,44 @@
-import { TrendingUp, Clock, Zap } from "lucide-react";
+import { Clock, TrendingUp, Zap } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { IconTile } from "@/components/ui/icon-tile";
+import { SectionHeader } from "@/components/ui/section-header";
+import type { DashboardAnalytics } from "./types";
 
 interface InsightsRowProps {
-  analytics: any;
+  analytics: DashboardAnalytics | null;
 }
 
 export function InsightsRow({ analytics }: InsightsRowProps) {
   if (!analytics) return null;
 
   return (
-    <div>
-      <p
-        className="text-micro uppercase tracking-widest"
-        style={{ letterSpacing: "1.5px", marginBottom: "16px" }}
-      >
-        KEY INSIGHTS
-      </p>
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr",
-          gap: "24px",
-          background: "transparent",
-          border: "none",
-        }}
-        className="insights-responsive"
-      >
-        <style>{`
-          @media (min-width: 640px) {
-            .insights-responsive {
-              grid-template-columns: repeat(2, 1fr) !important;
-            }
-          }
+    <section aria-label="Key insights">
+      <SectionHeader
+        title="Key insights"
+        description="Patterns across your synced commit history."
+      />
 
-          @media (min-width: 1024px) {
-            .insights-responsive {
-              grid-template-columns: repeat(3, 1fr) !important;
-            }
-          }
-        `}</style>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <InsightCell
-          icon={<TrendingUp size={14} />}
-          label="Best Day"
-          value={analytics?.mostProductiveDay || "N/A"}
+          icon={<TrendingUp className="size-4" />}
+          label="Best day"
+          value={analytics.mostProductiveDay || "Not enough data"}
+          scope="Across all synced commits"
         />
         <InsightCell
-          icon={<Clock size={14} />}
-          label="Peak Hour"
-          value={formatHour(analytics?.mostProductiveHour)}
+          icon={<Clock className="size-4" />}
+          label="Peak hour"
+          value={formatHour(analytics.mostProductiveHour)}
+          scope="Across all synced commits"
         />
         <InsightCell
-          icon={<Zap size={14} />}
-          label="Longest Streak"
-          value={`${analytics?.longestStreak || 0} days`}
+          icon={<Zap className="size-4" />}
+          label="Longest streak"
+          value={`${analytics.longestStreak ?? 0} days`}
+          scope="All-time record"
         />
       </div>
-    </div>
+    </section>
   );
 }
 
@@ -62,43 +46,40 @@ function InsightCell({
   icon,
   label,
   value,
+  scope,
 }: {
   icon: React.ReactNode;
   label: string;
   value: string;
+  scope: string;
 }) {
   return (
-    <div
+    <Card
       role="article"
       aria-label={`Insight: ${label}`}
-      className="brutalist-glass"
-      style={{
-        padding: "clamp(16px, 3vw, 24px)",
-        display: "flex",
-        flexDirection: "column",
-        gap: "6px",
-      }}
-      
-      
+      className="flex h-full flex-col"
     >
-      <div className="opacity-35 mb-1" aria-hidden="true">{icon}</div>
-      <div className="flex flex-col border-[rgba(240,240,250,0.35)] pl-4 border-l-2">
-         <p className="text-micro font-medium uppercase tracking-widest" style={{ opacity: 0.5, marginBottom: "8px" }}>{label}</p>
-         <div className="flex flex-col items-start">
-             <p
-                className="text-section-head text-2xl sm:text-3xl font-bold tracking-widest text-[#f0f0fa] opacity-80"
-                aria-live="polite"
-              >
-                {value}
-              </p>
-         </div>
+      <div className="flex items-start justify-between gap-3">
+        <IconTile>{icon}</IconTile>
       </div>
-    </div>
+
+      <p className="mt-4 text-label">{label}</p>
+      <p
+        className="mt-1.5 break-words font-display text-[28px] font-bold leading-none tracking-[0.02em] text-text"
+        aria-live="polite"
+      >
+        {value}
+      </p>
+
+      <p className="mt-auto border-t border-border-subtle pt-3 text-caption">
+        {scope}
+      </p>
+    </Card>
   );
 }
 
 function formatHour(hour: number | null | undefined): string {
-  if (hour === null || hour === undefined) return "N/A";
+  if (hour === null || hour === undefined) return "Not enough data";
   const period = hour >= 12 ? "PM" : "AM";
   const displayHour = hour % 12 || 12;
   return `${displayHour}:00 ${period}`;

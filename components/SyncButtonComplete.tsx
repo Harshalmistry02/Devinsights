@@ -1,8 +1,10 @@
-'use client';
+"use client";
 
-import { useState, useRef } from 'react';
-import { Loader2, RefreshCw, CheckCircle, XCircle, Github, AlertCircle } from 'lucide-react';
-import { signOut } from 'next-auth/react';
+import { useRef, useState } from "react";
+import { Github, Loader2, RefreshCw } from "lucide-react";
+import { signOut } from "next-auth/react";
+import { Button } from "@/components/ui/button";
+import { InlineNotice, type NoticeVariant } from "@/components/ui/inline-notice";
 
 interface SyncResponse {
   success: boolean;
@@ -37,7 +39,7 @@ interface SyncErrorData {
 }
 
 interface SyncStatus {
-  status: 'idle' | 'syncing' | 'success' | 'error' | 'warning';
+  status: "idle" | "syncing" | "success" | "error" | "warning";
   message: string;
   progress: number;
   details?: {
@@ -47,24 +49,32 @@ interface SyncStatus {
   };
 }
 
+const NOTICE_VARIANTS: Record<SyncStatus["status"], NoticeVariant> = {
+  idle: "info",
+  syncing: "info",
+  success: "success",
+  warning: "warning",
+  error: "error",
+};
+
 /**
  * Enhanced Sync Button with real-time progress tracking
- * 
+ *
  * WCAG 2.1 AA Accessibility Features:
  * - ARIA live regions for screen reader announcements
- * - Proper focus indicators (ring-2 ring-cyan-400)
- * - Keyboard accessible (Tab navigation)
+ * - Proper focus indicators
+ * - Keyboard accessible
  * - Status announcements for sync progress
  * - Clear disabled state communication
  */
 export function SyncButtonComplete() {
   const [status, setStatus] = useState<SyncStatus>({
-    status: 'idle',
-    message: 'Ready to sync GitHub data',
+    status: "idle",
+    message: "Ready to sync GitHub data",
     progress: 0,
   });
   const [requiresReauth, setRequiresReauth] = useState(false);
-  
+
   // Reference for screen reader announcements
   const announcementRef = useRef<HTMLDivElement>(null);
 
@@ -73,34 +83,36 @@ export function SyncButtonComplete() {
       return error.message;
     }
 
-    if (typeof error === 'object' && error !== null && 'message' in error) {
+    if (typeof error === "object" && error !== null && "message" in error) {
       const msg = (error as { message?: unknown }).message;
-      if (typeof msg === 'string') {
+      if (typeof msg === "string") {
         return msg;
       }
     }
 
-    if (typeof error === 'string') {
+    if (typeof error === "string") {
       return error;
     }
 
-    return 'Unknown sync error';
+    return "Unknown sync error";
   };
 
   const handleReauth = async () => {
     setStatus({
-      status: 'error',
-      message: 'Redirecting to sign out. Please sign back in to reconnect GitHub.',
+      status: "error",
+      message:
+        "Redirecting to sign out. Please sign back in to reconnect GitHub.",
       progress: 0,
     });
 
     try {
-      await signOut({ callbackUrl: '/login', redirect: true });
+      await signOut({ callbackUrl: "/login", redirect: true });
     } catch (error) {
-      console.error('Failed to sign out for GitHub reauthentication:', error);
+      console.error("Failed to sign out for GitHub reauthentication:", error);
       setStatus({
-        status: 'error',
-        message: 'Please use Sign out, then sign back in to reconnect GitHub.',
+        status: "error",
+        message:
+          "Please use Sign out, then sign back in to reconnect GitHub.",
         progress: 0,
       });
     }
@@ -109,22 +121,22 @@ export function SyncButtonComplete() {
   const handleSync = async (forceFullSync: boolean = false) => {
     setRequiresReauth(false);
     setStatus({
-      status: 'syncing',
-      message: forceFullSync 
-        ? 'INITIALIZING FULL GITHUB DATA RE-SYNC...'
-        : 'INITIALIZING GITHUB DATA SYNC...',
+      status: "syncing",
+      message: forceFullSync
+        ? "Starting full GitHub re-sync…"
+        : "Starting GitHub sync…",
       progress: 5,
     });
 
     // Simulate progress while waiting for the actual sync
     const progressMessages = [
-      { progress: 10, message: 'CONNECTING TO GITHUB...' },
-      { progress: 20, message: 'FETCHING REPOSITORIES...' },
-      { progress: 35, message: 'ANALYZING COMMIT HISTORY...' },
-      { progress: 50, message: 'PROCESSING COMMITS...' },
-      { progress: 65, message: 'ENRICHING DATA WITH STATISTICS...' },
-      { progress: 80, message: 'SAVING TO DATABASE...' },
-      { progress: 90, message: 'CALCULATING ANALYTICS...' },
+      { progress: 10, message: "Connecting to GitHub…" },
+      { progress: 20, message: "Fetching repositories…" },
+      { progress: 35, message: "Analyzing commit history…" },
+      { progress: 50, message: "Processing commits…" },
+      { progress: 65, message: "Enriching data with statistics…" },
+      { progress: 80, message: "Saving to database…" },
+      { progress: 90, message: "Calculating analytics…" },
     ];
 
     let progressIndex = 0;
@@ -141,14 +153,15 @@ export function SyncButtonComplete() {
     }, 3000);
 
     try {
-      console.log(forceFullSync
-        ? 'Starting FULL GitHub sync (force)...'
-        : 'Starting complete GitHub sync...'
+      console.log(
+        forceFullSync
+          ? "Starting FULL GitHub sync (force)..."
+          : "Starting complete GitHub sync..."
       );
 
-      const response = await fetch('/api/sync', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("/api/sync", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ forceFullSync }),
       });
 
@@ -166,7 +179,8 @@ export function SyncButtonComplete() {
           message: data.message || data.error || `HTTP ${response.status}`,
           error: data.error,
           status: response.status,
-          requiresReauth: data.requiresReauth === true || response.status === 401,
+          requiresReauth:
+            data.requiresReauth === true || response.status === 401,
           code: data.code,
         };
         throw syncError;
@@ -174,7 +188,7 @@ export function SyncButtonComplete() {
 
       if (!data.success) {
         const syncError: SyncErrorData = {
-          message: data.message || 'Sync failed',
+          message: data.message || "Sync failed",
           error: data.error,
           status: response.status,
           requiresReauth: data.requiresReauth,
@@ -188,19 +202,19 @@ export function SyncButtonComplete() {
 
       if (!syncData) {
         throw {
-          message: 'Sync succeeded but no sync payload was returned.',
+          message: "Sync succeeded but no sync payload was returned.",
           status: response.status,
         } as SyncErrorData;
       }
 
-      console.log('Sync completed!', {
+      console.log("Sync completed!", {
         totalRepos: syncData.totalRepos,
         totalCommits: syncData.totalCommits,
         syncDurationMin: syncData.syncDurationMin,
       });
 
       setStatus({
-        status: syncData.syncErrors > 0 ? 'warning' : 'success',
+        status: syncData.syncErrors > 0 ? "warning" : "success",
         message:
           syncData.syncErrors > 0
             ? `Sync completed with ${syncData.syncErrors} errors. Most data synced successfully.`
@@ -222,11 +236,11 @@ export function SyncButtonComplete() {
       setTimeout(() => window.location.reload(), 2500);
     } catch (err: unknown) {
       clearInterval(progressInterval);
-      console.error('Sync error:', getErrorMessage(err), err);
+      console.error("Sync error:", getErrorMessage(err), err);
 
-      let errorMessage = 'Sync failed. Please try again.';
+      let errorMessage = "Sync failed. Please try again.";
       const errorData =
-        typeof err === 'object' && err !== null && 'message' in err
+        typeof err === "object" && err !== null && "message" in err
           ? (err as SyncErrorData)
           : null;
       const errorStr = errorData?.message || getErrorMessage(err);
@@ -237,43 +251,61 @@ export function SyncButtonComplete() {
         setRequiresReauth(true);
         errorMessage =
           errorData.message ||
-          'GitHub authentication required. Please log out and log back in.';
+          "GitHub authentication required. Please log out and log back in.";
         setStatus({
-          status: 'error',
+          status: "error",
           message: errorMessage,
           progress: 0,
         });
-        
-        console.log('Tip: Log out and log back in to refresh your GitHub connection');
+
+        console.log(
+          "Tip: Log out and log back in to refresh your GitHub connection"
+        );
         return;
       }
 
       setRequiresReauth(false);
 
-      if (normalizedError.includes('rate limit') || normalizedError.includes('429')) {
-        errorMessage = 'GitHub rate limit exceeded. Please wait a few minutes and try again.';
-      } else if (
-        normalizedError.includes('authentication') ||
-        normalizedError.includes('401') ||
-        normalizedError.includes('unauthorized')
+      if (
+        normalizedError.includes("rate limit") ||
+        normalizedError.includes("429")
       ) {
-        errorMessage = 'GitHub authentication failed. Please reconnect your account by logging out and back in.';
-      } else if (normalizedError.includes('not linked')) {
-        errorMessage = 'GitHub account not linked. Please connect your GitHub account first.';
+        errorMessage =
+          "GitHub rate limit exceeded. Please wait a few minutes and try again.";
+      } else if (
+        normalizedError.includes("authentication") ||
+        normalizedError.includes("401") ||
+        normalizedError.includes("unauthorized")
+      ) {
+        errorMessage =
+          "GitHub authentication failed. Please reconnect your account by logging out and back in.";
+      } else if (normalizedError.includes("not linked")) {
+        errorMessage =
+          "GitHub account not linked. Please connect your GitHub account first.";
       } else if (errorData?.message) {
         errorMessage = errorData.message;
       }
 
       setStatus({
-        status: 'error',
+        status: "error",
         message: errorMessage,
         progress: 0,
       });
     }
   };
 
+  const isSyncing = status.status === "syncing";
+  const statusTitle =
+    status.status === "syncing"
+      ? "Syncing GitHub data"
+      : status.status === "success"
+        ? "Sync complete"
+        : status.status === "warning"
+          ? "Sync completed with warnings"
+          : "Sync failed";
+
   return (
-    <div className="space-y-4" role="region" aria-label="GitHub Data Sync">
+    <div className="space-y-3" role="region" aria-label="GitHub Data Sync">
       {/* Screen reader live region for status announcements */}
       <div
         ref={announcementRef}
@@ -282,188 +314,116 @@ export function SyncButtonComplete() {
         aria-atomic="true"
         className="sr-only"
       >
-        {status.status === 'syncing' && 'Syncing in progress. ' + status.message}
-        {status.status === 'success' && 'Sync completed successfully. ' + status.message}
-        {status.status === 'error' && 'Sync failed. ' + status.message}
-        {status.status === 'warning' && 'Sync completed with warnings. ' + status.message}
+        {status.status === "syncing" &&
+          "Syncing in progress. " + status.message}
+        {status.status === "success" &&
+          "Sync completed successfully. " + status.message}
+        {status.status === "error" && "Sync failed. " + status.message}
+        {status.status === "warning" &&
+          "Sync completed with warnings. " + status.message}
       </div>
 
-      {/* Main Sync Button */}
-      <button
+      <Button
+        variant="primary"
+        size="md"
+        className="w-full"
         onClick={() => handleSync(false)}
-        disabled={status.status === 'syncing'}
+        loading={isSyncing}
+        loadingText="Syncing GitHub data"
+        leadingIcon={<RefreshCw className="size-4" />}
         aria-label={
-          status.status === 'syncing'
-            ? 'Syncing GitHub data, please wait'
-            : 'Sync GitHub repositories and commits'
+          isSyncing
+            ? "Syncing GitHub data, please wait"
+            : "Sync GitHub data from your linked repositories"
         }
-        aria-describedby="sync-status"
-        className={`btn-ghost ${status.status === 'syncing' ? 'btn-ghost-sm' : ''}`}
-        style={{
-          width: "100%",
-          justifyContent: "center",
-          opacity: status.status === 'syncing' ? 0.5 : 1,
-          cursor: status.status === 'syncing' ? 'not-allowed' : 'pointer',
-        }}
+        aria-describedby={status.status === "idle" ? undefined : "sync-status"}
       >
-        {status.status === 'syncing' ? (
-          <>
-            <Loader2 size={14} style={{ animation: "spin 1s linear infinite" }} aria-hidden="true" />
-            <span className="uppercase tracking-widest">SYNCING...</span>
-          </>
-        ) : (
-          <>
-            <RefreshCw size={14} aria-hidden="true" />
-            <span className="uppercase tracking-widest">SYNC GITHUB DATA</span>
-            <Github size={12} style={{ opacity: 0.5 }} aria-hidden="true" />
-          </>
-        )}
-      </button>
+        Sync GitHub data
+      </Button>
 
-      {/* Force Full Sync Button */}
-      {status.status !== 'syncing' && (
-        <button
+      {!isSyncing ? (
+        <Button
+          variant="ghost"
+          size="sm"
+          className="w-full"
           onClick={() => handleSync(true)}
           aria-label="Force full re-sync of all GitHub data"
           title="Use this if sync shows 0 commits but you have repos with commits"
-          style={{
-            width: "100%",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "6px",
-            padding: "8px",
-            background: "none",
-            border: "none",
-            cursor: "pointer",
-            color: "var(--spectral-white)",
-            opacity: 0.3,
-            transition: "opacity 0.2s ease",
-          }}
-          className="text-micro"
-          
-          
+          leadingIcon={<RefreshCw className="size-3" />}
         >
-          <RefreshCw size={10} aria-hidden="true" />
-          <span className="uppercase tracking-widest">FORCE FULL RE-SYNC</span>
-        </button>
-      )}
+          Force full re-sync
+        </Button>
+      ) : null}
 
-      {/* Status Display */}
-      {status.status !== 'idle' && (
-        <div
+      {status.status !== "idle" ? (
+        <InlineNotice
           id="sync-status"
+          variant={NOTICE_VARIANTS[status.status]}
           role="status"
-          aria-live="polite"
-          style={{
-            padding: "14px 16px",
-            background: status.status === 'success' ? "rgba(134,239,172,0.04)"
-              : status.status === 'error' ? "rgba(252,165,165,0.04)"
-              : status.status === 'warning' ? "rgba(251,191,36,0.04)"
-              : "rgba(240,240,250,0.03)",
-            border: `1px solid ${status.status === 'success' ? "rgba(134,239,172,0.12)"
-              : status.status === 'error' ? "rgba(252,165,165,0.12)"
-              : status.status === 'warning' ? "rgba(251,191,36,0.12)"
-              : "rgba(240,240,250,0.06)"}`,
-            borderRadius: "var(--radius-sharp)",
-          }}
+          icon={
+            isSyncing ? <Loader2 className="animate-spin" /> : undefined
+          }
+          title={statusTitle}
         >
-          {/* Progress Bar */}
-          <div className="progress-bar-track" style={{ marginBottom: "10px" }}>
-            <div
-              className="progress-bar-fill"
-              style={{
-                width: `${status.progress}%`,
-                background: status.status === 'success' ? "rgba(134,239,172,0.6)"
-                  : status.status === 'error' ? "rgba(252,165,165,0.5)"
-                  : status.status === 'warning' ? "rgba(251,191,36,0.6)"
-                  : "var(--spectral-white)",
-              }}
-            />
-          </div>
+          <p>{status.message}</p>
 
-          {/* Status Message */}
-          <div style={{ display: "flex", alignItems: "flex-start", gap: "8px" }}>
-            {status.status === 'success' && (
-              <CheckCircle size={12} style={{ color: "rgba(134,239,172,0.7)", flexShrink: 0, marginTop: "2px" }} />
-            )}
-            {status.status === 'error' && (
-              <XCircle size={12} style={{ color: "rgba(252,165,165,0.6)", flexShrink: 0, marginTop: "2px" }} />
-            )}
-            {status.status === 'warning' && (
-              <AlertCircle size={12} style={{ color: "rgba(251,191,36,0.6)", flexShrink: 0, marginTop: "2px" }} />
-            )}
-            {status.status === 'syncing' && (
-              <Loader2 size={12} style={{ animation: "spin 1s linear infinite", opacity: 0.5, flexShrink: 0, marginTop: "2px" }} />
-            )}
-
-            <div style={{ flex: 1 }}>
-              <p
-                className="text-micro uppercase tracking-widest"
-                style={{
-                  opacity: status.status === 'success' ? 0.6
-                    : status.status === 'error' ? 0.55
-                    : status.status === 'warning' ? 0.55
-                    : 0.4,
-                  color: status.status === 'success' ? "rgba(134,239,172,0.8)"
-                    : status.status === 'error' ? "rgba(252,165,165,0.8)"
-                    : status.status === 'warning' ? "rgba(251,191,36,0.8)"
-                    : "var(--spectral-white)",
-                }}
+          {isSyncing ? (
+            <>
+              <div
+                className="progress-bar-track mt-3"
+                role="progressbar"
+                aria-label="Sync progress"
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-valuenow={status.progress}
               >
-                {status.message.toUpperCase()}
-              </p>
-
-              {/* Detailed Stats */}
-              {status.details && (status.status === 'success' || status.status === 'warning') && (
                 <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "repeat(auto-fit, minmax(90px, 1fr))",
-                    gap: "1px",
-                    marginTop: "10px",
-                    background: "rgba(240,240,250,0.05)",
-                    borderRadius: "2px",
-                    overflow: "hidden",
-                  }}
-                >
-                  <div style={{ background: "#000", padding: "8px 10px" }}>
-                    <p className="text-micro uppercase tracking-widest" style={{ opacity: 0.25, marginBottom: "2px" }}>REPOS</p>
-                    <p className="stat-value" style={{ fontSize: "0.875rem" }}>{status.details.totalRepos}</p>
-                  </div>
-                  <div style={{ background: "#000", padding: "8px 10px" }}>
-                    <p className="text-micro uppercase tracking-widest" style={{ opacity: 0.25, marginBottom: "2px" }}>COMMITS</p>
-                    <p className="stat-value" style={{ fontSize: "0.875rem" }}>{status.details.totalCommits?.toLocaleString()}</p>
-                  </div>
-                  <div style={{ background: "#000", padding: "8px 10px" }}>
-                    <p className="text-micro uppercase tracking-widest" style={{ opacity: 0.25, marginBottom: "2px" }}>DURATION</p>
-                    <p className="stat-value" style={{ fontSize: "0.875rem" }}>{status.details.syncDurationMin?.toFixed(1)}M</p>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
+                  className="progress-bar-fill"
+                  style={{ width: `${status.progress}%` }}
+                />
+              </div>
+              <p className="mt-2">{status.progress}% complete</p>
+            </>
+          ) : null}
 
-          {/* Progress Percentage */}
-          {status.status === 'syncing' && (
-            <p className="text-micro uppercase tracking-widest" style={{ textAlign: "right", marginTop: "6px", opacity: 0.25 }}>
-              {status.progress}% COMPLETE
-            </p>
-          )}
-        </div>
-      )}
+          {status.details &&
+          (status.status === "success" || status.status === "warning") ? (
+            <dl className="mt-3 grid grid-cols-3 divide-x divide-border-subtle overflow-hidden rounded-card border border-border-subtle">
+              <div className="p-2.5">
+                <dt className="text-label">Repositories</dt>
+                <dd className="mt-1 font-mono text-sm tabular-nums text-text">
+                  {(status.details.totalRepos ?? 0).toLocaleString("en-US")}
+                </dd>
+              </div>
+              <div className="p-2.5">
+                <dt className="text-label">Commits</dt>
+                <dd className="mt-1 font-mono text-sm tabular-nums text-text">
+                  {(status.details.totalCommits ?? 0).toLocaleString("en-US")}
+                </dd>
+              </div>
+              <div className="p-2.5">
+                <dt className="text-label">Duration</dt>
+                <dd className="mt-1 font-mono text-sm tabular-nums text-text">
+                  {(status.details.syncDurationMin ?? 0).toFixed(1)} min
+                </dd>
+              </div>
+            </dl>
+          ) : null}
+        </InlineNotice>
+      ) : null}
 
-      {requiresReauth && status.status === 'error' && (
-        <button
+      {requiresReauth && status.status === "error" ? (
+        <Button
+          variant="secondary"
+          size="sm"
+          className="w-full"
           onClick={handleReauth}
-          className="btn-ghost btn-ghost-sm"
-          style={{ width: '100%', justifyContent: 'center' }}
-          aria-label="Sign out and reconnect GitHub"
+          aria-label="Log out and reconnect GitHub"
+          leadingIcon={<Github className="size-3.5" />}
         >
-          <Github size={13} aria-hidden="true" />
-          <span className="uppercase tracking-widest">LOG OUT & RECONNECT GITHUB</span>
-        </button>
-      )}
+          Log out and reconnect GitHub
+        </Button>
+      ) : null}
     </div>
   );
 }

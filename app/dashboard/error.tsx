@@ -1,12 +1,16 @@
-'use client';
+"use client";
 
-import { useEffect } from 'react';
-import { AlertTriangle, RefreshCw, Home } from 'lucide-react';
-import Link from 'next/link';
+import { useEffect } from "react";
+import { AlertTriangle, Home, RefreshCw } from "lucide-react";
+import { Button, ButtonLink } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { IconTile } from "@/components/ui/icon-tile";
+import { PageShell } from "@/components/ui/page-shell";
+import { SpaceBackground } from "@/components/ui/space-background";
 
 /**
  * Dashboard Error Boundary
- * 
+ *
  * Displays a user-friendly error message when something goes wrong.
  * Accessibility: Uses proper ARIA attributes, focus management, and semantic HTML.
  */
@@ -19,76 +23,73 @@ export default function DashboardError({
 }) {
   useEffect(() => {
     // Log error for debugging
-    console.error('Dashboard Error:', error);
+    console.error("Dashboard Error:", error);
   }, [error]);
 
   return (
-    <div 
-      className="min-h-screen bg-linear-to-br from-slate-950 via-slate-900 to-slate-950 pt-20 sm:pt-24 flex items-center justify-center"
-      role="alert"
-      aria-live="assertive"
-    >
-      <div className="max-w-md mx-auto px-4 text-center">
-        <div className="border border-red-500/30 p-8 backdrop-blur-sm">
-          {/* Error Icon */}
-          <div 
-            className="w-16 h-16 mx-auto mb-4 rounded-full bg-red-500/10 flex items-center justify-center border border-red-500/30"
-            aria-hidden="true"
-          >
-            <AlertTriangle className="w-8 h-8 text-red-400" />
-          </div>
+    <div role="alert" aria-live="assertive">
+      <SpaceBackground variant="app" />
 
-          {/* Error Title */}
-          <h1 className="text-xl font-semibold opacity-80 mb-2">
-            Something went wrong
-          </h1>
-          
-          {/* Error Description */}
-          <p className="text-sm opacity-80 mb-6">
-            We encountered an error loading your dashboard. This might be a temporary issue.
-          </p>
-
-          {/* Error Details (development only) */}
-          {process.env.NODE_ENV === 'development' && (
-            <div className="mb-6 p-3 border border-[rgba(240,240,250,0.15)] text-left">
-              <p className="text-xs text-red-400 font-mono break-all">
-                {error.message}
-              </p>
-              {error.digest && (
-                <p className="text-xs opacity-80 mt-1">
-                  Error ID: {error.digest}
-                </p>
-              )}
+      <PageShell>
+        <main
+          id="main-content"
+          className="flex min-h-[60vh] items-center justify-center py-8"
+        >
+          <Card className="w-full max-w-lg text-center">
+            <div className="flex justify-center">
+              <IconTile size="lg" tone="danger">
+                <AlertTriangle className="size-5" />
+              </IconTile>
             </div>
-          )}
 
-          {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <button
-              onClick={reset}
-              className="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-medium text-[#f0f0fa] bg-cyan-500/10 border border-cyan-500/30 hover:bg-cyan-500/20 hover:border-cyan-500/50 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2 focus:ring-offset-slate-900"
-              aria-label="Try loading the dashboard again"
-            >
-              <RefreshCw className="w-4 h-4" aria-hidden="true" />
-              Try Again
-            </button>
-            
-            <Link
-              href="/"
-              className="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-medium opacity-80 border border-[rgba(240,240,250,0.15)] hover:opacity-100 hover:border-[rgba(240,240,250,0.35)] transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2 focus:ring-offset-slate-900"
-              aria-label="Return to home page"
-            >
-              <Home className="w-4 h-4" aria-hidden="true" />
-              Go Home
-            </Link>
-          </div>
+            <h1 className="mt-5 text-section-head text-3xl">
+              Something went wrong
+            </h1>
 
-          {/* Help Text */}
-          <p className="text-xs opacity-80 mt-6">
-            If this problem persists, please contact support.
-          </p>
-        </div>
-      </div>
+            <p className="mx-auto mt-3 max-w-[42ch] text-body">
+              We encountered an error loading your dashboard. This might be a
+              temporary issue.
+            </p>
+
+            {process.env.NODE_ENV === "development" ? (
+              <div className="mt-6 rounded-card border border-danger/30 bg-danger-soft p-3 text-left">
+                <p className="break-all font-mono text-[11px] leading-relaxed text-danger">
+                  {error.message}
+                </p>
+                {error.digest ? (
+                  <p className="mt-1 font-mono text-[11px] text-text-3">
+                    Error ID: {error.digest}
+                  </p>
+                ) : null}
+              </div>
+            ) : null}
+
+            <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
+              <Button
+                variant="primary"
+                onClick={reset}
+                leadingIcon={<RefreshCw className="size-4" />}
+                aria-label="Try again to load the dashboard"
+              >
+                Try again
+              </Button>
+
+              <ButtonLink
+                href="/"
+                variant="secondary"
+                leadingIcon={<Home className="size-4" />}
+                aria-label="Go home to the landing page"
+              >
+                Go home
+              </ButtonLink>
+            </div>
+
+            <p className="mt-6 text-caption">
+              If this problem persists, please contact support.
+            </p>
+          </Card>
+        </main>
+      </PageShell>
     </div>
   );
 }

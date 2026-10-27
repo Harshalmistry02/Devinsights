@@ -11,22 +11,24 @@ import {
 } from '@/components/charts';
 import { ChartEmptyState, LanguageEmptyState } from '@/components/ui/empty-states';
 import { BarChart3, PieChart, GitBranch } from 'lucide-react';
+import type { DayOfWeekStats, LanguageDetail, RepoStat } from '@/lib/analytics/types';
+import type { DashboardAnalytics } from './types';
 
 interface ChartsSectionProps {
-  analytics: any;
+  analytics: DashboardAnalytics | null;
 }
 
 export function ChartsSection({ analytics }: ChartsSectionProps) {
   if (!analytics) return null;
 
   // Adapt data from analytics
-  const dailyCommits = (analytics.dailyCommits as unknown as Record<string, number>) || {};
-  const dayOfWeekStats = (analytics.dayOfWeekStats as unknown as any) || {
+  const dailyCommits = (analytics.dailyCommits as Record<string, number> | null) || {};
+  const dayOfWeekStats = (analytics.dayOfWeekStats as DayOfWeekStats | null) || {
     Monday: 0, Tuesday: 0, Wednesday: 0, Thursday: 0, Friday: 0, Saturday: 0, Sunday: 0
   };
-  const hourlyStats = (analytics.hourlyStats as unknown as Record<string, number>) || {};
-  const topLanguages = (analytics.topLanguages as unknown as any[]) || [];
-  const repoStats = (analytics.repoStats as unknown as any[]) || [];
+  const hourlyStats = (analytics.hourlyStats as Record<string, number> | null) || {};
+  const topLanguages = (analytics.topLanguages as LanguageDetail[] | null) || [];
+  const repoStats = (analytics.repoStats as RepoStat[] | null) || [];
 
   const hasDailyCommitData = Object.keys(dailyCommits).length > 0;
   const hasLanguageData = topLanguages.length > 0;

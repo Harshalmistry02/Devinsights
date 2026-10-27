@@ -1,303 +1,169 @@
-'use client';
+"use client";
 
-import { Code, Activity, Flame, Star, RefreshCw } from "lucide-react";
-import { useState, useMemo } from "react";
+import { Activity, Code, Flame, RefreshCw, Star } from "lucide-react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import {
   calculateComparativePeriod,
-  formatChangePercent,
-  formatChange,
-  getTrendIndicator,
-  type PeriodMetrics,
 } from "@/lib/analytics/comparison-calculator";
+import type { DailyCommitStats } from "@/lib/analytics/types";
+import { Button } from "@/components/ui/button";
+import { SectionHeader } from "@/components/ui/section-header";
+import { StatCard } from "@/components/ui/stat-card";
+import { StatCardSkeleton } from "@/components/ui/skeletons";
+import type { DashboardAnalytics } from "./types";
 
 interface StatsGridProps {
-  analytics: any;
-  previousAnalytics?: any;
+  analytics: DashboardAnalytics | null;
+  previousAnalytics?: DashboardAnalytics | null;
 }
 
 /**
  * Enhanced Stats Grid with Comparative Period Analytics
  * SpaceX-inspired: minimal, achromatic, uppercase labels
  */
-export function StatsGrid({ analytics: initialAnalytics, previousAnalytics }: StatsGridProps) {
+export function StatsGrid({
+  analytics: initialAnalytics,
+  previousAnalytics,
+}: StatsGridProps) {
   const [analytics, setAnalytics] = useState(initialAnalytics);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const hasSyncedData = analytics !== null && (analytics.totalCommits > 0 || analytics.totalRepos > 0);
+  const hasSyncedData =
+    analytics !== null &&
+    ((analytics.totalCommits ?? 0) > 0 || (analytics.totalRepos ?? 0) > 0);
+
+  const dailyCommits = analytics?.dailyCommits as
+    | DailyCommitStats
+    | null
+    | undefined;
+  const hasDailyCommitData =
+    dailyCommits !== null &&
+    dailyCommits !== undefined &&
+    Object.keys(dailyCommits).length > 0;
 
   const comparativePeriod = useMemo(() => {
     return calculateComparativePeriod(
-      analytics?.dailyCommits,
+      dailyCommits,
       30,
       analytics?.currentStreak || 0,
       previousAnalytics?.currentStreak || 0
     );
-  }, [analytics, previousAnalytics]);
+  }, [analytics, dailyCommits, previousAnalytics]);
 
   const refreshStats = async () => {
     setIsRefreshing(true);
     try {
-      const response = await fetch('/api/analytics?refresh=true');
-      if (!response.ok) throw new Error('Failed to refresh stats');
-      const data = await response.json();
-      setAnalytics(data.data);
-      toast.success('Statistics refreshed successfully');
+      const response = await fetch("/api/analytics?refresh=true");
+      if (!response.ok) throw new Error("Failed to refresh stats");
+      const data: { data?: DashboardAnalytics } = await response.json();
+      setAnalytics(data.data ?? null);
+      toast.success("Statistics refreshed successfully");
     } catch (error) {
-      console.error('Failed to refresh stats:', error);
-      toast.error('Failed to refresh statistics');
+      console.error("Failed to refresh stats:", error);
+      toast.error("Failed to refresh statistics");
     } finally {
       setIsRefreshing(false);
     }
   };
 
-  return (
-    <div>
-      {/* Section header */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px", gap: "10px", flexWrap: "wrap" }}>
-        <p className="text-micro uppercase tracking-widest" style={{ letterSpacing: "1.5px" }}>STATISTICS</p>
-        <button
-          onClick={refreshStats}
-          disabled={isRefreshing}
-          style={{
-            background: "none",
-            border: "none",
-            color: "var(--spectral-white)",
-            cursor: isRefreshing ? "wait" : "pointer",
-            opacity: isRefreshing ? 0.3 : 0.4,
-            transition: "opacity 0.2s ease",
-            padding: "4px",
-            display: "flex",
-            alignItems: "center",
-          }}
-          title="Refresh statistics"
-          aria-label="Refresh statistics"
-          
-          
-        >
-          <RefreshCw
-            size={14}
-            style={{ animation: isRefreshing ? "spin 1s linear infinite" : "none" }}
-          />
-        </button>
-      </div>
-
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr",
-          gap: "24px",
-          background: "transparent",
-          border: "none",
-          overflow: "visible",
-        }}
-        className="stats-responsive"
-      >
-        <style>{`
-          @media (min-width: 640px) {
-            .stats-responsive {
-              grid-template-columns: repeat(2, 1fr) !important;
-            }
-          }
-
-          @media (min-width: 1024px) {
-            .stats-responsive {
-              grid-template-columns: repeat(4, 1fr) !important;
-            }
-          }
-        `}</style>
-
-        {isRefreshing ? (
-          <>
-            <StatCardSkeleton />
-            <StatCardSkeleton />
-            <StatCardSkeleton />
-            <StatCardSkeleton />
-          </>
-        ) : (
-          <>
-            <StatCard
-              icon={<Code size={16} />}
-              title="Repositories"
-              value={analytics?.totalRepos?.toString() || "0"}
-              subtitle={hasSyncedData ? "synced repos" : "sync to see"}
-              metrics={null}
-            />
-            <StatCard
-              icon={<Activity size={16} />}
-              title="Total Commits"
-              value={formatNumber(analytics?.totalCommits || 0)}
-              subtitle={hasSyncedData ? "all time" : "sync to see"}
-              metrics={comparativePeriod.totalCommits}
-              period="30d"
-            />
-            <StatCard
-              icon={<Flame size={16} />}
-              title="Current Streak"
-              value={analytics?.currentStreak?.toString() || "0"}
-              subtitle={
-                analytics?.currentStreak
-                  ? `${analytics.currentStreak} day${analytics.currentStreak !== 1 ? "s" : ""}`
-                  : "days"
-              }
-              highlight={analytics?.isActiveToday}
-              metrics={comparativePeriod.streak}
-              period="30d"
-            />
-            <StatCard
-              icon={<Star size={16} />}
-              title="Stars Earned"
-              value={formatNumber(analytics?.totalStars || 0)}
-              subtitle="across repos"
-              metrics={null}
-            />
-          </>
-        )}
-      </div>
-    </div>
-  );
-}
-
-interface StatCardProps {
-  icon: React.ReactNode;
-  title: string;
-  value: string;
-  subtitle?: string;
-  highlight?: boolean;
-  metrics?: PeriodMetrics | null;
-  period?: "7d" | "30d" | "90d";
-}
-
-function StatCard({
-  icon,
-  title,
-  value,
-  subtitle,
-  highlight = false,
-  metrics,
-  period = "30d",
-}: StatCardProps) {
-  const trendIndicator = metrics ? getTrendIndicator(metrics.trend, metrics.isImprovement) : null;
+  const commitMetrics = hasDailyCommitData
+    ? comparativePeriod.totalCommits
+    : null;
 
   return (
-    <div
-      role="region"
-      aria-label={`${title} statistics`}
-      className="brutalist-glass"
-      style={{
-        padding: "clamp(16px, 3vw, 24px)",
-        position: "relative",
-      }}
-      
-      
-    >
-      {/* Active pulse indicator */}
-      {highlight && (
-        <div
-          style={{
-            position: "absolute",
-            top: "12px",
-            right: "12px",
-            width: "6px",
-            height: "6px",
-            borderRadius: "50%",
-            background: "rgba(251,191,36,0.7)",
-            animation: "pulse 2s ease infinite",
-          }}
-          aria-label="Active today"
-        />
-      )}
-
-      {/* Icon + trend badge row */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "12px" }}>
-        <div className="opacity-30 p-2" aria-hidden="true">
-            <span className="text-[#f0f0fa] scale-150 block">{icon}</span>
-        </div>
-
-        {/* Trend badge */}
-        {metrics && metrics.trend !== 'stable' && (
-          <span
-            style={{
-              fontSize: "0.625rem",
-              letterSpacing: "0.5px",
-              textTransform: "uppercase",
-              padding: "2px 6px",
-              border: `1px solid ${metrics.isImprovement ? "rgba(134,239,172,0.2)" : "rgba(252,165,165,0.2)"}`,
-              color: metrics.isImprovement ? "rgba(134,239,172,0.7)" : "rgba(252,165,165,0.7)",
-              borderRadius: "2px",
-            }}
-            aria-label={trendIndicator?.label}
+    <section aria-label="Statistics">
+      <SectionHeader
+        title="Statistics"
+        description="Activity across your synced GitHub repositories."
+        action={
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={refreshStats}
+            loading={isRefreshing}
+            loadingText="Refreshing"
+            leadingIcon={<RefreshCw className="size-3.5" />}
+            aria-label="Refresh statistics"
+            title="Refresh statistics"
           >
-            {formatChangePercent(metrics.changePercent)}
-          </span>
-        )}
-      </div>
+            Refresh
+          </Button>
+        }
+      />
 
-      <div className="flex flex-col items-start border-l-2 border-[rgba(240,240,250,0.35)] pl-4">
-        {/* Label */}
-        <p className="text-micro font-medium uppercase tracking-widest" style={{ opacity: 0.5, marginBottom: "8px" }}>{title}</p>
+      {isRefreshing ? (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <StatCardSkeleton />
+          <StatCardSkeleton />
+          <StatCardSkeleton />
+          <StatCardSkeleton />
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <StatCard
+            label="Repositories"
+            value={(analytics?.totalRepos ?? 0).toLocaleString("en-US")}
+            icon={<Code className="size-4" />}
+            context={
+              hasSyncedData
+                ? "Synced repositories"
+                : "No repositories synced yet"
+            }
+            footer="From your connected GitHub account"
+          />
 
-        {/* Value */}
-        <p className="text-section-head text-4xl font-bold tracking-widest text-[#f0f0fa] opacity-80" aria-live="polite">
-            {value}
-        </p>
+          <StatCard
+            label="Total commits"
+            value={(analytics?.totalCommits ?? 0).toLocaleString("en-US")}
+            icon={<Activity className="size-4" />}
+            context="Across synced repositories"
+            delta={
+              commitMetrics
+                ? {
+                    value: Math.round(commitMetrics.changePercent),
+                    isImprovement: commitMetrics.isImprovement,
+                    suffix: "%",
+                    label:
+                      "Commits in the last 30 days compared with the previous 30 days",
+                    caption: "Last 30 days",
+                  }
+                : undefined
+            }
+            footer="All-time total across synced repositories"
+          />
 
-        {/* Subtitle */}
-        {subtitle && (
-            <p className="text-micro pt-1 uppercase tracking-widest" style={{ opacity: 0.25 }}>{subtitle}</p>
-        )}
-      </div>
+          <StatCard
+            label="Current streak"
+            value={(analytics?.currentStreak ?? 0).toLocaleString("en-US")}
+            icon={<Flame className="size-4" />}
+            context={
+              analytics?.isActiveToday ? (
+                <span className="inline-flex items-center gap-1.5">
+                  <span
+                    className="size-1.5 rounded-full bg-success"
+                    aria-hidden="true"
+                  />
+                  Active today
+                </span>
+              ) : analytics?.currentStreak ? (
+                "Consecutive active days"
+              ) : (
+                "No active streak"
+              )
+            }
+            footer="As of today"
+          />
 
-      {/* Comparative section */}
-      {metrics && (
-        <div
-          style={{
-            marginTop: "12px",
-            paddingTop: "10px",
-            borderTop: "1px solid rgba(240,240,250,0.05)",
-          }}
-        >
-          <div style={{ display: "flex", justifyContent: "space-between", gap: "8px" }}>
-            <span
-              style={{
-                fontSize: "0.688rem",
-                fontWeight: 700,
-                textTransform: "uppercase",
-                letterSpacing: "0.5px",
-                color: metrics.trend === "up"
-                  ? "rgba(134,239,172,0.6)"
-                  : metrics.trend === "down"
-                  ? "rgba(252,165,165,0.6)"
-                  : "rgba(240,240,250,0.3)",
-              }}
-              aria-label={`Change: ${formatChange(metrics.change)} (${formatChangePercent(metrics.changePercent)})`}
-            >
-              {formatChange(metrics.change, 0)}
-            </span>
-            <span className="text-micro" style={{ opacity: 0.25 }}>vs prev {period}</span>
-          </div>
-          <p className="text-micro" style={{ marginTop: "3px", opacity: 0.2 }}>
-            Prev: {metrics.previous > 0 ? formatNumber(Math.round(metrics.previous)) : '—'}
-          </p>
+          <StatCard
+            label="Stars earned"
+            value={(analytics?.totalStars ?? 0).toLocaleString("en-US")}
+            icon={<Star className="size-4" />}
+            context="Across synced repositories"
+            footer="All-time total"
+          />
         </div>
       )}
-    </div>
+    </section>
   );
-}
-
-function StatCardSkeleton() {
-  return (
-    <div style={{ background: "transparent", padding: "0" }}>
-      <div className="skeleton" style={{ width: "16px", height: "16px", marginBottom: "12px" }} />
-      <div className="skeleton" style={{ width: "60px", height: "10px", marginBottom: "6px" }} />
-      <div className="skeleton" style={{ width: "80px", height: "28px", marginBottom: "4px" }} />
-      <div className="skeleton" style={{ width: "50px", height: "8px" }} />
-    </div>
-  );
-}
-
-function formatNumber(num: number): string {
-  if (num >= 1000000) return (num / 1000000).toFixed(1) + "M";
-  if (num >= 1000) return (num / 1000).toFixed(1) + "K";
-  return num.toString();
 }

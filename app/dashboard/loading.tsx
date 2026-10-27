@@ -1,129 +1,110 @@
+import { PageShell } from "@/components/ui/page-shell";
+import { SpaceBackground } from "@/components/ui/space-background";
+import {
+  ActivityOverviewSkeleton,
+  InsightCardSkeleton,
+  ProfileCardSkeleton,
+  Skeleton,
+  StatCardSkeleton,
+} from "@/components/ui/skeletons";
+import { SkeletonCard } from "@/components/ui/skeleton";
+
 /**
- * Dashboard Loading Skeleton — SpaceX-inspired spectral shimmer
+ * Dashboard Loading Skeleton — matches the final card geometry.
  */
 export default function DashboardLoading() {
   return (
     <div
-      className="section-cinematic bg-black items-start"
       role="status"
       aria-busy="true"
       aria-label="Loading dashboard content"
     >
-      <div 
-        className="section-photo" 
-        style={{ 
-          backgroundImage: "url('/space-hero.png')", 
-          backgroundSize: "cover", 
-          backgroundPosition: "center"
-        }} 
-      />
-      <div className="section-overlay" />
-      <div className="section-content relative z-20 w-full" style={{ padding: "clamp(88px, 14vh, 120px) clamp(24px, 6vw, 80px) 40px" }}>
-        <div className="grid grid-cols-1 gap-6 lg:gap-8 lg:grid-cols-[280px_minmax(0,1fr)]">
+      <SpaceBackground variant="app" />
 
-          {/* Left Sidebar Skeleton */}
+      <PageShell>
+        <div className="mb-8 space-y-3 sm:mb-10" aria-hidden="true">
+          <Skeleton className="h-3 w-20" />
+          <Skeleton className="h-10 w-72 max-w-full" />
+          <Skeleton className="h-4 w-96 max-w-full" />
+        </div>
+
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[280px_minmax(0,1fr)] lg:gap-8">
           <aside aria-hidden="true">
-            <div
-              style={{
-                background: "transparent",
-                border: "none",
-                borderRadius: "0",
-              }}
-            >
-              <div style={{ padding: "24px 0 0" }}>
-                <div className="skeleton" style={{ width: "64px", height: "64px", borderRadius: "50%", marginBottom: "16px" }} />
-                <div className="skeleton" style={{ width: "70%", height: "14px", marginBottom: "8px" }} />
-                <div className="skeleton" style={{ width: "50%", height: "10px", marginBottom: "20px" }} />
-                <div style={{ display: "flex", gap: "8px", marginBottom: "20px" }}>
-                  <div className="skeleton" style={{ width: "80px", height: "22px", borderRadius: "12px" }} />
-                </div>
-                <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginBottom: "20px" }}>
-                  <div className="skeleton" style={{ width: "100%", height: "36px", borderRadius: "20px" }} />
-                  <div className="skeleton" style={{ width: "100%", height: "36px", borderRadius: "20px" }} />
-                </div>
-                <div style={{ height: "1px", background: "rgba(240,240,250,0.05)", margin: "0 0 16px" }} />
-                <div className="skeleton" style={{ width: "60px", height: "8px", marginBottom: "10px" }} />
-                <div className="skeleton" style={{ width: "100%", height: "44px", borderRadius: "20px" }} />
-              </div>
-            </div>
+            <ProfileCardSkeleton />
           </aside>
 
-          {/* Main Content Skeleton */}
-          <main style={{ display: "flex", flexDirection: "column", gap: "24px" }} aria-hidden="true">
-            {/* Welcome Header Skeleton */}
-            <div style={{ paddingBottom: "16px", borderBottom: "1px solid rgba(240,240,250,0.06)" }}>
-              <div className="skeleton" style={{ width: "80px", height: "8px", marginBottom: "10px" }} />
-              <div className="skeleton" style={{ width: "55%", height: "28px", marginBottom: "8px" }} />
-              <div className="skeleton" style={{ width: "40%", height: "14px" }} />
-            </div>
+          <div className="flex min-w-0 flex-col gap-6" aria-hidden="true">
+            <SkeletonCard>
+              <div className="flex items-start justify-between gap-4">
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-40" />
+                  <Skeleton className="h-3 w-28" />
+                </div>
+                <Skeleton className="h-6 w-28 rounded-pill" />
+              </div>
+              <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-3">
+                {Array.from({ length: 3 }).map((_, index) => (
+                  <div key={index} className="space-y-3">
+                    <Skeleton className="h-3 w-20" />
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-4/5" />
+                    <Skeleton className="h-4 w-3/5" />
+                  </div>
+                ))}
+              </div>
+            </SkeletonCard>
 
-            {/* Stats Grid Skeleton */}
             <div>
-              <div className="skeleton" style={{ width: "80px", height: "8px", marginBottom: "16px" }} />
-              <div
-                style={{
-                  gap: "24px",
-                  background: "transparent",
-                  border: "none",
-                }}
-                className="grid grid-cols-1 sm:grid-cols-2"
-              >
-                {[...Array(4)].map((_, i) => (
-                  <div key={i} style={{ background: "transparent", padding: "0" }}>
-                    <div className="skeleton" style={{ width: "16px", height: "16px", marginBottom: "12px" }} />
-                    <div className="skeleton" style={{ width: "60px", height: "10px", marginBottom: "6px" }} />
-                    <div className="skeleton" style={{ width: "80px", height: "28px", marginBottom: "4px" }} />
-                    <div className="skeleton" style={{ width: "50px", height: "8px" }} />
-                  </div>
-                ))}
+              <div className="mb-4 flex items-end justify-between gap-3">
+                <div className="space-y-2">
+                  <Skeleton className="h-5 w-28" />
+                  <Skeleton className="h-3 w-64 max-w-full" />
+                </div>
+                <Skeleton className="h-8 w-20 rounded-pill" />
+              </div>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                <StatCardSkeleton />
+                <StatCardSkeleton />
+                <StatCardSkeleton />
+                <StatCardSkeleton />
               </div>
             </div>
 
-            {/* Insights Row Skeleton */}
             <div>
-              <div className="skeleton" style={{ width: "80px", height: "8px", marginBottom: "16px" }} />
-              <div
-                style={{
-                  gap: "24px",
-                  background: "transparent",
-                  border: "none",
-                }}
-                className="grid grid-cols-1 md:grid-cols-3"
-              >
-                {[...Array(3)].map((_, i) => (
-                  <div key={i} style={{ background: "transparent", padding: "0" }}>
-                    <div className="skeleton" style={{ width: "60%", height: "10px", marginBottom: "8px" }} />
-                    <div className="skeleton" style={{ width: "40%", height: "22px", marginBottom: "4px" }} />
-                    <div className="skeleton" style={{ width: "45%", height: "8px" }} />
-                  </div>
-                ))}
+              <div className="mb-4 space-y-2">
+                <Skeleton className="h-5 w-28" />
+                <Skeleton className="h-3 w-64 max-w-full" />
+              </div>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                <InsightCardSkeleton />
+                <InsightCardSkeleton />
+                <InsightCardSkeleton />
               </div>
             </div>
 
-            {/* Activity section skeleton */}
-            <div
-              style={{
-                background: "transparent",
-                border: "none",
-              }}
-            >
-              <div style={{ padding: "16px 0", borderBottom: "1px solid rgba(240,240,250,0.05)" }}>
-                <div className="skeleton" style={{ width: "120px", height: "12px" }} />
+            <SkeletonCard>
+              <div className="flex items-start justify-between gap-4">
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-36" />
+                  <Skeleton className="h-3 w-44" />
+                </div>
+                <Skeleton className="size-14 rounded-card" />
               </div>
-              <div style={{ padding: "20px 0", gap: "24px", background: "transparent" }} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-                {[...Array(4)].map((_, i) => (
-                  <div key={i} style={{ background: "transparent", padding: "0" }}>
-                    <div className="skeleton" style={{ width: "60px", height: "8px", marginBottom: "6px" }} />
-                    <div className="skeleton" style={{ width: "45px", height: "20px" }} />
-                  </div>
-                ))}
+              <div className="mt-6 space-y-4">
+                <Skeleton className="h-3 w-28" />
+                <Skeleton className="h-1.5 w-full rounded-pill" />
+                <Skeleton className="h-1.5 w-full rounded-pill" />
+                <Skeleton className="h-1.5 w-full rounded-pill" />
+                <Skeleton className="h-1.5 w-full rounded-pill" />
               </div>
-            </div>
-          </main>
+            </SkeletonCard>
+
+            <ActivityOverviewSkeleton />
+          </div>
         </div>
-      </div>
+      </PageShell>
 
-      <span className="sr-only">Loading dashboard, please wait...</span>
+      <span className="sr-only">Loading dashboard, please wait…</span>
     </div>
   );
 }

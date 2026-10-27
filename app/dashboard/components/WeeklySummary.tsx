@@ -1,24 +1,26 @@
-'use client';
+"use client";
 
 import {
   Calendar,
-  TrendingUp,
-  TrendingDown,
-  Minus,
+  Code,
   Flame,
   GitCommit,
-  Code,
+  Minus,
+  Sparkles,
   Target,
-  ExternalLink,
-  Sparkles
+  TrendingDown,
+  TrendingUp,
 } from "lucide-react";
 import { useMemo } from "react";
 import {
   buildWeeklySummary,
   getWeekLabel,
-  formatWeekChange,
 } from "@/lib/analytics/weekly-summary";
-import { cn } from "@/lib/utils";
+import { Badge, Chip } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
+import { DeltaChip } from "@/components/ui/delta-chip";
+import { IconTile } from "@/components/ui/icon-tile";
+import { cn } from "@/components/ui/cn";
 
 interface WeeklySummaryProps {
   analytics: {
@@ -48,217 +50,192 @@ export function WeeklySummary({ analytics, className }: WeeklySummaryProps) {
 
   if (!summaryData) {
     return (
-      <div
-        style={{
-          background: "rgba(240,240,250,0.02)",
-          border: "1px solid rgba(240,240,250,0.06)",
-          borderRadius: "var(--radius-sharp)",
-          padding: "20px",
-          display: "flex",
-          alignItems: "center",
-          flexWrap: "wrap",
-          gap: "10px",
-          opacity: 0.5,
-        }}
-      >
-        <Calendar size={14} />
-        <span className="text-caption">Sync your data to see weekly summary</span>
-      </div>
+      <Card className={cn("flex flex-wrap items-center gap-3", className)}>
+        <Calendar className="size-4 text-text-3" aria-hidden="true" />
+        <p className="text-caption">
+          Sync your data to see a weekly summary.
+        </p>
+      </Card>
     );
   }
 
-  const { currentWeek, comparison, highlights, streakInfo } = summaryData;
+  const { currentWeek, previousWeek, comparison, highlights, streakInfo } =
+    summaryData;
+
+  const highlightItems = [
+    ...(highlights.bestDay
+      ? [
+          {
+            label: "Best day",
+            value: `${highlights.bestDay.dayName} · ${highlights.bestDay.commits} commits this week`,
+          },
+        ]
+      : []),
+    ...(highlights.mostActiveHour
+      ? [
+          {
+            label: "Peak hour",
+            value: `${highlights.mostActiveHour.label} · all time`,
+          },
+        ]
+      : []),
+    ...(streakInfo.daysToMilestone !== null && streakInfo.milestoneLabel
+      ? [
+          {
+            label: "Streak milestone",
+            value: `${streakInfo.daysToMilestone} days to the ${streakInfo.milestoneLabel} badge`,
+          },
+        ]
+      : []),
+    ...(highlights.topRepos.length > 0
+      ? [
+          {
+            label: "Top repositories",
+            value: `${highlights.topRepos.slice(0, 2).join(", ")} · all time`,
+          },
+        ]
+      : []),
+  ];
 
   return (
-    <div
-      className={cn("brutalist-glass", className)}
-      style={{
-        padding: "0",
-        borderRadius: "2px",
-      }}
-    >
-      {/* Header */}
-      <div
-        style={{
-          padding: "16px 20px",
-          borderBottom: "1px solid rgba(240,240,250,0.05)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: "12px",
-          flexWrap: "wrap",
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          <Calendar size={14} style={{ opacity: 0.35 }} aria-hidden="true" />
-          <div>
-            <p className="text-caption-bold" style={{ fontSize: "0.75rem" }}>
+    <Card padding="none" className={cn("overflow-hidden", className)}>
+      <div className="flex flex-wrap items-start justify-between gap-4 border-b border-border-subtle p-5 sm:p-6">
+        <div className="flex min-w-0 items-start gap-3">
+          <IconTile>
+            <Calendar className="size-4" />
+          </IconTile>
+          <div className="min-w-0">
+            <h2 className="text-card-title">
               {getWeekLabel(currentWeek.weekNumber, currentWeek.year)}
-            </p>
-            <p className="text-micro uppercase tracking-widest" style={{ opacity: 0.3, marginTop: "2px" }}>THIS WEEK AT A GLANCE</p>
+            </h2>
+            <p className="mt-1 text-caption">This week at a glance.</p>
           </div>
         </div>
 
-        {/* Overall trend */}
-        <TrendBadge trend={comparison.trend} percentChange={comparison.commitsPercentChange} />
+        <TrendBadge
+          trend={comparison.trend}
+          percentChange={comparison.commitsPercentChange}
+        />
       </div>
 
-      {/* Content Grid */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr",
-          gap: "24px",
-          background: "transparent",
-        }}
-        className="weekly-grid"
-      >
-        <style>{`
-          @media (min-width: 640px) {
-            .weekly-grid {
-              grid-template-columns: repeat(2, 1fr) !important;
-            }
-          }
+      <div className="grid grid-cols-1 divide-y divide-border-subtle lg:grid-cols-3 lg:divide-x lg:divide-y-0">
+        <section className="p-5 sm:p-6" aria-label="Weekly progress">
+          <h3 className="flex items-center gap-2 text-label">
+            <Target className="size-3.5 text-text-3" aria-hidden="true" />
+            This week
+          </h3>
 
-          @media (min-width: 1024px) {
-            .weekly-grid {
-              grid-template-columns: repeat(3, 1fr) !important;
-            }
-          }
-        `}</style>
-
-        {/* Progress Section */}
-        <div style={{ background: "transparent", padding: "0" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "14px", opacity: 0.4 }}>
-            <Target size={12} />
-            <p className="text-micro uppercase tracking-widest">PROGRESS</p>
-          </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+          <div className="mt-4 space-y-3">
             <ProgressItem
-              icon={<GitCommit size={12} />}
-              label="COMMITS"
+              icon={<GitCommit className="size-3.5" />}
+              label="Commits this week"
               value={currentWeek.totalCommits}
               change={comparison.commitsDiff}
-              changeLabel="VS LAST WEEK"
+              changeLabel="Compared with the previous week"
             />
             <ProgressItem
-              icon={<Flame size={12} />}
-              label="DAY STREAK"
+              icon={<Code className="size-3.5" />}
+              label="Active days this week"
+              value={currentWeek.activeDays}
+            />
+            <ProgressItem
+              icon={<Flame className="size-3.5" />}
+              label="Current streak"
               value={streakInfo.current}
+              suffix={streakInfo.current === 1 ? "day" : "days"}
             />
-            <ProgressItem
-              icon={<Code size={12} />}
-              label="REPOS TOUCHED"
-              value={highlights.totalReposTouched}
-            />
-            {comparison.weekendChange !== 0 && (
-              <p
-                className="text-micro"
-                style={{
-                  padding: "6px 10px",
-                  border: `1px solid ${comparison.weekendChange < 0 ? "rgba(251,191,36,0.2)" : "rgba(134,239,172,0.2)"}`,
-                  color: comparison.weekendChange < 0 ? "rgba(251,191,36,0.6)" : "rgba(134,239,172,0.6)",
-                  borderRadius: "2px",
-                }}
-              >
-                Weekend activity {comparison.weekendChange > 0 ? 'up' : 'down'} {Math.abs(comparison.weekendChange)}%
-              </p>
-            )}
           </div>
-        </div>
 
-        {/* Highlights Section */}
-        <div style={{ background: "transparent", padding: "0" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "14px", opacity: 0.4 }}>
-            <Sparkles size={12} />
-            <p className="text-micro uppercase tracking-widest">HIGHLIGHTS</p>
-          </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-            {highlights.bestDay && (
-              <HighlightItem
-                label="BEST DAY"
-                value={`${highlights.bestDay.dayName} (${highlights.bestDay.commits} COMMITS)`}
-              />
-            )}
-            {highlights.mostActiveHour && (
-              <HighlightItem
-                label="MOST ACTIVE"
-                value={highlights.mostActiveHour.label}
-              />
-            )}
-            {streakInfo.daysToMilestone && streakInfo.milestoneLabel && (
-              <HighlightItem
-                label="STREAK MILESTONE"
-                value={`${streakInfo.daysToMilestone} DAY${streakInfo.daysToMilestone !== 1 ? 'S' : ''} TO ${streakInfo.milestoneLabel} BADGE`}
-                highlight
-              />
-            )}
-            {highlights.topRepos.length > 0 && (
-              <HighlightItem
-                label="TOP REPOS"
-                value={highlights.topRepos.slice(0, 2).join(', ').toUpperCase()}
-              />
-            )}
-          </div>
-        </div>
+          {comparison.weekendChange !== 0 ? (
+            <Chip
+              variant={comparison.weekendChange < 0 ? "warning" : "success"}
+              className="mt-4"
+            >
+              Weekend activity{" "}
+              {comparison.weekendChange < 0 ? "down" : "up"}{" "}
+              {Math.abs(comparison.weekendChange)}% vs last week
+            </Chip>
+          ) : null}
 
-        {/* Mini Chart Section */}
-        <div style={{ background: "transparent", padding: "0" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "14px", opacity: 0.4 }}>
-            <TrendingUp size={12} />
-            <p className="text-micro uppercase tracking-widest">THIS WEEK</p>
-          </div>
+          <p className="mt-4 text-caption">
+            Changes compare with the previous week.
+          </p>
+        </section>
+
+        <section className="p-5 sm:p-6" aria-label="Weekly highlights">
+          <h3 className="flex items-center gap-2 text-label">
+            <Sparkles className="size-3.5 text-text-3" aria-hidden="true" />
+            Highlights
+          </h3>
+
+          {highlightItems.length > 0 ? (
+            <dl className="mt-3 divide-y divide-border-subtle">
+              {highlightItems.map((item) => (
+                <div key={item.label} className="py-2.5">
+                  <dt className="text-label">{item.label}</dt>
+                  <dd className="mt-1 break-words text-sm leading-snug text-text">
+                    {item.value}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          ) : (
+            <p className="mt-4 text-caption">
+              Not enough activity this week.
+            </p>
+          )}
+        </section>
+
+        <section className="p-5 sm:p-6" aria-label="Daily commits this week">
+          <h3 className="flex items-center gap-2 text-label">
+            <TrendingUp className="size-3.5 text-text-3" aria-hidden="true" />
+            Daily commits
+          </h3>
+
           <WeekMiniChart data={currentWeek.dailyBreakdown} />
-
-          {/* Quick Actions */}
-          <div style={{ display: "flex", gap: "8px", marginTop: "16px", flexWrap: "wrap" }}>
-            {!streakInfo.isActive && (
-              <button className="btn-ghost btn-ghost-sm w-full sm:w-auto" style={{ fontSize: "0.625rem", padding: "8px 16px" }}>
-                <GitCommit size={11} />
-                COMMIT TODAY
-              </button>
-            )}
-            <button className="btn-ghost btn-ghost-sm w-full sm:w-auto" style={{ fontSize: "0.625rem", padding: "8px 16px" }}>
-              <ExternalLink size={11} />
-              WEEKLY REPORT
-            </button>
-          </div>
-        </div>
+        </section>
       </div>
-    </div>
+
+      <div className="border-t border-border-subtle px-5 py-3 text-caption sm:px-6">
+        <span className="text-text-2">
+          {formatShortDate(currentWeek.startDate)} –{" "}
+          {formatShortDate(currentWeek.endDate)}
+        </span>{" "}
+        · compared with {formatShortDate(previousWeek.startDate)} –{" "}
+        {formatShortDate(previousWeek.endDate)}
+      </div>
+    </Card>
   );
 }
 
 function TrendBadge({
   trend,
-  percentChange
+  percentChange,
 }: {
-  trend: 'up' | 'down' | 'stable';
+  trend: "up" | "down" | "stable";
   percentChange: number;
 }) {
   const config = {
-    up: { icon: TrendingUp, color: "rgba(134,239,172,0.6)", border: "rgba(134,239,172,0.2)" },
-    down: { icon: TrendingDown, color: "rgba(252,165,165,0.6)", border: "rgba(252,165,165,0.2)" },
-    stable: { icon: Minus, color: "rgba(240,240,250,0.3)", border: "rgba(240,240,250,0.08)" },
+    up: { icon: TrendingUp, variant: "success" as const },
+    down: { icon: TrendingDown, variant: "danger" as const },
+    stable: { icon: Minus, variant: "neutral" as const },
   };
-  const { icon: Icon, color, border } = config[trend];
+
+  const { icon: Icon, variant } = config[trend];
+  const sign = percentChange > 0 ? "+" : "";
 
   return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: "6px",
-        padding: "4px 10px",
-        border: `1px solid ${border}`,
-        borderRadius: "2px",
-      }}
+    <Badge
+      variant={variant}
+      size="sm"
+      uppercase={false}
+      mono
+      icon={<Icon className="size-3" />}
     >
-      <Icon size={12} style={{ color }} />
-      <span className="text-micro" style={{ color }}>
-        {percentChange > 0 ? '+' : ''}{percentChange}%
-      </span>
-    </div>
+      {percentChange === 0
+        ? "No change vs last week"
+        : `${sign}${percentChange}% vs last week`}
+    </Badge>
   );
 }
 
@@ -266,113 +243,90 @@ function ProgressItem({
   icon,
   label,
   value,
+  suffix,
   change,
   changeLabel,
 }: {
   icon: React.ReactNode;
   label: string;
   value: number;
+  suffix?: string;
   change?: number;
   changeLabel?: string;
 }) {
   return (
-    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-        <span style={{ opacity: 0.3 }}>{icon}</span>
-        <span className="text-caption uppercase tracking-widest">
-          <span className="text-caption-bold" style={{ fontSize: "0.75rem" }}>{value}</span>
-          {' '}{label}
+    <div className="flex items-center justify-between gap-3">
+      <div className="flex min-w-0 items-center gap-2">
+        <span className="text-text-3" aria-hidden="true">
+          {icon}
         </span>
+        <span className="truncate text-caption">{label}</span>
       </div>
-      {change !== undefined && (
-        <span
-          className="text-micro uppercase tracking-widest"
-          style={{
-            padding: "2px 6px",
-            border: `1px solid ${change >= 0 ? "rgba(134,239,172,0.15)" : "rgba(252,165,165,0.15)"}`,
-            color: change >= 0 ? "rgba(134,239,172,0.6)" : "rgba(252,165,165,0.6)",
-            borderRadius: "2px",
-          }}
-        >
-          {formatWeekChange(change).toUpperCase()} {changeLabel?.toUpperCase()}
+      <div className="flex shrink-0 items-center gap-2">
+        <span className="font-mono text-sm tabular-nums text-text">
+          {value.toLocaleString("en-US")}
+          {suffix ? ` ${suffix}` : ""}
         </span>
-      )}
-    </div>
-  );
-}
-
-function HighlightItem({
-  label,
-  value,
-  highlight = false,
-}: {
-  label: string;
-  value: string;
-  highlight?: boolean;
-}) {
-  return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "flex-start",
-        gap: "8px",
-        padding: "6px 8px",
-        borderRadius: "2px",
-        background: highlight ? "rgba(240,240,250,0.03)" : "transparent",
-        border: highlight ? "1px solid rgba(240,240,250,0.06)" : "none",
-      }}
-    >
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <span className="text-micro uppercase tracking-widest" style={{ opacity: 0.3 }}>{label}: </span>
-        <span
-          className="text-caption uppercase tracking-widest"
-          style={{ opacity: highlight ? 0.8 : 0.55 }}
-        >
-          {value}
-        </span>
+        {change !== undefined ? (
+          <DeltaChip
+            value={change}
+            label={changeLabel ?? "Compared with the previous week"}
+          />
+        ) : null}
       </div>
     </div>
   );
 }
 
 function WeekMiniChart({
-  data
+  data,
 }: {
-  data: { date: string; commits: number; dayName: string }[]
+  data: { date: string; commits: number; dayName: string }[];
 }) {
-  const maxCommits = Math.max(...data.map(d => d.commits), 1);
-  const today = new Date().toISOString().split('T')[0];
+  const maxCommits = Math.max(...data.map((day) => day.commits), 1);
+  const today = new Date().toISOString().split("T")[0];
+  const summary = data
+    .map((day) => `${day.dayName}: ${day.commits}`)
+    .join(", ");
 
   return (
-    <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: "4px", height: "56px" }}>
-      {data.map((day, i) => {
+    <div
+      className="mt-4 flex h-24 items-end gap-1.5"
+      role="img"
+      aria-label={`Daily commits this week. ${summary}.`}
+    >
+      {data.map((day) => {
         const height = (day.commits / maxCommits) * 100;
         const isToday = day.date === today;
         const isFuture = day.date > today;
 
         return (
-          <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: "4px" }}>
-            <div
-              style={{
-                width: "100%",
-                borderRadius: "1px",
-                height: `${Math.max(height, 6)}%`,
-                background: isFuture
-                  ? "rgba(240,240,250,0.05)"
-                  : day.commits > 0
-                    ? isToday
-                      ? "var(--spectral-white)"
-                      : "rgba(240,240,250,0.35)"
-                    : "rgba(240,240,250,0.08)",
-                outline: isToday ? "1px solid rgba(240,240,250,0.4)" : "none",
-                outlineOffset: "1px",
-                transition: "height 0.3s ease",
-              }}
-              title={`${day.dayName}: ${day.commits} commits`}
-            />
+          <div
+            key={day.date}
+            className="flex h-full min-w-0 flex-1 flex-col justify-end gap-1.5"
+          >
+            <div className="flex flex-1 items-end">
+              <div
+                className={cn(
+                  "w-full rounded-t-[2px] transition-[height] duration-300",
+                  isFuture
+                    ? "bg-white/10"
+                    : day.commits > 0
+                      ? isToday
+                        ? "bg-accent"
+                        : "bg-text-3"
+                      : "bg-white/10"
+                )}
+                style={{ height: `${Math.max(height, 6)}%` }}
+                title={`${day.dayName}: ${day.commits} commits`}
+                aria-hidden="true"
+              />
+            </div>
             <span
-              className="text-micro"
-              style={{ fontSize: "0.5rem", opacity: isToday ? 0.7 : 0.25 }}
+              className={cn(
+                "text-center text-[11px] leading-none",
+                isToday ? "text-text" : "text-text-3"
+              )}
             >
               {day.dayName.charAt(0)}
             </span>
@@ -383,10 +337,20 @@ function WeekMiniChart({
   );
 }
 
+function formatShortDate(date: Date): string {
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+  }).format(date);
+}
+
 /**
  * Compact Weekly Summary
  */
-export function WeeklySummaryCompact({ analytics, className }: WeeklySummaryProps) {
+export function WeeklySummaryCompact({
+  analytics,
+  className,
+}: WeeklySummaryProps) {
   const summaryData = useMemo(() => {
     if (!analytics) return null;
     return buildWeeklySummary(
@@ -404,27 +368,25 @@ export function WeeklySummaryCompact({ analytics, className }: WeeklySummaryProp
 
   return (
     <div
-      className={className}
-      style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        padding: "14px 0",
-        background: "transparent",
-        border: "none",
-      }}
+      className={cn(
+        "flex flex-wrap items-center justify-between gap-4 border-y border-border-subtle py-4",
+        className
+      )}
     >
-      <div style={{ display: "flex", alignItems: "center", gap: "24px" }}>
+      <div className="flex items-center gap-4">
         <div>
-          <p className="stat-value" style={{ fontSize: "1.5rem" }}>{currentWeek.totalCommits}</p>
-          <p className="text-micro" style={{ opacity: 0.3 }}>commits</p>
+          <p className="text-section-head text-2xl">
+            {currentWeek.totalCommits.toLocaleString("en-US")}
+          </p>
+          <p className="text-caption">commits this week</p>
         </div>
-        <div style={{ width: "1px", height: "32px", background: "rgba(240,240,250,0.08)" }} />
-        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          <span className="text-caption uppercase tracking-widest">{streakInfo.current} DAY STREAK</span>
-        </div>
+        <div className="h-8 w-px bg-border-subtle" aria-hidden="true" />
+        <p className="text-caption">{streakInfo.current} day streak</p>
       </div>
-      <TrendBadge trend={comparison.trend} percentChange={comparison.commitsPercentChange} />
+      <TrendBadge
+        trend={comparison.trend}
+        percentChange={comparison.commitsPercentChange}
+      />
     </div>
   );
 }

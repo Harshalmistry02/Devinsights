@@ -1,15 +1,15 @@
 import type { Metadata, Viewport } from "next";
-import { Barlow, Barlow_Condensed } from "next/font/google";
+import { Barlow, Barlow_Condensed, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import ClientLayout from "./components/ClientLayout";
 import { SessionProviderWrapper } from "@/components/SessionProvider";
 import { ToastProvider } from "@/components/ToastProvider";
-import { KeyboardShortcuts, KeyboardShortcutsHelp } from "@/components/dashboard/KeyboardShortcuts";
+import { ShortcutChrome } from "./components/ShortcutChrome";
 
 // Self-hosted via next/font — downloaded at build time, served locally (no external requests)
 const barlow = Barlow({
   subsets: ["latin"],
-  weight: ["400", "700"],
+  weight: ["400", "500", "600", "700"],
   style: ["normal", "italic"],
   variable: "--font-barlow",
   display: "swap",
@@ -17,13 +17,20 @@ const barlow = Barlow({
 
 const barlowCondensed = Barlow_Condensed({
   subsets: ["latin"],
-  weight: ["400", "700"],
+  weight: ["400", "500", "600", "700"],
   variable: "--font-barlow-condensed",
   display: "swap",
 });
 
+// Monospace for SHAs, IDs, code and tabular technical details.
+const geistMono = Geist_Mono({
+  subsets: ["latin"],
+  variable: "--font-geist-mono",
+  display: "swap",
+});
+
 export const viewport: Viewport = {
-  themeColor: "#020617",
+  themeColor: "#000000",
   width: "device-width",
   initialScale: 1,
   maximumScale: 5, // allows zooming, better for a11y
@@ -111,7 +118,10 @@ export default function RootLayout({
   };
 
   return (
-    <html lang="en" className={`${barlow.variable} ${barlowCondensed.variable}`}>
+    <html
+      lang="en"
+      className={`${barlow.variable} ${barlowCondensed.variable} ${geistMono.variable}`}
+    >
       <head>
         <script 
           type="application/ld+json"
@@ -122,8 +132,7 @@ export default function RootLayout({
         <SessionProviderWrapper>
           <ClientLayout>{children}</ClientLayout>
           <ToastProvider />
-          <KeyboardShortcuts />
-          <KeyboardShortcutsHelp />
+          <ShortcutChrome />
         </SessionProviderWrapper>
       </body>
     </html>

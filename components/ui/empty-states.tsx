@@ -10,15 +10,16 @@ import {
   PieChart,
   Calendar,
   Zap,
-  AlertCircle,
-  AlertTriangle,
-  RefreshCw,
-  XCircle
 } from 'lucide-react';
-import Link from 'next/link';
+import { Card } from './card';
+import { Badge } from './badge';
+import { Button, ButtonLink } from './button';
+import { EmptyState as BaseEmptyState } from './empty-state';
+import { InlineNotice } from './inline-notice';
 
 /**
- * Empty State Components — SpaceX-inspired, minimal achromatic design
+ * Shared empty and notice states. Legacy export names are preserved so
+ * existing pages keep working while they migrate to the primitives.
  */
 
 interface EmptyStateProps {
@@ -33,184 +34,132 @@ interface EmptyStateProps {
   variant?: 'default' | 'compact';
 }
 
-// Generic Empty State Component
 export function EmptyState({
   icon,
   title,
   description,
   action,
-  variant = 'default'
+  variant = 'default',
 }: EmptyStateProps) {
-  const isCompact = variant === 'compact';
-
   return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        minHeight: isCompact ? "100px" : "160px",
-      }}
-      role="status"
-      aria-label={`${title}: ${description}`}
-    >
-      <div style={{ textAlign: "center" }}>
-        {icon && (
-          <div style={{ marginBottom: isCompact ? "8px" : "12px", opacity: 0.15 }} aria-hidden="true">
-            {icon}
-          </div>
-        )}
-        <p className="text-caption-bold uppercase tracking-widest text-[#f0f0fa]" style={{ opacity: 0.45, marginBottom: "4px" }}>{title}</p>
-        <p className="text-micro uppercase tracking-widest" style={{ opacity: 0.25, maxWidth: "240px" }}>{description}</p>
-        {action && (
-          <div style={{ marginTop: "16px" }}>
-            {action.href ? (
-              <Link
-                href={action.href}
-                className="btn-ghost btn-ghost-sm"
-                aria-label={action.label}
-              >
-                {action.label}
-              </Link>
-            ) : (
-              <button
-                onClick={action.onClick}
-                className="btn-ghost btn-ghost-sm"
-                aria-label={action.label}
-              >
-                {action.label}
-              </button>
-            )}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-// First-time user empty state - No synced data
-export function NoDataEmptyState() {
-  return (
-    <div
-      style={{
-        background: "rgba(240,240,250,0.02)",
-        border: "1px solid rgba(240,240,250,0.06)",
-        borderRadius: "var(--radius-sharp)",
-        padding: "40px 24px",
-        textAlign: "center",
-      }}
-      role="region"
-      aria-label="No data available"
-    >
-      <div style={{ maxWidth: "360px", margin: "0 auto" }}>
-        <div
-          style={{
-            width: "52px",
-            height: "52px",
-            margin: "0 auto 20px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            opacity: 0.2,
-          }}
-          aria-hidden="true"
-        >
-          <Github size={40} />
-        </div>
-        <h3 className="text-caption-bold text-sm uppercase tracking-widest text-[#f0f0fa]" style={{ marginBottom: "12px", opacity: 0.7 }}>
-          SYNC YOUR GITHUB DATA TO SEE INSIGHTS
-        </h3>
-        <p className="text-micro uppercase tracking-widest" style={{ opacity: 0.3, marginBottom: "24px", maxWidth: "280px", margin: "0 auto 24px" }}>
-          CONNECT AND SYNC YOUR GITHUB REPOSITORIES TO UNLOCK POWERFUL ANALYTICS,
-          ACTIVITY TRACKING, AND AI-POWERED INSIGHTS ABOUT YOUR CODING PATTERNS.
-        </p>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: "16px", justifyContent: "center" }} aria-label="Benefits of syncing">
-          <div style={{ display: "flex", alignItems: "center", gap: "6px", opacity: 0.3 }}>
-            <Activity size={12} aria-hidden="true" />
-            <span className="text-micro uppercase tracking-widest">TRACK YOUR COMMITS</span>
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: "6px", opacity: 0.3 }}>
-            <Code size={12} aria-hidden="true" />
-            <span className="text-micro uppercase tracking-widest">ANALYZE LANGUAGES</span>
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: "6px", opacity: 0.3 }}>
-            <TrendingUp size={12} aria-hidden="true" />
-            <span className="text-micro uppercase tracking-widest">DISCOVER PATTERNS</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// Activity Empty State
-export function ActivityEmptyState() {
-  return (
-    <EmptyState
-      icon={<Activity size={40} />}
-      title="NO ACTIVITY DATA YET"
-      description='USE THE "SYNC GITHUB DATA" BUTTON TO GET STARTED'
+    <BaseEmptyState
+      icon={icon}
+      title={title}
+      description={description}
+      variant={variant}
+      action={
+        action
+          ? action.href
+            ? (
+                <ButtonLink
+                  href={action.href}
+                  variant="secondary"
+                  size="sm"
+                >
+                  {action.label}
+                </ButtonLink>
+              )
+            : (
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={action.onClick}
+                >
+                  {action.label}
+                </Button>
+              )
+          : undefined
+      }
     />
   );
 }
 
-// Chart Empty State
-export function ChartEmptyState({ chartType = 'chart' }: { chartType?: string }) {
-  const icons: Record<string, React.ReactNode> = {
-    timeline: <TrendingUp size={32} />,
-    heatmap: <Calendar size={32} />,
-    bar: <BarChart3 size={32} />,
-    pie: <PieChart size={32} />,
-    chart: <BarChart3 size={32} />,
-  };
-
+// First-time user empty state — no synced data
+export function NoDataEmptyState() {
   return (
-    <div
-      style={{
-        height: "200px",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        background: "rgba(240,240,250,0.02)",
-        border: "1px solid rgba(240,240,250,0.05)",
-        borderRadius: "var(--radius-sharp)",
-      }}
-    >
-      <div style={{ textAlign: "center" }}>
-        <div style={{ opacity: 0.1, marginBottom: "8px" }}>
-          {icons[chartType] || icons.chart}
-        </div>
-        <p className="text-micro uppercase tracking-widest" style={{ opacity: 0.25 }}>NO DATA AVAILABLE</p>
-        <p className="text-micro uppercase tracking-widest" style={{ opacity: 0.15, marginTop: "3px" }}>SYNC YOUR GITHUB DATA TO SEE {chartType.toUpperCase()}</p>
+    <Card className="text-center" role="region" aria-label="No data available">
+      <BaseEmptyState
+        icon={<Github className="size-6" />}
+        title="Sync your GitHub data to see insights"
+        description="Connect and sync your repositories to unlock analytics, activity tracking and AI-powered insights about your coding patterns."
+      />
+      <div
+        className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 border-t border-border-subtle pt-4"
+        aria-label="Benefits of syncing"
+      >
+        <span className="inline-flex items-center gap-2 text-caption">
+          <Activity className="size-3.5 text-accent" aria-hidden="true" />
+          Track commits
+        </span>
+        <span className="inline-flex items-center gap-2 text-caption">
+          <Code className="size-3.5 text-accent" aria-hidden="true" />
+          Analyze languages
+        </span>
+        <span className="inline-flex items-center gap-2 text-caption">
+          <TrendingUp className="size-3.5 text-accent" aria-hidden="true" />
+          Discover patterns
+        </span>
       </div>
-    </div>
+      <p className="mt-4 text-caption">
+        Use &quot;Sync GitHub data&quot; in the profile panel to get started.
+      </p>
+    </Card>
   );
 }
 
-// Language Empty State
-export function LanguageEmptyState() {
+export function ActivityEmptyState() {
   return (
-    <EmptyState
-      icon={<Code size={32} />}
-      title="NO LANGUAGE DATA YET"
-      description="LANGUAGE STATISTICS WILL APPEAR AFTER SYNCING REPOSITORIES"
+    <BaseEmptyState
+      icon={<Activity className="size-6" />}
+      title="No activity yet"
+      description="Use the Sync GitHub data button to pull in your commit activity."
       variant="compact"
     />
   );
 }
 
-// Streak Empty State
-export function StreakEmptyState() {
+export function ChartEmptyState({ chartType = 'chart' }: { chartType?: string }) {
+  const icons: Record<string, React.ReactNode> = {
+    timeline: <TrendingUp className="size-6" />,
+    heatmap: <Calendar className="size-6" />,
+    bar: <BarChart3 className="size-6" />,
+    pie: <PieChart className="size-6" />,
+    chart: <BarChart3 className="size-6" />,
+  };
+
   return (
-    <div style={{ textAlign: "center", padding: "8px 0" }}>
-      <Zap size={16} style={{ margin: "0 auto 4px", opacity: 0.15 }} />
-      <p className="text-caption uppercase tracking-widest" style={{ opacity: 0.35 }}>START TODAY!</p>
-      <p className="text-micro uppercase tracking-widest" style={{ opacity: 0.2 }}>MAKE A COMMIT TO BEGIN YOUR STREAK</p>
-    </div>
+    <BaseEmptyState
+      icon={icons[chartType] ?? icons.chart}
+      title="No chart data yet"
+      description={`Sync your GitHub data to see ${chartType === 'chart' ? 'this chart' : `the ${chartType}`}.`}
+      variant="compact"
+      className="min-h-[200px]"
+    />
   );
 }
 
-// Error Banner Component
+export function LanguageEmptyState() {
+  return (
+    <BaseEmptyState
+      icon={<Code className="size-6" />}
+      title="No language data yet"
+      description="Language statistics appear after repositories are synced."
+      variant="compact"
+    />
+  );
+}
+
+export function StreakEmptyState() {
+  return (
+    <BaseEmptyState
+      icon={<Zap className="size-6" />}
+      title="Start your streak today"
+      description="Make a commit to begin your streak."
+      variant="compact"
+    />
+  );
+}
+
 interface ErrorBannerProps {
   title?: string;
   message: string;
@@ -219,65 +168,37 @@ interface ErrorBannerProps {
 }
 
 export function ErrorBanner({
-  title = "Sync Error",
+  title = 'Sync error',
   message,
   onRetry,
-  onDismiss
+  onDismiss,
 }: ErrorBannerProps) {
   return (
-    <div
-      style={{
-        background: "rgba(252,165,165,0.04)",
-        border: "1px solid rgba(252,165,165,0.12)",
-        borderRadius: "var(--radius-sharp)",
-        padding: "16px 20px",
-        marginBottom: "20px",
-      }}
-      role="alert"
-      aria-live="assertive"
-    >
-      <div style={{ display: "flex", alignItems: "flex-start", gap: "12px" }}>
-        <XCircle size={14} style={{ color: "rgba(252,165,165,0.6)", flexShrink: 0, marginTop: "1px" }} aria-hidden="true" />
-        <div style={{ flex: 1 }}>
-          <p className="text-caption-bold uppercase tracking-widest" style={{ color: "rgba(252,165,165,0.7)", marginBottom: "4px" }}>{title.toUpperCase()}</p>
-          <p className="text-caption uppercase tracking-widest text-xs" style={{ color: "rgba(252,165,165,0.5)" }}>{message.toUpperCase()}</p>
-          <div style={{ display: "flex", gap: "8px", marginTop: "10px" }}>
-            {onRetry && (
-              <button
-                onClick={onRetry}
-                className="btn-ghost btn-ghost-sm"
-                style={{ fontSize: "0.625rem" }}
-                aria-label="Retry the failed sync"
-              >
-                <RefreshCw size={10} />
-                RETRY SYNC
-              </button>
-            )}
-            {onDismiss && (
-              <button
-                onClick={onDismiss}
-                className="text-micro uppercase tracking-widest"
-                style={{
-                  background: "none",
-                  border: "none",
-                  cursor: "pointer",
-                  color: "var(--spectral-white)",
-                  opacity: 0.3,
-                  transition: "opacity 0.2s ease",
-                }}
-                aria-label="Dismiss error"
-              >
-                DISMISS
-              </button>
-            )}
+    <InlineNotice
+      variant="error"
+      title={title}
+      action={
+        onRetry || onDismiss ? (
+          <div className="flex flex-wrap gap-2">
+            {onRetry ? (
+              <Button variant="secondary" size="sm" onClick={onRetry}>
+                Retry sync
+              </Button>
+            ) : null}
+            {onDismiss ? (
+              <Button variant="ghost" size="sm" onClick={onDismiss}>
+                Dismiss
+              </Button>
+            ) : null}
           </div>
-        </div>
-      </div>
-    </div>
+        ) : undefined
+      }
+    >
+      {message}
+    </InlineNotice>
   );
 }
 
-// Warning Banner Component (for partial sync)
 interface WarningBannerProps {
   syncedRepos: number;
   totalRepos: number;
@@ -287,58 +208,32 @@ interface WarningBannerProps {
 export function PartialSyncWarning({
   syncedRepos,
   totalRepos,
-  onRetry
+  onRetry,
 }: WarningBannerProps) {
   return (
-    <div
-      style={{
-        background: "rgba(251,191,36,0.04)",
-        border: "1px solid rgba(251,191,36,0.12)",
-        borderRadius: "var(--radius-sharp)",
-        padding: "16px 20px",
-        marginBottom: "20px",
-      }}
-      role="status"
-      aria-label="Partial sync notice"
+    <InlineNotice
+      variant="warning"
+      title={
+        <span className="inline-flex flex-wrap items-center gap-2">
+          Partial sync
+          <Badge variant="warning" size="sm">
+            {syncedRepos}/{totalRepos} repos
+          </Badge>
+        </span>
+      }
+      action={
+        onRetry ? (
+          <Button variant="secondary" size="sm" onClick={onRetry}>
+            Retry sync
+          </Button>
+        ) : undefined
+      }
     >
-      <div style={{ display: "flex", alignItems: "flex-start", gap: "12px" }}>
-        <AlertTriangle size={14} style={{ color: "rgba(251,191,36,0.6)", flexShrink: 0, marginTop: "1px" }} aria-hidden="true" />
-        <div style={{ flex: 1 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
-            <p className="text-caption-bold uppercase tracking-widest" style={{ color: "rgba(251,191,36,0.7)" }}>PARTIAL SYNC</p>
-            <span
-              className="text-micro uppercase tracking-widest"
-              style={{
-                padding: "2px 6px",
-                border: "1px solid rgba(251,191,36,0.2)",
-                color: "rgba(251,191,36,0.5)",
-                borderRadius: "2px",
-              }}
-            >
-              {syncedRepos}/{totalRepos} REPOS
-            </span>
-          </div>
-          <p className="text-caption uppercase tracking-widest text-xs" style={{ color: "rgba(251,191,36,0.4)" }}>
-            SOME REPOSITORIES COULDN&apos;T BE SYNCED. SHOWING AVAILABLE DATA.
-          </p>
-          {onRetry && (
-            <button
-              onClick={onRetry}
-              className="btn-ghost btn-ghost-sm"
-              style={{ marginTop: "10px", fontSize: "0.625rem" }}
-              aria-label="Retry sync for remaining repositories"
-            >
-              <RefreshCw size={10} />
-              RETRY SYNC
-            </button>
-          )}
-        </div>
-      </div>
-    </div>
+      Some repositories couldn&apos;t be synced. Showing the available data.
+    </InlineNotice>
   );
 }
 
-// Sync In Progress Banner
 interface SyncProgressBannerProps {
   progress?: number;
   message?: string;
@@ -348,59 +243,39 @@ interface SyncProgressBannerProps {
 
 export function SyncProgressBanner({
   progress = 0,
-  message = "Syncing GitHub data...",
+  message = 'Syncing GitHub data…',
   processedRepos,
-  totalRepos
+  totalRepos,
 }: SyncProgressBannerProps) {
   return (
-    <div
-      style={{
-        background: "rgba(240,240,250,0.03)",
-        border: "1px solid rgba(240,240,250,0.08)",
-        borderRadius: "var(--radius-sharp)",
-        padding: "16px 20px",
-        marginBottom: "20px",
-      }}
-      role="region"
-      aria-label="Sync progress"
+    <InlineNotice
+      variant="info"
+      title={
+        <span className="flex flex-wrap items-center justify-between gap-2">
+          <span>{message}</span>
+          {processedRepos !== undefined && totalRepos !== undefined ? (
+            <span className="font-mono text-[11px] font-normal tabular-nums text-text-3">
+              {processedRepos}/{totalRepos} repos
+            </span>
+          ) : null}
+        </span>
+      }
     >
-      <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-        <RefreshCw
-          size={14}
-          style={{ opacity: 0.4, animation: "spin 1s linear infinite", flexShrink: 0 }}
-          aria-hidden="true"
-        />
-        <div style={{ flex: 1 }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "8px" }}>
-            <p className="text-caption uppercase tracking-widest" style={{ opacity: 0.6 }}>{message.toUpperCase()}</p>
-            {processedRepos !== undefined && totalRepos !== undefined && (
-              <span
-                className="text-micro uppercase tracking-widest"
-                style={{ opacity: 0.35 }}
-                aria-label={`${processedRepos} of ${totalRepos} repositories processed`}
-              >
-                {processedRepos}/{totalRepos} REPOS
-              </span>
-            )}
-          </div>
-          <div
-            className="progress-bar-track"
-            role="progressbar"
-            aria-valuenow={progress}
-            aria-valuemin={0}
-            aria-valuemax={100}
-            aria-label={`Sync progress: ${progress}%`}
-          >
-            <div className="progress-bar-fill" style={{ width: `${progress}%` }} />
-          </div>
-          <p className="text-micro uppercase tracking-widest" style={{ marginTop: "4px", opacity: 0.2 }}>{progress}% COMPLETE</p>
-        </div>
+      <div
+        className="progress-bar-track mt-1"
+        role="progressbar"
+        aria-valuenow={progress}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-label={`Sync progress: ${progress}%`}
+      >
+        <div className="progress-bar-fill" style={{ width: `${progress}%` }} />
       </div>
-    </div>
+      <p className="mt-1.5 text-caption">{progress}% complete</p>
+    </InlineNotice>
   );
 }
 
-// Info Notice Component
 interface InfoNoticeProps {
   icon?: React.ReactNode;
   message: string;
@@ -408,19 +283,8 @@ interface InfoNoticeProps {
 
 export function InfoNotice({ icon, message }: InfoNoticeProps) {
   return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: "8px",
-        padding: "8px 12px",
-        background: "rgba(240,240,250,0.02)",
-        border: "1px solid rgba(240,240,250,0.06)",
-        borderRadius: "2px",
-      }}
-    >
-      <span style={{ opacity: 0.3 }}>{icon || <AlertCircle size={12} />}</span>
-      <span className="text-micro uppercase tracking-widest" style={{ opacity: 0.4 }}>{message.toUpperCase()}</span>
-    </div>
+    <InlineNotice variant="info" icon={icon}>
+      {message}
+    </InlineNotice>
   );
 }

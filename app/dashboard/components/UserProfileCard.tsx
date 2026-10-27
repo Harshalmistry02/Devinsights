@@ -1,8 +1,10 @@
-import { Github, User, Settings, Loader2 } from "lucide-react";
-import Link from "next/link";
+import { Github, Loader2, Settings, User } from "lucide-react";
 import Image from "next/image";
 import type { Session } from "next-auth";
 import { SyncButtonComplete } from "@/components/SyncButtonComplete";
+import { Badge } from "@/components/ui/badge";
+import { ButtonLink } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 
 interface UserProfileCardProps {
   session: Session;
@@ -20,16 +22,26 @@ interface UserProfileCardProps {
   } | null;
 }
 
-export function UserProfileCard({ session, githubStatus, lastSync, analytics }: UserProfileCardProps) {
+export function UserProfileCard({
+  session,
+  githubStatus,
+  lastSync,
+  analytics,
+}: UserProfileCardProps) {
   const { user } = session;
 
   const isSyncInProgress = lastSync?.status === "IN_PROGRESS";
+  const provider = githubStatus.provider ?? "github";
+  const providerLabel =
+    provider.toLowerCase() === "github"
+      ? "GitHub"
+      : provider.charAt(0).toUpperCase() + provider.slice(1);
 
   const syncDate = lastSync?.completedAt
     ? new Date(lastSync.completedAt).toLocaleString("en-US", {
         month: "short",
         day: "numeric",
-        hour: "2-digit",
+        hour: "numeric",
         minute: "2-digit",
       })
     : "Never";
@@ -37,172 +49,133 @@ export function UserProfileCard({ session, githubStatus, lastSync, analytics }: 
   return (
     <aside
       aria-label="User profile and actions"
-      style={{ alignSelf: "start" }}
-      className="brutalist-glass p-5 sm:p-8 lg:sticky lg:top-30"
+      className="min-w-0 self-start lg:sticky lg:top-[calc(var(--nav-height)+24px)]"
     >
-      <div
-        style={{
-          background: "transparent",
-          border: "none",
-          borderRadius: 0,
-        }}
-      >
-        {/* Profile header — thin spectral line instead of colored gradient */}
+      <Card>
         <div
-          style={{
-            height: "1px",
-            background: "rgba(240,240,250,0.35)",
-            marginBottom: "24px"
-          }}
+          className="mb-6 h-px bg-border-strong"
           aria-hidden="true"
         />
 
-        {/* Avatar row */}
-        <div style={{ display: "flex", justifyContent: "center" }}>
+        <div className="flex justify-center">
           {user.image ? (
             <Image
               src={user.image}
-              alt={`${user.name || user.username || 'User'} GitHub profile picture`}
-              width={80}
-              height={80}
-              style={{
-                borderRadius: "50%",
-                border: "1px solid rgba(240,240,250,0.15)",
-              }}
-              priority={true}
+              alt={`${user.name || user.username || "User"} GitHub profile picture`}
+              width={88}
+              height={88}
+              priority
+              className="size-[88px] rounded-full border border-border object-cover"
             />
           ) : (
-            <div
-              style={{
-                width: "80px",
-                height: "80px",
-                borderRadius: "50%",
-                background: "rgba(240,240,250,0.05)",
-                border: "1px solid rgba(240,240,250,0.1)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <Github size={32} style={{ opacity: 0.4 }} />
+            <div className="flex size-[88px] items-center justify-center rounded-full border border-border bg-surface-hover">
+              <Github className="size-8 text-text-3" aria-hidden="true" />
             </div>
           )}
         </div>
 
-        {/* User info */}
-        <div style={{ padding: "24px 0 24px", textAlign: "center" }}>
-          <h2
-            className="text-caption-bold uppercase tracking-widest text-lg"
-            style={{ marginBottom: "8px" }}
-          >
-            {user.name || user.username || "ANONYMOUS USER"}
+        <div className="pt-5 text-center">
+          <h2 className="break-words text-section-head">
+            {user.name || user.username || "Anonymous user"}
           </h2>
-          {user.username && (
+
+          {user.username ? (
             <a
               href={`https://github.com/${user.username}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-micro uppercase tracking-widest"
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "6px",
-                opacity: 0.45,
-                marginBottom: "8px",
-                textDecoration: "none",
-              }}
+              className="focus-ring mt-2 inline-flex min-h-6 items-center gap-1.5 rounded-sm text-caption text-text-2 transition-colors duration-150 hover:text-accent"
             >
-              <Github size={11} />
-              GH/{user.username.toUpperCase()}
+              <Github className="size-3.5" aria-hidden="true" />
+              @{user.username}
+              <span className="sr-only"> (opens in a new tab)</span>
             </a>
-          )}
-          {user.email && (
+          ) : null}
+
+          {user.email ? (
             <p
-              className="text-micro opacity-30 mt-2 truncate max-w-full"
+              className="mt-2 break-words text-caption"
               title={user.email}
             >
-              {user.email.toUpperCase()}
+              {user.email}
             </p>
-          )}
+          ) : null}
 
-          {/* Status badges — minimal */}
-          <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "8px", margin: "24px 0" }}>
-            <span
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                padding: "4px 10px",
-                border: "1px solid rgba(240, 240, 250, 0.15)",
-              }}
-              className="text-micro uppercase tracking-widest"
-            >
-              VERIFIED
-            </span>
-            {analytics?.isActiveToday && (
-              <span
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  padding: "4px 10px",
-                  border: "1px solid rgba(240, 240, 250, 0.15)",
-                  background: "rgba(240,240,250,0.05)"
-                }}
-                className="text-micro uppercase tracking-widest"
-              >
-                ONLINE
-              </span>
-            )}
-          </div>
+          {analytics?.isActiveToday ? (
+            <div className="mt-5 flex justify-center">
+              <Badge variant="success" size="sm" dot>
+                Active today
+              </Badge>
+            </div>
+          ) : null}
 
-          {/* Quick Actions */}
-          <nav style={{ display: "flex", flexDirection: "column", gap: "10px" }} aria-label="Quick actions">
-            <Link
+          <nav
+            className="mt-6 flex flex-col gap-2"
+            aria-label="Quick actions"
+          >
+            <ButtonLink
               href="/profile"
-              className="btn-ghost btn-ghost-sm uppercase tracking-widest"
-              style={{ width: "100%", justifyContent: "center" }}
+              variant="secondary"
+              size="sm"
+              className="w-full"
+              leadingIcon={<User className="size-3.5" />}
             >
-              <User size={13} />
-              PROFILE
-            </Link>
-            <Link
+              Profile
+            </ButtonLink>
+            <ButtonLink
               href="/settings"
-              className="btn-ghost btn-ghost-sm uppercase tracking-widest"
-              style={{ width: "100%", justifyContent: "center" }}
+              variant="secondary"
+              size="sm"
+              className="w-full"
+              leadingIcon={<Settings className="size-3.5" />}
             >
-              <Settings size={13} />
-              SETTINGS
-            </Link>
+              Settings
+            </ButtonLink>
           </nav>
 
-          {/* Divider */}
-          <div style={{ height: "1px", background: "rgba(240,240,250,0.05)", margin: "32px 0" }} />
+          <div
+            className="my-6 h-px bg-border-subtle"
+            aria-hidden="true"
+          />
 
-          {/* Data Sync Section */}
-          <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-            <p className="text-micro uppercase tracking-widest opacity-40">SYSTEM SYNC</p>
-            <p className="text-micro uppercase tracking-widest opacity-25">
-              PROVIDER: {(githubStatus.provider || "GITHUB").toUpperCase()}
+          <section aria-label="Sync status" className="space-y-3 text-left">
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-label">System sync</p>
+              <Badge
+                variant={githubStatus.isConnected ? "success" : "neutral"}
+                size="sm"
+                dot
+              >
+                {githubStatus.isConnected ? "Connected" : "Not connected"}
+              </Badge>
+            </div>
+
+            <p className="text-caption">
+              Provider:{" "}
+              <span className="text-text-2">{providerLabel}</span>
             </p>
+
             <SyncButtonComplete />
 
-            {/* Sync Status */}
             {isSyncInProgress ? (
               <p
-                className="text-micro uppercase tracking-widest opacity-50 flex items-center justify-center gap-2"
+                className="flex items-center justify-center gap-2 text-caption"
+                aria-live="polite"
               >
-                <Loader2 size={10} className="animate-spin" />
-                SYNC IN PROGRESS
+                <Loader2
+                  className="size-3.5 animate-spin"
+                  aria-hidden="true"
+                />
+                Sync in progress
               </p>
             ) : (
-              <p
-                className="text-micro uppercase tracking-widest opacity-30 text-center"
-              >
-                LAST: {syncDate.toUpperCase()}
+              <p className="text-center text-caption">
+                Last sync: <span className="text-text-2">{syncDate}</span>
               </p>
             )}
-          </div>
+          </section>
         </div>
-      </div>
+      </Card>
     </aside>
   );
 }
