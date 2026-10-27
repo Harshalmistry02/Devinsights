@@ -11,6 +11,9 @@ export const authConfig: NextAuthConfig = {
     GitHub({
       clientId: process.env.GITHUB_CLIENT_ID!,
       clientSecret: process.env.GITHUB_CLIENT_SECRET!,
+      // GitHub includes this RFC 9207 issuer in its authorization response.
+      // Pinning it prevents Auth.js from comparing it to its placeholder issuer.
+      issuer: 'https://github.com/login/oauth',
       authorization: {
         params: {
           scope: 'read:user user:email repo read:org',
@@ -37,7 +40,7 @@ export const authConfig: NextAuthConfig = {
      * Runs whenever a JWT is created or updated
      * Handles token refresh for GitHub access tokens
      */
-    async jwt({ token, user, account, profile, trigger }) {
+    async jwt({ token, user, account, profile }) {
       // Initial sign in - store user data and tokens
       if (user) {
         if (user.id) {
