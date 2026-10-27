@@ -118,18 +118,15 @@ export function createDataHash(data: AnalyticsSummary): string {
 export function getMockInsights(): InsightResponse {
   return {
     patterns: [
-      'Consistent weekday activity with Tuesday peaks',
-      'Strong focus on TypeScript projects (68% of contributions)',
-      'Moderate commit sizes suggest thoughtful, incremental changes',
+      'AI insights are unavailable, so no telemetry-based pattern analysis was generated.',
+      'Connect a Groq API key to turn the available GitHub telemetry into measured patterns.',
     ],
     strengths: [
-      'Excellent commit consistency with 12-day streak',
-      'Diverse language proficiency across 5+ languages',
+      'GitHub telemetry is available for analysis once AI generation is configured.',
     ],
     suggestions: [
-      'Consider weekend contributions to extend streaks further',
-      'Experiment with smaller, more frequent commits for better collaboration',
-      'Add more descriptive commit messages for better project history',
+      'Configure GROQ_API_KEY to generate insights grounded in your actual activity and quality metrics.',
+      'Run a GitHub sync before generating insights so the analysis uses current telemetry.',
     ],
   };
 }

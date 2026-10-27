@@ -1,117 +1,58 @@
-// lib/ai/prompts.ts
-
 import { AnalyticsSummary } from './types';
 
 /**
- * System prompt for AI insight generation
- * Refined to act as a Senior Engineering Lead focused on sustainable performance.
+ * Instructions shared by all insight-generation paths. Keep this contract in
+ * one place so the standard and enhanced endpoints cannot drift in output
+ * shape or analysis policy.
  */
 export function buildSystemPrompt(): string {
-  return `You are DevInsights AI, a data-driven Senior Engineering Manager and Tech Lead.
+  return `You are DevInsights AI — a data-driven Senior Engineering Manager and Tech Lead specializing in developer performance, sustainable productivity, and code quality habits.
 
-YOUR GOAL: 
-Analyze developer telemetry to identify deep work patterns, sustainability risks, and code quality habits.
+Your sole purpose is to turn raw GitHub telemetry into precise, high-leverage insights that help individual developers improve their craft, avoid burnout, and build better engineering habits.
 
-INPUT CONTEXT:
-You will receive a "AnalyticsSummary" object containing:
-- Activity: Commits, streaks, velocity trends.
-- Work Habits: Hourly distribution (morning/night), weekend intensity.
-- Quality Metrics: Conventional Commit adherence, message quality grades.
-- Consistency: Entropy-based diversity and consistency scores.
+Speak as a calm, experienced engineering leader. Be objective, specific, and constructive. Prefer concrete observations backed by supplied numbers. Never invent data, correlations, percentages, or behaviors. When the data is limited or low quality, explicitly lower confidence and avoid strong claims. Prefer sustainability and maintainability over raw velocity.
 
-OUTPUT RULES:
-1. Return ONLY valid JSON matching this schema:
-   {
-     "patterns": ["string", "string", "string"],   // Max 3
-     "strengths": ["string", "string"],            // Max 2
-     "suggestions": ["string", "string", "string"] // Max 3
-   }
-2. Tone: Professional, objective, and high-leverage (no fluff like "Good job!").
-3. Length: Each string must be under 200 characters.
+You receive an AnalyticsSummary, which may contain activity, work-pattern, commit-quality, data-health, period-comparison, trend, and anomaly fields. A missing field means it was not measured; do not infer it.
 
-ANALYSIS LOGIC (Apply these heuristics):
-- PATTERNS: Correlate time with output. (e.g., "Late night commits correlate with lower message quality"). Identify "Sprint" behavior vs "Consistent" behavior.
-- STRENGTHS: Validate high 'ConsistencyScore' (>70) or strong 'ConventionalCommit' adherence. 
-- SUGGESTIONS: 
-  - If 'commitQualityMetrics.grade' is < B, suggest specific improvements (e.g., "Adopt Conventional Commits").
-  - If 'weekendRatio' is high, suggest burnout checks.
-  - If 'avgCommitSize' > 300, suggest atomic commits.
-
-NO MARKDOWN. NO PREAMBLE. ONLY JSON.`;
+Return ONLY one valid JSON object, with no markdown or text outside the object. It must match this exact schema:
+{
+  "patterns": ["string", "string"],
+  "strengths": ["string"],
+  "suggestions": ["string", "string"]
 }
 
-/**
- * Build user prompt from analytics data
- * Refined to include Quality Metrics and Data Health which were previously missing.
- */
+Schema rules:
+- patterns: 2–4 self-contained strings.
+- strengths: 1–3 self-contained strings.
+- suggestions: 2–4 self-contained strings.
+- Every string is 200 characters or fewer.
+- Do not add keys. Do not use markdown, bullets, or generic praise.
+
+Analysis rules:
+- Patterns should describe measured recurring behavior, comparisons, commit-size distribution, language concentration, supplied anomalies, or a supported time/quality relationship. Always address supplied anomalies in patterns when possible.
+- Only claim strengths supported by the telemetry: consistency score at least 70, conventional-commit score at least 75, quality grade A/B, a meaningful good/excellent streak, an improving measured trend, balanced sustained activity, or supported language diversity/specialization. Cite the supporting metric.
+- Prioritize suggestions in this order: quality issues; sustainability risks; large or hard-to-review commits; commit-message/process hygiene; focus or growth; streak/milestone coaching.
+- For grade C/D/F or low conventional adherence, recommend Conventional Commits using feat:, fix:, or docs:. For missing ticket references or body text, recommend the specific missing practice. For average commit size over 300 or many large commits, recommend smaller reviewable commits.
+- Flag a potential sustainability risk only when weekend-heavy activity (weekdayVsWeekendRatio below 0.8) combines with a quality or streak decline. Mention night work only if lower quality is actually supplied or detected.
+- Do not say “Great job!”, “Keep it up!”, “You’re doing amazing”, or similar empty encouragement. Do not recommend tools, frameworks, or languages absent from the telemetry.`;
+}
+
+/** Serialize only supplied telemetry; absence remains visible to the model. */
 export function buildUserPrompt(data: AnalyticsSummary): string {
-  // 1. Core Activity & Trends
-  const trend = data.previousPeriodCommits
-    ? `${data.totalCommits > data.previousPeriodCommits ? '📈' : '📉'} ${Math.round(
-        ((data.totalCommits - data.previousPeriodCommits) / Math.max(data.previousPeriodCommits, 1)) * 100
-      )}% vs prev`
-    : 'No prev data';
-  
-  const langs = Object.entries(data.topLanguages)
-    .sort(([, a], [, b]) => b - a)
-    .slice(0, 3)
-    .map(([l, c]) => `${l}(${Math.round((c / data.totalCommits) * 100)}%)`)
-    .join(', ');
-
-  // 2. Calculated Scores & Health
-  const scores = [
-    `Consistency: ${data.consistencyScore || 0}/100`,
-    `Streak: ${data.currentStreak}d (${data.streakHealth || 'neutral'})`,
-    `Diversity: ${data.languageDiversity || 0}/100`
-  ].join(' | ');
-
-  // 3. Work Patterns (Time & Day)
-  const patterns = [
-    data.hourlyPattern ? `Primary Time: ${data.hourlyPattern}` : null,
-    data.weekdayVsWeekendRatio 
-      ? `Weekend Ratio: ${data.weekdayVsWeekendRatio.toFixed(1)} (${data.weekdayVsWeekendRatio > 1.5 ? 'High Weekday' : 'Weekend Heavy'})`
-      : null
-  ].filter(Boolean).join(' | ');
-
-  // 4. Quality Metrics (CRITICAL ADDITION)
-  let qualityInfo = 'Quality: N/A';
-  if (data.commitQualityMetrics) {
-    const { qualityGrade, conventionalCommitScore, hasTicketReferences } = data.commitQualityMetrics;
-    qualityInfo = `Quality Grade: ${qualityGrade} | Conventional Score: ${conventionalCommitScore}/100 | Ref Tickets: ${hasTicketReferences ? 'Yes' : 'No'}`;
-  }
-
-  // 5. Data Quality Indicators
-  let dataQualityInfo = '';
-  if (data.dataQuality) {
-    const { outlierCount, unknownExtensionPercent, hasSufficientData } = data.dataQuality;
-    dataQualityInfo = `\nData Health: ${hasSufficientData ? '✓ Sufficient' : '⚠ Limited'} | Outliers: ${outlierCount} | Unknown Extensions: ${unknownExtensionPercent.toFixed(1)}%`;
-  }
-
-  // 6. Recent Context
-  const recentMsgs = data.recentMessages?.length 
-    ? `\nRecent Commits: "${data.recentMessages.slice(0, 3).join('", "')}"` 
-    : '';
-
-  // Final Assembly
-  return `
-[DATA REPORT]
-Period: ${data.period}
-Velocity: ${data.totalCommits} commits (${trend})
-Context: ${langs || 'N/A'}
-Avg Size: ${data.avgCommitSize} lines
-Scores: ${scores}
-Habits: ${patterns || 'N/A'}
-${qualityInfo}${dataQualityInfo}
-${recentMsgs}
-
-Analyze this report. Identify constraints, praise specific engineering habits, and provide actionable optimizations.`;
+  return `Analyze this AnalyticsSummary. Treat it as the complete source of truth; do not infer missing metrics.\n\n${JSON.stringify(data, null, 2)}`;
 }
 
-/**
- * Compact prompt for quota-saving (includes quality grade for minimal context)
- */
+/** Compact mode retains the same contract while avoiding fabricated defaults. */
 export function buildUserPromptCompact(data: AnalyticsSummary): string {
-  const q = data.commitQualityMetrics?.qualityGrade || '?';
-  const consistency = data.consistencyScore ? `cons:${data.consistencyScore}` : '';
-  return `Stats: ${data.totalCommits}cmts, ${data.currentStreak}d streak, Grade:${q}${consistency ? `, ${consistency}` : ''}. Analyze.`;
+  const compact = {
+    totalCommits: data.totalCommits,
+    currentStreak: data.currentStreak,
+    avgCommitSize: data.avgCommitSize,
+    period: data.period,
+    consistencyScore: data.consistencyScore,
+    commitQualityMetrics: data.commitQualityMetrics,
+    dataQuality: data.dataQuality,
+  };
+
+  return `Analyze this limited AnalyticsSummary. State that confidence is limited when the omitted fields are needed.\n\n${JSON.stringify(compact, null, 2)}`;
 }

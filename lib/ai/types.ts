@@ -71,10 +71,10 @@ export interface AnalyticsSummary {
 
 // Output: What AI returns (validated with Zod)
 export const InsightSchema = z.object({
-  patterns: z.array(z.string().max(200)).min(1).max(5),
-  strengths: z.array(z.string().max(200)).min(1).max(5),
-  suggestions: z.array(z.string().max(200)).min(1).max(5),
-});
+  patterns: z.array(z.string().max(200)).min(2).max(4),
+  strengths: z.array(z.string().max(200)).min(1).max(3),
+  suggestions: z.array(z.string().max(200)).min(2).max(4),
+}).strict();
 
 export type InsightResponse = z.infer<typeof InsightSchema>;
 
