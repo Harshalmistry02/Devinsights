@@ -1,30 +1,31 @@
-  'use client';
+"use client";
 
-import React, { useState } from 'react';
 import {
-  BarChart3,
-  PieChart,
   Activity,
-  Calendar,
-  Clock,
+  BarChart3,
+  CalendarDays,
+  Clock3,
   GitBranch,
-} from 'lucide-react';
+  PieChart,
+} from "lucide-react";
 import {
-  DynamicCommitTimeline,
   DynamicActivityHeatmap,
+  DynamicCommitTimeline,
   DynamicDayOfWeekChart,
   DynamicHourlyActivity,
   DynamicLanguageBreakdown,
   DynamicRepoStatsChart,
-} from '@/components/charts';
+} from "@/components/charts";
+import { Card } from "@/components/ui/card";
+import { ChartCard } from "@/components/ui/chart-card";
+import { EmptyState } from "@/components/ui/empty-state";
+import { SectionHeader } from "@/components/ui/section-header";
 
 // Type definitions that match the chart component interfaces
 type DailyCommits = Record<string, number>;
 
-// DayOfWeekStats - flexible input type
 type DayOfWeekStatsInput = Record<string, number>;
 
-// Full DayOfWeekStats with all required days
 interface DayOfWeekStatsFull {
   Monday: number;
   Tuesday: number;
@@ -38,7 +39,6 @@ interface DayOfWeekStatsFull {
 
 type HourlyStats = Record<string, number>;
 
-// RepoStat must match the chart's expected interface
 interface RepoStat {
   id: string;
   name: string;
@@ -63,9 +63,6 @@ interface InsightsChartsSectionProps {
   topLanguages: TopLanguage[] | null;
 }
 
-// Time period options
-type TimePeriod = '7d' | '30d' | '90d' | 'all';
-
 export function InsightsChartsSection({
   dailyCommits,
   dayOfWeekStats,
@@ -73,157 +70,115 @@ export function InsightsChartsSection({
   repoStats,
   topLanguages,
 }: InsightsChartsSectionProps) {
-  const [timePeriod] = useState<TimePeriod>('all');
+  const hasDailyCommits =
+    dailyCommits !== null && Object.keys(dailyCommits).length > 0;
+  const hasDayOfWeek =
+    dayOfWeekStats !== null && Object.keys(dayOfWeekStats).length > 0;
+  const hasHourly = hourlyStats !== null && Object.keys(hourlyStats).length > 0;
+  const hasLanguages = topLanguages !== null && topLanguages.length > 0;
+  const hasRepos = repoStats !== null && repoStats.length > 0;
 
-  // Filter daily commits based on time period
-  const filteredDailyCommits = filterByPeriod(dailyCommits, timePeriod);
-
-  // Check if we have any data to display
-  const hasChartData = dailyCommits || dayOfWeekStats || hourlyStats || topLanguages;
-
-  if (!hasChartData) {
-    return (
-    <div className="bg-transparent py-8 text-center">
-        <BarChart3 className="w-12 h-12 opacity-80 mx-auto mb-4" />
-        <h3 className="text-lg font-medium opacity-80 mb-2">No chart data available</h3>
-        <p className="opacity-80 text-sm">Sync your GitHub data to see visualizations</p>
-      </div>
-    );
-  }
+  const hasChartData =
+    hasDailyCommits || hasDayOfWeek || hasHourly || hasLanguages || hasRepos;
 
   return (
-    <div className="space-y-8">
-      {/* Section Header with Time Period Selector */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h2 className="text-display-hero text-2xl flex items-center gap-3">
-            <BarChart3 className="w-5 h-5 text-[#f0f0fa]" />
-            VISUAL ANALYTICS
-          </h2>
-          <p className="text-micro mt-2 tracking-[2px] opacity-40">
-            EXPLORE YOUR CODING PATTERNS THROUGH INDUSTRIAL DATA VISUALIZATIONS
-          </p>
-        </div>
-        
-        {/* Time period selector removed per user request */}
-      </div>
+    <section aria-label="Visual analytics" className="space-y-5">
+      <SectionHeader
+        title="Visual analytics"
+        description="Patterns across your synced commit history, from daily cadence to language mix."
+      />
 
-      {/* Commit Timeline - Full Width */}
-      {filteredDailyCommits && Object.keys(filteredDailyCommits).length > 0 && (
-        <ChartCard
-          title="Commit Timeline"
-          subtitle={`Activity over ${timePeriod === 'all' ? 'all time' : `the last ${timePeriod.slice(0, -1)} days`}`}
-          icon={<Activity className="w-5 h-5 text-[#f0f0fa]" />}
-        >
-          <DynamicCommitTimeline data={filteredDailyCommits} />
-        </ChartCard>
+      {!hasChartData ? (
+        <Card>
+          <EmptyState
+            icon={<BarChart3 className="size-5" />}
+            title="No chart data yet"
+            description="Sync your GitHub repositories to populate the activity charts."
+          />
+        </Card>
+      ) : (
+        <>
+          {hasDailyCommits ? (
+            <ChartCard
+              title="Commit timeline"
+              description="Daily commits over the last 30 days."
+              scope="30 days"
+              icon={<Activity className="size-4" />}
+            >
+              <DynamicCommitTimeline data={dailyCommits} />
+            </ChartCard>
+          ) : null}
+
+          {hasDailyCommits ? (
+            <ChartCard
+              title="Activity heatmap"
+              description="Daily commit density for the last year."
+              scope="365 days"
+              icon={<CalendarDays className="size-4" />}
+            >
+              <DynamicActivityHeatmap data={dailyCommits} />
+            </ChartCard>
+          ) : null}
+
+          <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+            {hasLanguages && topLanguages ? (
+              <ChartCard
+                title="Language distribution"
+                description="Share of language-classified commits by primary language."
+                scope="All time"
+                icon={<PieChart className="size-4" />}
+              >
+                <DynamicLanguageBreakdown data={topLanguages} />
+              </ChartCard>
+            ) : null}
+
+            {hasDayOfWeek && dayOfWeekStats ? (
+              <ChartCard
+                title="Weekly patterns"
+                description="Commit volume by day of the week."
+                scope="All time"
+                icon={<CalendarDays className="size-4" />}
+              >
+                <DynamicDayOfWeekChart
+                  data={normalizeDayOfWeekStats(dayOfWeekStats)}
+                />
+              </ChartCard>
+            ) : null}
+
+            {hasHourly && hourlyStats ? (
+              <ChartCard
+                title="Daily rhythm"
+                description="Commit volume by hour of day."
+                scope="All time"
+                icon={<Clock3 className="size-4" />}
+              >
+                <DynamicHourlyActivity data={hourlyStats} />
+              </ChartCard>
+            ) : null}
+
+            {hasRepos && repoStats ? (
+              <ChartCard
+                title="Top repositories"
+                description="Most active repositories by stored commits."
+                scope="All time"
+                icon={<GitBranch className="size-4" />}
+              >
+                <DynamicRepoStatsChart data={repoStats} />
+              </ChartCard>
+            ) : null}
+          </div>
+        </>
       )}
-
-      {/* Activity Heatmap - Full Width */}
-      {dailyCommits && Object.keys(dailyCommits).length > 0 && (
-        <ChartCard
-          title="Activity Heatmap"
-          subtitle="GitHub-style contribution graph"
-          icon={<Calendar className="w-5 h-5 text-[#f0f0fa]" />}
-        >
-          <DynamicActivityHeatmap data={dailyCommits} />
-        </ChartCard>
-      )}
-
-      {/* Two Column Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-        {/* Language Breakdown */}
-        {topLanguages && topLanguages.length > 0 && (
-          <ChartCard
-            title="Language Distribution"
-            subtitle="Your programming language usage"
-            icon={<PieChart className="w-5 h-5 text-[#f0f0fa]" />}
-          >
-            <DynamicLanguageBreakdown data={topLanguages} />
-          </ChartCard>
-        )}
-
-        {/* Day of Week Chart */}
-        {dayOfWeekStats && Object.keys(dayOfWeekStats).length > 0 && (
-          <ChartCard
-            title="Weekly Patterns"
-            subtitle="Commits by day of week"
-            icon={<Calendar className="w-5 h-5 text-[#f0f0fa]" />}
-          >
-            <DynamicDayOfWeekChart data={normalizeDayOfWeekStats(dayOfWeekStats)} />
-          </ChartCard>
-        )}
-
-        {/* Hourly Activity */}
-        {hourlyStats && Object.keys(hourlyStats).length > 0 && (
-          <ChartCard
-            title="Daily Rhythm"
-            subtitle="Your most productive hours"
-            icon={<Clock className="w-5 h-5 text-[#f0f0fa]" />}
-          >
-            <DynamicHourlyActivity data={hourlyStats} />
-          </ChartCard>
-        )}
-
-        {/* Repository Stats */}
-        {repoStats && repoStats.length > 0 && (
-          <ChartCard
-            title="Top Repositories"
-            subtitle="Your most active repos"
-            icon={<GitBranch className="w-5 h-5 text-[#f0f0fa]" />}
-          >
-            <DynamicRepoStatsChart data={repoStats.slice(0, 10)} />
-          </ChartCard>
-        )}
-      </div>
-    </div>
+    </section>
   );
 }
-
-// ===========================================
-// Helper Components
-// ===========================================
-
-
-
-function ChartCard({
-  title,
-  subtitle,
-  icon,
-  children,
-}: {
-  title: string;
-  subtitle: string;
-  icon: React.ReactNode;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="brutalist-glass p-5 sm:p-8 min-w-0">
-      {/* Header */}
-      <div className="mb-8 border-l-2 border-[rgba(240,240,250,0.35)] pl-4">
-        <div className="flex items-center gap-3 mb-2">
-          <div className="opacity-30">{icon}</div>
-          <h3 className="text-caption-bold text-sm tracking-widest uppercase">{title}</h3>
-        </div>
-        <p className="text-micro opacity-40 tracking-widest uppercase">{subtitle}</p>
-      </div>
-      
-      {/* Chart Content */}
-      <div className="mt-4 min-w-0">
-        {children}
-      </div>
-    </div>
-  );
-}
-
-// ===========================================
-// Helper Functions
-// ===========================================
 
 /**
- * Normalize DayOfWeekStats to ensure all days are present
+ * Normalize DayOfWeekStats to ensure all days are present.
  */
-function normalizeDayOfWeekStats(input: DayOfWeekStatsInput): DayOfWeekStatsFull {
+function normalizeDayOfWeekStats(
+  input: DayOfWeekStatsInput
+): DayOfWeekStatsFull {
   return {
     Monday: input.Monday ?? input.monday ?? 0,
     Tuesday: input.Tuesday ?? input.tuesday ?? 0,
@@ -233,27 +188,4 @@ function normalizeDayOfWeekStats(input: DayOfWeekStatsInput): DayOfWeekStatsFull
     Saturday: input.Saturday ?? input.saturday ?? 0,
     Sunday: input.Sunday ?? input.sunday ?? 0,
   };
-}
-
-function filterByPeriod(
-  dailyCommits: DailyCommits | null,
-  period: TimePeriod
-): DailyCommits | null {
-  if (!dailyCommits || period === 'all') return dailyCommits;
-
-  const days = parseInt(period.slice(0, -1));
-  const cutoff = new Date();
-  cutoff.setDate(cutoff.getDate() - days);
-  cutoff.setHours(0, 0, 0, 0);
-
-  const filtered: DailyCommits = {};
-  
-  for (const [date, count] of Object.entries(dailyCommits)) {
-    const dateObj = new Date(date);
-    if (dateObj >= cutoff) {
-      filtered[date] = count;
-    }
-  }
-
-  return filtered;
 }

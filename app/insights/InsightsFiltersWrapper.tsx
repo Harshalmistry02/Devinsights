@@ -8,7 +8,7 @@ interface InsightsFiltersWrapperProps {
 }
 
 export function InsightsFiltersWrapper({ availableLanguages }: InsightsFiltersWrapperProps) {
-  const [filters, setFilters] = useState<InsightFilters | null>(null);
+  const [, setFilters] = useState<InsightFilters | null>(null);
 
   const handleFilterChange = (newFilters: InsightFilters) => {
     setFilters(newFilters);

@@ -1,66 +1,78 @@
-'use client';
+"use client";
 
 /**
  * Activity Heatmap
- * 
- * GitHub-style contribution calendar showing daily commit activity
+ *
+ * GitHub-style contribution calendar for the last 365 days.
  */
 
-import { useMemo } from 'react';
+import { useMemo } from "react";
+import { ChartStat } from "./chart-primitives";
 
 interface ActivityHeatmapProps {
   data: Record<string, number>; // { "2024-01-15": 5, "2024-01-16": 3 }
   className?: string;
 }
 
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const MONTHS = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+];
+const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-export function ActivityHeatmap({ data, className = '' }: ActivityHeatmapProps) {
-  // Generate calendar data for the last 365 days
-  const { calendar, months, totalCommits, maxCommits, activeDays } = useMemo(() => {
-    return generateCalendarData(data);
-  }, [data]);
+export function ActivityHeatmap({ data, className = "" }: ActivityHeatmapProps) {
+  const { calendar, months, totalCommits, maxCommits, activeDays } = useMemo(
+    () => generateCalendarData(data),
+    [data]
+  );
 
   return (
-    <div className={` bg-transparent border-none ${className}`}>
-      {/* Summary Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 mb-8">
-        <div className="border-l-2 border-[rgba(240,240,250,0.1)] pl-4">
-          <p className="text-micro opacity-40 mb-2 tracking-[2px]">TOTAL COMMITS</p>
-          <p className="text-display-hero text-3xl opacity-90 tabular-nums">{totalCommits.toLocaleString()}</p>
-        </div>
-        <div className="border-l-2 border-[rgba(240,240,250,0.1)] pl-4">
-          <p className="text-micro opacity-40 mb-2 tracking-[2px]">ACTIVE DAYS</p>
-          <p className="text-display-hero text-3xl opacity-90 tabular-nums">{activeDays}</p>
-        </div>
+    <div className={className}>
+      <div className="mb-5 grid grid-cols-2 gap-4">
+        <ChartStat
+          label="Commits"
+          value={totalCommits.toLocaleString("en-US")}
+          detail="Last 365 days"
+        />
+        <ChartStat
+          label="Active days"
+          value={activeDays.toLocaleString("en-US")}
+          detail="At least one commit"
+        />
       </div>
 
-      {/* Legend */}
-      <div className="flex items-center justify-end gap-3 text-micro opacity-40 mb-4 px-2 tracking-widest">
-        <span>LESS</span>
-        <div className="flex gap-0.5">
-          <div className="w-2.5 h-2.5 bg-[rgba(240,240,250,0.05)]" />
-          <div className="w-2.5 h-2.5 bg-[rgba(240,240,250,0.2)]" />
-          <div className="w-2.5 h-2.5 bg-[rgba(240,240,250,0.4)]" />
-          <div className="w-2.5 h-2.5 bg-[rgba(240,240,250,0.7)]" />
-          <div className="w-2.5 h-2.5 bg-[rgba(240,240,250,0.9)]" />
+      <div className="mb-3 flex items-center justify-end gap-2 text-caption">
+        <span>Less</span>
+        <div className="flex gap-0.5" aria-hidden="true">
+          <span className="size-2.5 rounded-[2px] bg-white/[0.05]" />
+          <span className="size-2.5 rounded-[2px] bg-accent/20" />
+          <span className="size-2.5 rounded-[2px] bg-accent/40" />
+          <span className="size-2.5 rounded-[2px] bg-accent/65" />
+          <span className="size-2.5 rounded-[2px] bg-accent/90" />
         </div>
-        <span>MORE</span>
+        <span>More</span>
       </div>
 
-      {/* Heatmap Grid */}
-      <div className="p-4 sm:p-6 overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
+      <div className="-mx-5 overflow-x-auto px-5 sm:mx-0 sm:px-0">
         <div className="min-w-[640px]">
-          {/* Month Labels */}
-          <div className="flex mb-2 ml-8">
+          <div className="mb-2 ml-8 flex">
             {months.map((month, index) => (
               <div
-                key={index}
-                className="text-xs opacity-80"
-                style={{ 
+                key={`${month.name}-${index}`}
+                className="text-[11px] leading-none text-text-3"
+                style={{
                   width: `${month.weeks * 14}px`,
-                  minWidth: `${month.weeks * 14}px`
+                  minWidth: `${month.weeks * 14}px`,
                 }}
               >
                 {month.name}
@@ -68,50 +80,58 @@ export function ActivityHeatmap({ data, className = '' }: ActivityHeatmapProps) 
             ))}
           </div>
 
-          {/* Grid */}
           <div className="flex">
-            {/* Day Labels */}
-            <div className="flex flex-col gap-0.5 mr-2 text-xs opacity-80">
+            <div className="mr-2 flex flex-col gap-0.5 text-[11px] leading-none text-text-3">
               {DAYS.map((day, index) => (
-                <div 
-                  key={day} 
-                  className="h-3 flex items-center"
-                  style={{ visibility: index % 2 === 1 ? 'visible' : 'hidden' }}
+                <div
+                  key={day}
+                  className="flex h-3 items-center"
+                  style={{ visibility: index % 2 === 1 ? "visible" : "hidden" }}
                 >
                   {day}
                 </div>
               ))}
             </div>
 
-            {/* Calendar Grid */}
-            <div className="flex gap-0.5">
+            <div
+              className="flex gap-0.5"
+              role="img"
+              aria-label={`Commit heatmap for the last 365 days. ${totalCommits} commits across ${activeDays} active days.`}
+            >
               {calendar.map((week, weekIndex) => (
                 <div key={weekIndex} className="flex flex-col gap-0.5">
                   {week.map((day, dayIndex) => (
                     <div
                       key={`${weekIndex}-${dayIndex}`}
-                      className="w-3 h-3 transition-all duration-200 hover:ring-2 hover:ring-cyan-400/50 cursor-pointer group relative"
+                      className="group relative size-3 rounded-[2px] border border-transparent transition-colors duration-150 hover:border-accent"
                       style={{
-                        backgroundColor: day 
-                          ? getColor(day.commits, maxCommits)
-                          : 'transparent',
-                        border: day && day.commits === 0 ? '1px solid #334155' : 'none',
+                        backgroundColor: day ? getColor(day.commits, maxCommits) : "transparent",
+                        borderColor:
+                          day && day.commits === 0
+                            ? "var(--border-subtle)"
+                            : undefined,
                       }}
-                      title={day ? `${day.date}: ${day.commits} commits` : ''}
+                      title={
+                        day
+                          ? `${formatDate(day.date)}: ${day.commits} ${
+                              day.commits === 1 ? "commit" : "commits"
+                            }`
+                          : undefined
+                      }
                     >
-                      {/* Tooltip */}
-                      {day && (
-                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block z-10">
-                          <div className="brutalist-glass px-3 py-2 whitespace-nowrap border-none ring-1 ring-[#f0f0fa]/10">
-                            <p className="text-micro opacity-40 mb-1 tracking-widest">
-                              {formatDate(day.date).toUpperCase()}
+                      {day ? (
+                        <div className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 hidden -translate-x-1/2 group-hover:block">
+                          <div className="whitespace-nowrap rounded-card border border-border bg-surface-2 px-3 py-2 shadow-[0_12px_40px_rgba(0,0,0,0.55)]">
+                            <p className="text-[11px] font-medium text-text">
+                              {formatDate(day.date)}
                             </p>
-                            <p className="text-caption-bold text-[#f0f0fa]">
-                              {day.commits} COMMITS
+                            <p className="mt-1 text-[11px] text-text-3">
+                              {day.commits}{" "}
+                              {day.commits === 1 ? "commit" : "commits"}
                             </p>
                           </div>
                         </div>
-                      )}
+                      ) : null}
                     </div>
                   ))}
                 </div>
@@ -120,6 +140,11 @@ export function ActivityHeatmap({ data, className = '' }: ActivityHeatmapProps) 
           </div>
         </div>
       </div>
+
+      <p className="mt-3 text-caption">
+        Scope: the last 365 days, ending today. Hover a cell for its daily
+        commit count.
+      </p>
     </div>
   );
 }
@@ -141,30 +166,29 @@ interface MonthData {
 function generateCalendarData(data: Record<string, number>) {
   const calendar: (DayData | null)[][] = [];
   const months: MonthData[] = [];
-  
+
   const today = new Date();
   const oneYearAgo = new Date(today);
   oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
-  
+
   // Start from the nearest Sunday before one year ago
   const startDate = new Date(oneYearAgo);
   startDate.setDate(startDate.getDate() - startDate.getDay());
-  
+
   const currentDate = new Date(startDate);
   let currentMonth = -1;
   let monthWeeks = 0;
   let totalCommits = 0;
   let activeDays = 0;
   let maxCommits = 0;
-  
-  // Generate weeks
+
   while (currentDate <= today) {
     const week: (DayData | null)[] = [];
-    
+
     for (let day = 0; day < 7; day++) {
-      const dateStr = currentDate.toISOString().split('T')[0];
+      const dateStr = currentDate.toISOString().split("T")[0];
       const commits = data[dateStr] || 0;
-      
+
       if (currentDate <= today && currentDate >= oneYearAgo) {
         week.push({ date: dateStr, commits });
         totalCommits += commits;
@@ -173,50 +197,53 @@ function generateCalendarData(data: Record<string, number>) {
       } else {
         week.push(null);
       }
-      
-      // Track months
+
       const month = currentDate.getMonth();
       if (month !== currentMonth) {
         if (currentMonth !== -1 && monthWeeks > 0) {
-          // Don't add empty months
-          if (months.length === 0 || months[months.length - 1].name !== MONTHS[currentMonth]) {
+          if (
+            months.length === 0 ||
+            months[months.length - 1].name !== MONTHS[currentMonth]
+          ) {
             months.push({ name: MONTHS[currentMonth], weeks: monthWeeks });
           }
         }
         currentMonth = month;
         monthWeeks = 0;
       }
-      
+
       currentDate.setDate(currentDate.getDate() + 1);
     }
-    
+
     monthWeeks++;
     calendar.push(week);
   }
-  
-  // Add final month
+
   if (monthWeeks > 0) {
     const lastMonth = new Date(today).getMonth();
-    if (months.length === 0 || months[months.length - 1].name !== MONTHS[lastMonth]) {
+    if (
+      months.length === 0 ||
+      months[months.length - 1].name !== MONTHS[lastMonth]
+    ) {
       months.push({ name: MONTHS[lastMonth], weeks: monthWeeks });
     }
   }
-  
+
   return { calendar, months, totalCommits, maxCommits, activeDays };
 }
 
 function getColor(commits: number, maxCommits: number): string {
-  if (commits === 0) return 'rgba(240, 240, 250, 0.05)';
+  if (commits === 0) return "rgba(240, 240, 250, 0.05)";
   const intensity = Math.min(commits / Math.max(maxCommits, 1), 1);
-  return `rgba(240, 240, 250, ${0.1 + intensity * 0.8})`;
+  return `rgba(108, 180, 255, ${0.18 + intensity * 0.72})`;
 }
 
 function formatDate(dateStr: string): string {
   const date = new Date(dateStr);
-  return date.toLocaleDateString('en-US', {
-    weekday: 'short',
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
+  return date.toLocaleDateString("en-US", {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    year: "numeric",
   });
 }

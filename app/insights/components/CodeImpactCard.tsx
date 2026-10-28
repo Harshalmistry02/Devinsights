@@ -1,14 +1,16 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import { 
-  Gauge, 
-} from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { 
-  CodeImpactMetrics, 
-  getImpactRating, 
-} from '@/lib/analytics/code-impact-analyzer';
+import { useState } from "react";
+import { Gauge, Info } from "lucide-react";
+import {
+  type CodeImpactMetrics,
+  getImpactRating,
+} from "@/lib/analytics/code-impact-analyzer";
+import { Badge, type BadgeVariant } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardHeader } from "@/components/ui/card";
+import { cn } from "@/components/ui/cn";
+import { EmptyState } from "@/components/ui/empty-state";
 
 interface CodeImpactCardProps {
   metrics: CodeImpactMetrics | null;
@@ -16,212 +18,264 @@ interface CodeImpactCardProps {
 }
 
 /**
- * Code Impact & Quality Card - SpaceX Industrial Design
+ * Code Impact Card
+ *
+ * Compares productive change volume with refactoring and rework.
  */
 export function CodeImpactCard({ metrics, className }: CodeImpactCardProps) {
   const [expanded, setExpanded] = useState(false);
-  
+
   if (!metrics) {
     return (
-      <div className={cn(
-        "brutalist-glass p-8 sm:p-16 text-center border-white/5",
-        className
-      )}>
-        <Gauge className="w-16 h-16 opacity-10 mx-auto mb-8" />
-        <h3 className="text-caption-bold text-lg opacity-40 mb-4 tracking-widest uppercase">METRIC DATABASE EMPTY</h3>
-        <p className="text-micro opacity-20 uppercase tracking-[2px]">SYNC REPOSITORIES TO INITIALIZE IMPACT ANALYSIS</p>
-      </div>
+      <Card className={cn("flex h-full flex-col", className)}>
+        <CardHeader
+          icon={<Gauge className="size-4" />}
+          title="Code impact"
+          description="Productive work versus rework."
+        />
+        <EmptyState
+          variant="compact"
+          icon={<Gauge className="size-4" />}
+          title="No impact data"
+          description="Sync your repositories to analyse change volume and churn."
+        />
+      </Card>
     );
   }
 
   const impactRating = getImpactRating(metrics.impactScore);
+  const ratingVariant = getRatingVariant(metrics.impactScore);
+  const maintenanceRate = Math.max(
+    0,
+    100 - metrics.churnGauge.productive - metrics.churnGauge.refactoring
+  );
+  const visibleInsights = expanded
+    ? metrics.insights
+    : metrics.insights.slice(0, 2);
 
   return (
-    <div className={cn(
-      "brutalist-glass p-5 sm:p-8 border-l-2 border-l-white/10",
-      className
-    )}>
-      {/* Header */}
-      <div className="py-4 border-b border-white/5 mb-8">
-        <div className="flex items-center gap-4">
-          <div className="p-3 bg-white/5 opacity-40">
-            <Gauge className="w-6 h-6 text-[#f0f0fa]" />
-          </div>
-          <div>
-            <h3 className="text-caption-bold text-sm tracking-widest uppercase opacity-80">CODE IMPACT ANALYSIS</h3>
-            <p className="text-micro opacity-20 uppercase tracking-widest mt-1">MEANINGFUL PRODUCTION VS SYSTEM CHURN</p>
-          </div>
+    <Card className={cn("flex h-full flex-col", className)}>
+      <CardHeader
+        icon={<Gauge className="size-4" />}
+        title="Code impact"
+        description="Productive work versus rework across analysed changes."
+        action={
+          <Badge variant={ratingVariant} size="sm">
+            {impactRating.label}
+          </Badge>
+        }
+      />
+
+      <div className="grid items-center gap-5 sm:grid-cols-[minmax(0,1fr)_auto]">
+        <div>
+          <p className="text-label">Impact score</p>
+          <p className="mt-1.5 text-value">{metrics.impactScore}</p>
+          <p className="mt-2 text-caption">
+            Out of 100, weighted by change patterns
+          </p>
+        </div>
+
+        <div className="flex flex-col items-center">
+          <ChurnGauge churn={metrics.churnRate} />
+          <p className="mt-1 text-label">Churn rate</p>
+          <p className="mt-1 max-w-[24ch] text-center text-caption">
+            Commits revisiting recently changed code
+          </p>
         </div>
       </div>
-      
-      {/* Main Content */}
-      <div className="py-2">
-        {/* Impact Score & Gauge Row */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 sm:gap-12 mb-10 sm:mb-12 items-center">
-          {/* Impact Score */}
-          <div className="text-center md:text-left">
-             <div className="text-micro opacity-30 uppercase tracking-[4px] mb-4">IMPACT COEFFICIENT</div>
-            <div className="text-display-hero text-6xl sm:text-7xl font-bold opacity-80 mb-6 font-mono tracking-tighter">
-              {metrics.impactScore}
-            </div>
-            <div className={cn(
-              "inline-block px-5 py-2 text-micro font-bold border border-white/10",
-              "uppercase tracking-[3px]",
-            )}>
-              STRETCH: {impactRating.label.toUpperCase()}
-            </div>
-          </div>
-          
-          {/* Churn Gauge */}
-          <div className="flex flex-col items-center justify-center">
-            <ChurnGauge 
-              productive={metrics.productiveRate}
-              refactoring={metrics.churnGauge.refactoring}
-              churn={metrics.churnRate}
-            />
-            <div className="mt-6 text-micro opacity-20 uppercase tracking-[3px]">CHURN GRADIENT</div>
-          </div>
+
+      <div className="mt-6 border-t border-border-subtle pt-5">
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <p className="text-label">Change mix</p>
+          <p className="text-caption">Share of analysed commits</p>
         </div>
-        
-        {/* Stats Row */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
-          <div className="brutalist-glass p-6 border-l-2 border-l-white/10">
-            <p className="text-micro opacity-20 mb-3 tracking-[2px] uppercase">PRODUCTIVE</p>
-            <p className="text-3xl font-bold opacity-80 tabular-nums font-mono">{metrics.productiveRate}%</p>
-          </div>
-          <div className="brutalist-glass p-6 border-l-2 border-l-white/10">
-            <p className="text-micro opacity-20 mb-3 tracking-[2px] uppercase">REFACTORING</p>
-            <p className="text-3xl font-bold opacity-80 tabular-nums font-mono">{metrics.churnGauge.refactoring}%</p>
-          </div>
-          <div className="brutalist-glass p-6 border-l-2 border-l-white/10">
-            <p className="text-micro opacity-20 mb-3 tracking-[2px] uppercase">SYSTEM CHURN</p>
-            <p className="text-3xl font-bold opacity-80 tabular-nums font-mono">{metrics.churnRate}%</p>
-          </div>
+
+        <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <RateStat
+            label="Productive"
+            value={metrics.churnGauge.productive}
+            tone="accent"
+            detail="Features and fixes"
+          />
+          <RateStat
+            label="Refactoring"
+            value={metrics.churnGauge.refactoring}
+            tone="neutral"
+            detail="Restructuring and cleanup"
+          />
+          <RateStat
+            label="Maintenance"
+            value={maintenanceRate}
+            tone="neutral"
+            detail="Small tweaks under 10 lines"
+          />
         </div>
-        
-        {/* Insights */}
-        {metrics.insights.length > 0 && (
-          <div className="space-y-4 pt-6 border-t border-white/5">
-             <div className="text-micro opacity-20 uppercase tracking-[2px] mb-2">ARCHIVE OBSERVATIONS:</div>
-            {metrics.insights.slice(0, expanded ? undefined : 2).map((insight, index) => (
-              <div 
-                key={index}
-                className="flex items-start gap-4 text-micro opacity-40 hover:opacity-100 transition-opacity uppercase tracking-widest leading-relaxed"
+
+        <p className="mt-4 text-caption">
+          Churn is measured separately, so a commit can count as both
+          productive and churn.
+        </p>
+      </div>
+
+      {metrics.insights.length > 0 ? (
+        <div className="mt-6 border-t border-border-subtle pt-5">
+          <p className="text-label">Observations</p>
+          <ul className="mt-3 space-y-2.5">
+            {visibleInsights.map((insight, index) => (
+              <li
+                key={`${index}-${insight}`}
+                className="flex items-start gap-2.5 text-caption text-text-2"
               >
-                <span className="shrink-0 w-8 h-px bg-white/20 mt-2" />
-                <span>{insight.toUpperCase()}</span>
-              </div>
+                <Info
+                  className="mt-0.5 size-3.5 shrink-0 text-text-3"
+                  aria-hidden="true"
+                />
+                <span>{cleanInsight(insight)}</span>
+              </li>
             ))}
-            
-            {metrics.insights.length > 2 && (
-              <button
-                onClick={() => setExpanded(!expanded)}
-                className="text-micro opacity-30 hover:opacity-100 transition-all mt-4 uppercase tracking-[3px] border-b border-dashed border-white/10 pb-1"
-              >
-                {expanded ? "COLLAPSE ARCHIVE" : `EXPAND ${metrics.insights.length - 2} ADDITIONAL OBSERVATIONS`}
-              </button>
-            )}
-          </div>
-        )}
-      </div>
-    </div>
+          </ul>
+
+          {metrics.insights.length > 2 ? (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="mt-4 px-0"
+              onClick={() => setExpanded((previous) => !previous)}
+              aria-expanded={expanded}
+            >
+              {expanded
+                ? "Show fewer observations"
+                : `Show ${metrics.insights.length - 2} more ${
+                    metrics.insights.length - 2 === 1
+                      ? "observation"
+                      : "observations"
+                  }`}
+            </Button>
+          ) : null}
+        </div>
+      ) : null}
+    </Card>
   );
 }
 
 // ===========================================
-// Churn Gauge Component (Semi-circle)
+// Churn Gauge (semi-circle)
 // ===========================================
 
-function ChurnGauge({ productive, refactoring, churn }: { productive: number, refactoring: number, churn: number }) {
-  const total = productive + refactoring + churn;
-  const pAngle = total > 0 ? (productive / total) * 180 : 60;
-  const rAngle = total > 0 ? (refactoring / total) * 180 : 60;
-  
+function ChurnGauge({ churn }: { churn: number }) {
+  const safeChurn = Math.min(Math.max(churn, 0), 100);
   const radius = 50;
-  const strokeWidth = 14;
   const circumference = Math.PI * radius;
-  
-  const pLen = (pAngle / 180) * circumference;
-  const rLen = (rAngle / 180) * circumference;
-  const cLen = circumference - pLen - rLen;
-  
+  const churnLength = (safeChurn / 100) * circumference;
+
   return (
-    <div className="relative w-48 h-28">
-      <svg 
-        viewBox="0 0 120 70" 
-        className="w-full h-full"
-      >
+    <div
+      className="relative h-28 w-48"
+      role="img"
+      aria-label={`Churn rate ${Math.round(
+        safeChurn
+      )}%. Share of analysed commits that revisit recently changed code.`}
+    >
+      <svg viewBox="0 0 120 70" className="size-full" aria-hidden="true">
         <path
           d="M 10 60 A 50 50 0 0 1 110 60"
           fill="none"
-          stroke="white"
-          strokeWidth={strokeWidth}
-          className="opacity-5"
+          stroke="rgba(240, 240, 250, 0.08)"
+          strokeWidth={14}
         />
-        
-        {/* Productive segment */}
+
         <path
           d="M 10 60 A 50 50 0 0 1 110 60"
           fill="none"
-          stroke="white"
-          strokeWidth={strokeWidth}
-          strokeDasharray={`${pLen} ${circumference}`}
-          strokeOpacity={0.6}
-        />
-        
-        {/* Refactoring segment */}
-        <path
-          d="M 10 60 A 50 50 0 0 1 110 60"
-          fill="none"
-          stroke="white"
-          strokeWidth={strokeWidth}
-          strokeDasharray={`${rLen} ${circumference}`}
-          strokeDashoffset={-pLen}
-          strokeOpacity={0.25}
-        />
-        
-        {/* Churn segment */}
-        <path
-          d="M 10 60 A 50 50 0 0 1 110 60"
-          fill="none"
-          stroke="white"
-          strokeWidth={strokeWidth}
-          strokeDasharray={`${cLen} ${circumference}`}
-          strokeDashoffset={-(pLen + rLen)}
-          strokeOpacity={0.1}
+          stroke="var(--danger)"
+          strokeWidth={14}
+          strokeDasharray={`${churnLength} ${circumference}`}
         />
       </svg>
-      
-      <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-2 text-center">
-        <div className="text-3xl font-bold opacity-80 font-mono tracking-tighter">{Math.round(churn)}%</div>
+
+      <div className="absolute inset-x-0 bottom-0 text-center">
+        <p className="font-display text-2xl font-bold leading-none text-text tabular-nums">
+          {Math.round(safeChurn)}%
+        </p>
       </div>
     </div>
   );
 }
 
 // ===========================================
-// Compact Version
+// Rate stat
 // ===========================================
 
-export function CodeImpactCardCompact({ metrics, className }: CodeImpactCardProps) {
+function RateStat({
+  label,
+  value,
+  detail,
+  tone,
+}: {
+  label: string;
+  value: number;
+  detail: string;
+  tone: "accent" | "neutral" | "danger";
+}) {
+  const fill =
+    tone === "accent"
+      ? "bg-accent"
+      : tone === "danger"
+        ? "bg-danger"
+        : "bg-white/35";
+
+  return (
+    <div className="min-w-0">
+      <div className="flex items-baseline justify-between gap-2">
+        <p className="text-label">{label}</p>
+        <p className="font-mono text-sm tabular-nums text-text">{value}%</p>
+      </div>
+      <div className="mt-2 h-1.5 w-full overflow-hidden rounded-pill bg-white/10">
+        <div
+          className={cn("h-full rounded-pill", fill)}
+          style={{ width: `${Math.min(Math.max(value, 0), 100)}%` }}
+        />
+      </div>
+      <p className="mt-1.5 text-caption">{detail}</p>
+    </div>
+  );
+}
+
+function getRatingVariant(score: number): BadgeVariant {
+  if (score >= 80) return "success";
+  if (score >= 60) return "accent";
+  if (score >= 40) return "warning";
+  return "danger";
+}
+
+function cleanInsight(text: string): string {
+  return text.replace(/^[^\p{L}\p{N}]+/u, "").trim();
+}
+
+// ===========================================
+// Compact version
+// ===========================================
+
+export function CodeImpactCardCompact({
+  metrics,
+  className,
+}: CodeImpactCardProps) {
   if (!metrics) return null;
 
   return (
-    <div className={cn("py-6 border-t border-white/5", className)}>
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-3">
-          <Gauge className="w-4 h-4 opacity-40 text-[#f0f0fa]" />
-          <span className="text-micro uppercase tracking-widest opacity-40">CODE IMPACT</span>
+    <div className={cn("border-t border-border-subtle py-4", className)}>
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <Gauge className="size-3.5 text-text-3" aria-hidden="true" />
+          <span className="text-caption">Code impact</span>
         </div>
-        <div className="text-2xl font-bold opacity-80 tracking-widest font-mono">
+        <span className="font-mono text-xs tabular-nums text-text">
           {metrics.impactScore}
-        </div>
+        </span>
       </div>
-      
-      <div className="flex items-center gap-4 text-micro uppercase tracking-widest opacity-20">
-        <span className="opacity-60">{metrics.productiveRate}% PROD</span>
-        <span className="opacity-60">{metrics.churnRate}% CHURN</span>
-      </div>
+      <p className="mt-1 text-caption">
+        {metrics.churnRate}% churn rate
+      </p>
     </div>
   );
 }

@@ -1,28 +1,33 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { LogoutButton } from "@/components/LogoutButton";
-import {
-  Mail,
-  Github,
-  Calendar,
-  Shield,
-  RefreshCw,
-  Settings,
-  AlertCircle,
-  CheckCircle2,
-  Clock,
-  User,
-  ArrowLeft,
-} from "lucide-react";
-import Link from "next/link";
+import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
 import type { Session } from "next-auth";
-import { cn } from "@/lib/utils";
-
-/**
- * Profile Content Component — SpaceX-inspired industrial aesthetic
- */
+import {
+  AlertCircle,
+  Clock,
+  ExternalLink,
+  Github,
+  KeyRound,
+  Mail,
+  RefreshCw,
+  Settings,
+  ShieldCheck,
+  User,
+} from "lucide-react";
+import { LogoutButton } from "@/components/LogoutButton";
+import { Badge, Chip } from "@/components/ui/badge";
+import { Button, ButtonLink } from "@/components/ui/button";
+import {
+  Card,
+  CardFooter,
+  CardHeader,
+} from "@/components/ui/card";
+import { IconTile } from "@/components/ui/icon-tile";
+import { InlineNotice } from "@/components/ui/inline-notice";
+import { KeyValueList } from "@/components/ui/key-value-list";
+import { PageHeader } from "@/components/ui/page-header";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface ProfileContentProps {
   session: Session;
@@ -36,265 +41,357 @@ interface GitHubConnectionData {
   error?: string;
 }
 
+/**
+ * Profile content: identity, GitHub connection and the current session.
+ */
 export function ProfileContent({ session }: ProfileContentProps) {
   const { user } = session;
   const [githubData, setGithubData] = useState<GitHubConnectionData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isReconnecting, setIsReconnecting] = useState(false);
+  const [statusError, setStatusError] = useState(false);
 
-  const joinedDate = user.email
-    ? new Date().toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      })
-    : "N/A";
+  const loadGitHubStatus = useCallback(async () => {
+    setIsLoading(true);
+    setStatusError(false);
 
-  useEffect(() => {
-    async function fetchGitHubStatus() {
-      try {
-        const response = await fetch("/api/profile/github-status");
-        if (response.ok) {
-          const data = await response.json();
-          setGithubData(data);
-        } else {
-          setGithubData({
-            isConnected: false,
-            lastSync: null,
-            provider: null,
-            error: "Failed to fetch GitHub status",
-          });
-        }
-      } catch (error) {
-        console.error("Error fetching GitHub status:", error);
-        setGithubData({
-          isConnected: false,
-          lastSync: null,
-          provider: null,
-          error: "Network error",
-        });
-      } finally {
-        setIsLoading(false);
+    try {
+      const response = await fetch("/api/profile/github-status");
+      if (!response.ok) {
+        throw new Error("GitHub status request failed");
       }
+      const data = (await response.json()) as GitHubConnectionData;
+      setGithubData(data);
+    } catch {
+      setGithubData({
+        isConnected: false,
+        lastSync: null,
+        provider: null,
+        error: "GitHub status is temporarily unavailable.",
+      });
+      setStatusError(true);
+    } finally {
+      setIsLoading(false);
     }
-    fetchGitHubStatus();
   }, []);
 
-  const handleReconnectGitHub = async () => {
+  useEffect(() => {
+    void loadGitHubStatus();
+  }, [loadGitHubStatus]);
+
+  const handleReconnectGitHub = () => {
     setIsReconnecting(true);
     window.location.href = "/api/auth/signin/github?callbackUrl=/profile";
   };
 
+  const displayName = user.name || user.username || "Signed-in user";
+  const needsReconnect =
+    !isLoading &&
+    !statusError &&
+    githubData !== null &&
+    (githubData.requiresReauth === true || !githubData.isConnected);
+
+  const connectionState = statusError
+    ? "Unavailable"
+    : isLoading
+      ? "Checking"
+      : githubData?.requiresReauth
+        ? "Reconnect required"
+        : githubData?.isConnected
+          ? "Connected"
+          : "Not connected";
+
   return (
-    <div className="section-cinematic bg-black items-start">
-      <div 
-        className="section-photo grayscale opacity-40 transition-opacity duration-1000" 
-        style={{ 
-          backgroundImage: "url('/space-hero.png')", 
-          backgroundSize: "cover", 
-          backgroundPosition: "center"
-        }} 
-      />
-      <div className="section-overlay" />
-      
-      <div className="section-content relative z-20 w-full" style={{ padding: "clamp(88px, 14vh, 120px) clamp(24px, 6vw, 80px) 40px", maxWidth: "900px", margin: "0 auto" }}>
-        {/* Header */}
-        <header className="mb-8 sm:mb-12">
-          <Link
-            href="/dashboard"
-            className="text-micro uppercase tracking-[4px] opacity-40 hover:opacity-100 transition-all inline-flex items-center gap-3 sm:gap-4 mb-6 sm:mb-10"
+    <>
+      <PageHeader
+        eyebrow="Account"
+        title="Profile"
+        subtitle="Your identity, GitHub connection and current session."
+        back={{ href: "/dashboard", label: "Dashboard" }}
+        actions={
+          <ButtonLink
+            href="/settings"
+            variant="secondary"
+            size="sm"
+            leadingIcon={<Settings className="size-3.5" />}
           >
-            <ArrowLeft size={11} />
-            BACK TO MISSION CONTROL
-          </Link>
+            Settings
+          </ButtonLink>
+        }
+      />
 
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 sm:gap-8 border-b border-white/10 pb-8 sm:pb-10">
-            <div>
-              <p className="text-micro uppercase tracking-[5px] opacity-20 mb-4 font-bold">PERSONNEL ARCHIVE</p>
-              <h1 className="text-display-hero font-bold opacity-80 tracking-tighter">PROFILE</h1>
-            </div>
-            <LogoutButton />
-          </div>
-        </header>
+      <div className="space-y-5">
+        <Card padding="lg">
+          <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
+            {user.image ? (
+              <Image
+                src={user.image}
+                alt={user.name ? `${user.name}'s avatar` : "GitHub avatar"}
+                width={96}
+                height={96}
+                className="size-20 shrink-0 rounded-card border border-border object-cover sm:size-24"
+              />
+            ) : (
+              <IconTile
+                size="xl"
+                tone="neutral"
+                className="size-20 rounded-card sm:size-24"
+              >
+                <User className="size-8" aria-hidden="true" />
+              </IconTile>
+            )}
 
-        {/* Profile identity & Information */}
-        <div className="brutalist-glass p-5 sm:p-10 space-y-10 sm:space-y-16">
-          {/* Identity row */}
-          <div className="flex items-center gap-6 sm:gap-10 flex-wrap sm:flex-nowrap border-b border-white/5 pb-8 sm:pb-12">
-            {/* Avatar block */}
-            <div className="relative group">
-              {user.image ? (
-                <Image
-                  src={user.image}
-                  alt={user.name || "User avatar"}
-                  width={96}
-                  height={96}
-                  className="w-24 h-24 grayscale border border-white/20 group-hover:grayscale-0 transition-all duration-500"
-                />
-              ) : (
-                <div className="w-24 h-24 border border-white/10 bg-white/5 flex items-center justify-center">
-                  <User size={40} className="opacity-20" />
-                </div>
-              )}
-               <div className="absolute -bottom-2 -right-2 w-6 h-6 bg-white flex items-center justify-center">
-                  <div className="w-1.5 h-1.5 bg-black" />
-               </div>
-            </div>
-
-            <div className="flex-1">
-              <h2 className="text-section-head text-3xl font-bold opacity-80 tracking-widest uppercase mb-4">
-                {user.name || user.username || "STATION_USER_00"}
+            <div className="min-w-0 flex-1">
+              <p className="text-label">Signed in as</p>
+              <h2 className="mt-1.5 break-words font-display text-2xl font-bold leading-tight tracking-[0.02em] text-text sm:text-3xl">
+                {displayName}
               </h2>
-              {user.username && (
+
+              {user.username ? (
                 <a
                   href={`https://github.com/${user.username}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-micro uppercase tracking-[3px] opacity-30 hover:opacity-100 transition-all inline-flex items-center gap-3"
+                  className="focus-ring mt-2 inline-flex min-h-11 items-center gap-1.5 text-caption text-accent transition-colors hover:text-text"
                 >
-                  <Github size={12} />
-                  GITHUB_REF: {user.username.toUpperCase()}
+                  @{user.username}
+                  <ExternalLink className="size-3" aria-hidden="true" />
+                  <span className="sr-only">on GitHub (opens in a new tab)</span>
                 </a>
+              ) : (
+                <p className="mt-2 text-caption">
+                  No GitHub username is attached to this session.
+                </p>
               )}
+
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                <Chip>GitHub account</Chip>
+                {!isLoading && githubData?.isConnected && !statusError ? (
+                  <Badge variant="success" size="sm" dot>
+                    Connected
+                  </Badge>
+                ) : null}
+              </div>
             </div>
           </div>
+        </Card>
 
-          {/* Detailed Info Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 sm:gap-16">
-            <section>
-              <div className="flex items-center gap-3 mb-8 opacity-20 group">
-                <Shield size={12} />
-                <h3 className="text-micro uppercase tracking-[4px] font-bold">CORE CREDENTIALS</h3>
-              </div>
-              <div className="space-y-6">
-                <InfoRow
-                  icon={<Mail size={12} />}
-                  label="REGISTRATION"
-                  value={user.email || "UNSPECIFIED"}
-                />
-                <InfoRow
-                  icon={<Github size={12} />}
-                  label="EXTERNAL_ID"
-                  value={user.username || "NULL"}
-                />
-                <InfoRow
-                  icon={<Calendar size={12} />}
-                  label="COMMISSIONED"
-                  value={joinedDate.toUpperCase()}
-                />
-              </div>
-            </section>
+        <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+          <Card className="flex h-full flex-col">
+            <CardHeader
+              icon={<User className="size-4" />}
+              title="Account"
+              description="Read-only details from your GitHub identity."
+            />
 
-            <section>
-              <div className="flex items-center gap-3 mb-8 opacity-20">
-                <Github size={12} />
-                <h3 className="text-micro uppercase tracking-[4px] font-bold">OPERATIONAL STATUS</h3>
-              </div>
-              {isLoading ? (
-                <div className="space-y-6 animate-pulse pt-4">
-                  <div className="h-4 bg-white/5 w-full" />
-                  <div className="h-4 bg-white/5 w-2/3" />
-                </div>
-              ) : (
-                <div className="space-y-6">
-                  <InfoRow
-                    icon={githubData?.isConnected
-                      ? <CheckCircle2 size={12} className="opacity-60" />
-                      : <AlertCircle size={12} className="opacity-40" />
-                    }
-                    label="NETWORK_SYNC"
-                    value={githubData?.requiresReauth
-                      ? "REAUTH_REQUIRED"
-                      : githubData?.isConnected
-                        ? "LINKED / ACTIVE"
-                        : "LINK_TERMINATED"
-                    }
-                    isStatus
-                  />
-                  {githubData?.lastSync && (
-                    <InfoRow
-                      icon={<Clock size={12} />}
-                      label="ARCHIVE_UPDATE"
-                      value={new Date(githubData.lastSync).toLocaleString("en-US", {
-                        month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
-                      }).toUpperCase()}
-                    />
-                  )}
-                </div>
-              )}
-            </section>
-          </div>
-          
-          {/* Hardware/System Status */}
-          <section className="pt-6 sm:pt-8 border-t border-white/5">
-             <div className="flex items-center gap-4 text-micro uppercase tracking-[3px] opacity-20 mb-6 font-bold">
-               SYSTEM VALIDATION
-             </div>
-             <div className="flex flex-wrap gap-6">
-                <div className="px-6 py-2 border border-white/10 bg-white/5 text-micro uppercase tracking-[4px] opacity-60 flex items-center gap-3">
-                   <div className="w-1.5 h-1.5 bg-white shadow-[0_0_10px_white]" />
-                   SESSION_VERIFIED_NOMINAL
-                </div>
-                <div className="px-6 py-2 border border-white/5 text-micro uppercase tracking-[4px] opacity-30 flex items-center gap-3">
-                   V6/ENCRYPTION_ACTIVE
-                </div>
-             </div>
-          </section>
-        </div>
-
-        {/* Action Controls */}
-        <div className="mt-8 sm:mt-12 flex gap-3 sm:gap-4 flex-wrap">
-          <Link
-            href="/settings"
-            className="btn-ghost flex items-center justify-center gap-4 px-8 py-3 text-micro uppercase tracking-[3px] w-full sm:w-auto"
-          >
-            <Settings size={13} className="opacity-40" />
-            PROTOCOL_SETTINGS
-          </Link>
-
-          {(githubData?.requiresReauth || !githubData?.isConnected) && !isLoading && (
-            <button
-              onClick={handleReconnectGitHub}
-              disabled={isReconnecting}
-              className="btn-ghost flex items-center justify-center gap-4 px-8 py-3 text-micro uppercase tracking-[3px] w-full sm:w-auto"
-            >
-              <RefreshCw
-                size={13}
-                className={cn("opacity-40", isReconnecting && "animate-spin")}
+            <div className="flex-1">
+              <KeyValueList
+                items={[
+                  {
+                    label: "Email",
+                    value: user.email || "Not provided",
+                    icon: <Mail />,
+                  },
+                  {
+                    label: "GitHub username",
+                    value: user.username ? (
+                      <a
+                        href={`https://github.com/${user.username}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="focus-ring inline-flex min-h-11 items-center gap-1 text-accent transition-colors hover:text-text"
+                      >
+                        @{user.username}
+                        <ExternalLink className="size-3" aria-hidden="true" />
+                        <span className="sr-only">
+                          on GitHub (opens in a new tab)
+                        </span>
+                      </a>
+                    ) : (
+                      "Not linked"
+                    ),
+                    icon: <Github />,
+                  },
+                  {
+                    label: "Display name",
+                    value: user.name || "Not set",
+                    icon: <User />,
+                  },
+                  {
+                    label: "Authentication",
+                    value: "GitHub OAuth",
+                    icon: <KeyRound />,
+                  },
+                ]}
               />
-              {isReconnecting ? "ESTABLISHING..." : "INITIALIZE_LINK"}
-            </button>
-          )}
+            </div>
+
+            <CardFooter>
+              <p className="text-caption">
+                Profile details come from your GitHub account.
+              </p>
+            </CardFooter>
+          </Card>
+
+          <Card className="flex h-full flex-col">
+            <CardHeader
+              icon={<Github className="size-4" />}
+              title="GitHub connection"
+              description="Sync access and the last archive update."
+              action={
+                isLoading ? (
+                  <Skeleton className="h-5 w-24 rounded-pill" />
+                ) : (
+                  <Badge
+                    variant={
+                      statusError
+                        ? "warning"
+                        : githubData?.requiresReauth
+                          ? "warning"
+                          : githubData?.isConnected
+                            ? "success"
+                            : "danger"
+                    }
+                    size="sm"
+                    dot
+                  >
+                    {connectionState}
+                  </Badge>
+                )
+              }
+            />
+
+            <div className="flex-1">
+              {isLoading ? (
+                <div className="space-y-3" aria-hidden="true">
+                  <Skeleton className="h-11 w-full rounded-card" />
+                  <Skeleton className="h-11 w-full rounded-card" />
+                  <Skeleton className="h-16 w-full rounded-card" />
+                </div>
+              ) : statusError ? (
+                <InlineNotice
+                  variant="warning"
+                  title="GitHub status unavailable"
+                  icon={<AlertCircle />}
+                  action={
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => void loadGitHubStatus()}
+                    >
+                      Retry
+                    </Button>
+                  }
+                >
+                  We could not read your GitHub connection state. Retry, or
+                  reconnect GitHub if syncing still fails.
+                </InlineNotice>
+              ) : githubData ? (
+                <>
+                  <KeyValueList
+                    items={[
+                      {
+                        label: "Provider",
+                        value: formatProvider(githubData.provider),
+                        icon: <ShieldCheck />,
+                      },
+                      {
+                        label: "Last sync",
+                        value: formatLastSync(githubData.lastSync),
+                        icon: <Clock />,
+                      },
+                    ]}
+                  />
+
+                  {githubData.requiresReauth ? (
+                    <InlineNotice
+                      variant="warning"
+                      className="mt-4"
+                      title="Reconnect required"
+                    >
+                      GitHub access needs to be renewed before syncing can
+                      continue.
+                    </InlineNotice>
+                  ) : !githubData.isConnected ? (
+                    <InlineNotice
+                      variant="info"
+                      className="mt-4"
+                      title="GitHub is not connected"
+                    >
+                      Reconnect GitHub to resume syncing repositories and
+                      commits.
+                    </InlineNotice>
+                  ) : null}
+
+                  {needsReconnect ? (
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={handleReconnectGitHub}
+                      loading={isReconnecting}
+                      loadingText="Redirecting…"
+                      leadingIcon={<RefreshCw className="size-3.5" />}
+                      className="mt-4 disabled:opacity-100"
+                    >
+                      Reconnect GitHub
+                    </Button>
+                  ) : null}
+                </>
+              ) : null}
+            </div>
+
+            <CardFooter>
+              <p className="text-caption">
+                Connection state is read from your GitHub account.
+              </p>
+            </CardFooter>
+          </Card>
         </div>
+
+        <Card>
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex min-w-0 items-start gap-3">
+              <IconTile tone="success">
+                <ShieldCheck className="size-4" />
+              </IconTile>
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-center gap-2">
+                  <h2 className="text-card-title">Session</h2>
+                  <Badge variant="success" size="sm" dot>
+                    Active
+                  </Badge>
+                </div>
+                <p className="mt-1 max-w-xl text-caption">
+                  Signed in with GitHub OAuth. Signing out ends this browser
+                  session; your synced data stays intact.
+                </p>
+              </div>
+            </div>
+
+            <LogoutButton className="shrink-0" />
+          </div>
+        </Card>
       </div>
-    </div>
+    </>
   );
 }
 
-// Info Row Component
-function InfoRow({
-  icon,
-  label,
-  value,
-  isStatus = false,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value: string;
-  isStatus?: boolean;
-}) {
-  return (
-    <div className="flex items-start gap-5 group">
-      <div className="mt-1 opacity-20 group-hover:opacity-60 transition-opacity shrink-0">{icon}</div>
-      <div className="flex-1 min-w-0">
-        <p className="text-micro uppercase tracking-[3px] opacity-20 font-bold mb-1">{label}</p>
-        <p className={cn(
-          "text-caption-bold text-sm uppercase tracking-widest wrap-break-word",
-          isStatus ? "opacity-100" : "opacity-60 group-hover:opacity-80 transition-opacity"
-        )}>
-          {value}
-        </p>
-      </div>
-    </div>
-  );
+function formatLastSync(value: string | null): string {
+  if (!value) return "Not synced yet";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "Unknown";
+
+  return date.toLocaleString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZoneName: "short",
+  });
+}
+
+function formatProvider(provider: string | null): string {
+  if (!provider) return "GitHub OAuth";
+  return provider.toLowerCase() === "github" ? "GitHub OAuth" : provider;
 }

@@ -1,21 +1,28 @@
-'use client';
+"use client";
 
 /**
  * Day of Week Chart
- * 
- * Bar chart showing commit distribution across days of the week
+ *
+ * Commit distribution across days of the week.
  */
 
 import {
-  BarChart,
   Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  Cell,
-} from 'recharts';
+} from "recharts";
+import {
+  ChartStat,
+  ChartTooltipContent,
+  chartAxisLine,
+  chartGridStroke,
+  chartTick,
+} from "./chart-primitives";
 
 interface DayOfWeekStats {
   Monday: number;
@@ -32,102 +39,116 @@ interface DayOfWeekChartProps {
   className?: string;
 }
 
-const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-const FULL_DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+const FULL_DAYS = [
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+  "Sunday",
+];
 
-export function DayOfWeekChart({ data, className = '' }: DayOfWeekChartProps) {
-  // Convert to chart format
+export function DayOfWeekChart({ data, className = "" }: DayOfWeekChartProps) {
   const chartData = FULL_DAYS.map((day, index) => ({
     day: DAYS[index],
     fullDay: day,
     commits: data[day as keyof DayOfWeekStats] || 0,
   }));
 
-  // Find the most productive day
-  const maxCommits = Math.max(...chartData.map(d => d.commits));
-  const mostProductiveDay = chartData.find(d => d.commits === maxCommits)?.fullDay;
+  const total = chartData.reduce((sum, item) => sum + item.commits, 0);
+  const maxCommits = Math.max(...chartData.map((item) => item.commits));
+  const mostProductiveDay =
+    total > 0
+      ? chartData.find((item) => item.commits === maxCommits)?.fullDay
+      : null;
 
-  // Calculate weekday vs weekend
-  const weekdayTotal = chartData.slice(0, 5).reduce((sum, d) => sum + d.commits, 0);
-  const weekendTotal = chartData.slice(5).reduce((sum, d) => sum + d.commits, 0);
-  const total = weekdayTotal + weekendTotal;
+  const weekdayTotal = chartData
+    .slice(0, 5)
+    .reduce((sum, item) => sum + item.commits, 0);
+  const weekdayRatio = total > 0 ? Math.round((weekdayTotal / total) * 100) : 0;
 
   return (
-    <div className={` bg-transparent border-none ${className}`}>
-      {/* Summary Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 mb-10">
-        <div className="border-l-2 border-[rgba(240,240,250,0.1)] pl-4">
-          <p className="text-micro opacity-40 mb-2 tracking-[2px]">MOST PRODUCTIVE DAY</p>
-          <p className="text-display-hero text-3xl opacity-90">{mostProductiveDay?.toUpperCase()}</p>
-        </div>
-        <div className="border-l-2 border-[rgba(240,240,250,0.1)] pl-4">
-          <p className="text-micro opacity-40 mb-2 tracking-[2px]">WEEKDAY RATIO</p>
-          <p className="text-display-hero text-3xl opacity-90 tabular-nums">{total > 0 ? Math.round((weekdayTotal / total) * 100) : 0}%</p>
-        </div>
+    <div className={className}>
+      <div className="mb-5 grid grid-cols-2 gap-4">
+        <ChartStat
+          label="Most productive day"
+          value={mostProductiveDay ?? "No activity"}
+          detail="Across all recorded commits"
+        />
+        <ChartStat
+          label="Weekday ratio"
+          value={`${weekdayRatio}%`}
+          detail="Monday to Friday share"
+        />
       </div>
 
-      {/* Chart */}
-      <div className="p-4 sm:p-6">
-        {total > 0 ? (
-          <>
-            <div className="h-48 min-h-48 min-w-0">
-              <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={192}>
-                <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="0" stroke="rgba(240,240,250,0.05)" vertical={false} />
-                  <XAxis
-                    dataKey="day"
-                    tick={{ fill: 'rgba(240,240,250,0.3)', fontSize: 10, letterSpacing: '1px' }}
-                    tickLine={false}
-                    axisLine={{ stroke: 'rgba(240,240,250,0.1)' }}
-                    tickFormatter={(value) => value.toUpperCase()}
-                  />
-                  <YAxis
-                    tick={{ fill: 'rgba(240,240,250,0.3)', fontSize: 10 }}
-                    tickLine={false}
-                    axisLine={false}
-                    allowDecimals={false}
-                  />
-                  <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(240, 240, 250, 0.05)' }} />
-                  <Bar dataKey="commits" radius={[0, 0, 0, 0]} maxBarSize={40}>
-                    {chartData.map((entry, index) => (
-                      <Cell
-                        key={`cell-${index}`}
-                        fill="#f0f0fa"
-                        opacity={entry.commits === maxCommits ? 0.9 : 0.2}
-                      />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-
-
-          </>
-        ) : (
-          <div className="h-48 flex items-center justify-center opacity-80">
-            <p>No activity data available</p>
+      {total > 0 ? (
+        <div>
+          <div
+            className="h-48 min-h-48 min-w-0"
+            role="img"
+            aria-label={`Commits by day of week. ${mostProductiveDay} is the most productive day. ${weekdayRatio}% of commits fall on weekdays.`}
+          >
+            <ResponsiveContainer
+              width="100%"
+              height="100%"
+              minWidth={0}
+              minHeight={192}
+            >
+              <BarChart
+                data={chartData}
+                margin={{ top: 10, right: 8, left: -20, bottom: 0 }}
+              >
+                <CartesianGrid
+                  strokeDasharray="0"
+                  stroke={chartGridStroke}
+                  vertical={false}
+                />
+                <XAxis
+                  dataKey="day"
+                  tick={chartTick}
+                  tickLine={false}
+                  axisLine={chartAxisLine}
+                />
+                <YAxis
+                  tick={chartTick}
+                  tickLine={false}
+                  axisLine={false}
+                  allowDecimals={false}
+                  width={36}
+                />
+                <Tooltip
+                  content={<ChartTooltipContent valueSuffix=" commits" />}
+                  cursor={{ fill: "var(--surface-hover)" }}
+                />
+                <Bar dataKey="commits" name="Commits" radius={[3, 3, 0, 0]} maxBarSize={36}>
+                  {chartData.map((entry) => (
+                    <Cell
+                      key={entry.fullDay}
+                      fill={
+                        entry.commits === maxCommits
+                          ? "var(--accent)"
+                          : "rgba(240, 240, 250, 0.18)"
+                      }
+                    />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
           </div>
-        )}
-      </div>
-    </div>
-  );
-}
 
-// ===========================================
-// Custom Tooltip Component
-// ===========================================
-
-function CustomTooltip({ active, payload }: any) {
-  if (!active || !payload || !payload.length) return null;
-
-  const data = payload[0].payload;
-
-  return (
-    <div className="brutalist-glass p-3 border-none ring-1 ring-[#f0f0fa]/10">
-      <p className="text-micro opacity-40 mb-1 tracking-widest">{data.fullDay.toUpperCase()}</p>
-      <p className="text-display-hero text-xl opacity-90">
-        {data.commits} COMMITS
-      </p>
+          <p className="mt-3 text-caption">
+            Scope: all recorded commits. The accent bar marks your most active
+            day.
+          </p>
+        </div>
+      ) : (
+        <p className="flex h-48 items-center justify-center text-caption">
+          No weekly activity data available.
+        </p>
+      )}
     </div>
   );
 }

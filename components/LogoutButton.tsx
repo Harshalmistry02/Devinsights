@@ -1,11 +1,14 @@
 "use client";
 
 import { signOut } from "next-auth/react";
-import { LogOut } from "lucide-react";
+import { Loader2, LogOut } from "lucide-react";
 import { useState } from "react";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { cn } from "@/components/ui/cn";
 
 /**
- * Logout Button Component — SpaceX ghost button style
+ * Sign-out control used by Profile and Settings.
+ * Behaviour is unchanged; the presentation now uses the shared button system.
  */
 interface LogoutButtonProps {
   className?: string;
@@ -14,7 +17,7 @@ interface LogoutButtonProps {
 }
 
 export function LogoutButton({
-  className = "",
+  className,
   variant = "default",
   redirectTo = "/",
 }: LogoutButtonProps) {
@@ -33,54 +36,36 @@ export function LogoutButton({
   if (variant === "icon") {
     return (
       <button
+        type="button"
         onClick={handleLogout}
         disabled={isLoading}
-        style={{
-          background: "none",
-          border: "none",
-          color: "var(--spectral-white)",
-          opacity: isLoading ? 0.3 : 0.45,
-          cursor: isLoading ? "not-allowed" : "pointer",
-          padding: "6px",
-          display: "flex",
-          alignItems: "center",
-          transition: "opacity 0.2s ease",
-        }}
-        className={className}
-        aria-label="Sign out"
-        
-        
-      >
-        <LogOut size={18} />
-      </button>
-    );
-  }
-
-  if (variant === "minimal") {
-    return (
-      <button
-        onClick={handleLogout}
-        disabled={isLoading}
-        className={`btn-ghost btn-ghost-sm ${className}`}
-        style={{ opacity: isLoading ? 0.5 : 1 }}
+        className={cn(
+          buttonVariants({ variant: "ghost", size: "md" }),
+          "size-11 px-0 disabled:opacity-100",
+          className
+        )}
         aria-label="Sign out"
       >
-        <LogOut size={13} />
-        {isLoading ? "Signing out..." : "Sign out"}
+        {isLoading ? (
+          <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+        ) : (
+          <LogOut className="size-4" aria-hidden="true" />
+        )}
       </button>
     );
   }
 
   return (
-    <button
+    <Button
+      variant={variant === "minimal" ? "ghost" : "secondary"}
+      size="sm"
       onClick={handleLogout}
-      disabled={isLoading}
-      className={`btn-ghost btn-ghost-sm ${className}`}
-      style={{ opacity: isLoading ? 0.5 : 1 }}
-      aria-label="Sign out of your account"
+      loading={isLoading}
+      loadingText="Signing out…"
+      leadingIcon={<LogOut className="size-3.5" aria-hidden="true" />}
+      className={cn("disabled:opacity-100", className)}
     >
-      <LogOut size={13} />
-      {isLoading ? "Signing out..." : "Sign out"}
-    </button>
+      Sign out
+    </Button>
   );
 }

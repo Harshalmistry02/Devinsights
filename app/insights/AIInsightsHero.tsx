@@ -1,21 +1,23 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect, useCallback } from 'react';
-import { 
-  Sparkles, 
-  Loader2, 
-  Brain, 
-  Zap, 
-  Lightbulb, 
-  AlertTriangle,
-  Target,
-  Clock,
+import React, { useCallback, useEffect, useState } from "react";
+import {
+  Brain,
   CheckCircle2,
+  Clock,
+  Lightbulb,
+  Sparkles,
+  Target,
   Wand2,
-  RotateCcw,
-} from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { AIAnalysisProgress } from '@/components/AIAnalysisProgress';
+  Zap,
+} from "lucide-react";
+import { AIAnalysisProgress } from "@/components/AIAnalysisProgress";
+import { Badge, Chip } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
+import { IconTile } from "@/components/ui/icon-tile";
+import { InlineNotice } from "@/components/ui/inline-notice";
 
 // Types for the insights API response
 interface InsightResponse {
@@ -28,7 +30,7 @@ interface InsightMeta {
   dataQuality: {
     consistencyScore: number;
     languageDiversity: number;
-    streakHealth: 'excellent' | 'good' | 'warning' | 'danger' | 'inactive';
+    streakHealth: "excellent" | "good" | "warning" | "danger" | "inactive";
   };
   daysToMilestone: { milestone: number; daysRemaining: number } | null;
   tokensUsed?: number;
@@ -46,10 +48,10 @@ interface AIInsightsHeroProps {
 }
 
 /**
- * AI Insights Hero Component
- * 
- * Premium, full-width AI insights generation panel that sits at the top of the Insights page.
- * Features a modern gradient design with animated elements.
+ * AI Insights Hero
+ *
+ * Full-width analysis panel at the top of the Insights page. Generation and
+ * caching behaviour is unchanged; only the presentation is rebuilt.
  */
 export function AIInsightsHero({ analytics }: AIInsightsHeroProps) {
   const [loading, setLoading] = useState(false);
@@ -64,7 +66,7 @@ export function AIInsightsHero({ analytics }: AIInsightsHeroProps) {
   useEffect(() => {
     const fetchExistingInsights = async () => {
       try {
-        const response = await fetch('/api/insights/generate');
+        const response = await fetch("/api/insights/generate");
         if (response.ok) {
           const data = await response.json();
           if (data.insights) {
@@ -75,7 +77,7 @@ export function AIInsightsHero({ analytics }: AIInsightsHeroProps) {
           }
         }
       } catch {
-        console.log('No existing insights found');
+        // No cached insights yet.
       }
     };
     fetchExistingInsights();
@@ -85,32 +87,36 @@ export function AIInsightsHero({ analytics }: AIInsightsHeroProps) {
     setLoading(true);
     setError(null);
     setAnalysisStep(0);
-    
+
     const stepInterval = setInterval(() => {
-      setAnalysisStep(prev => Math.min(prev + 1, 3));
+      setAnalysisStep((previous) => Math.min(previous + 1, 3));
     }, 1500);
-    
+
     try {
-      const response = await fetch('/api/insights/generate', { method: 'POST' });
+      const response = await fetch("/api/insights/generate", {
+        method: "POST",
+      });
       const data = await response.json();
-      
+
       if (!response.ok) {
-        if (data.code === 'QUOTA_EXCEEDED') {
-          setError('Daily AI quota exceeded. Try again tomorrow.');
+        if (data.code === "QUOTA_EXCEEDED") {
+          setError("Daily AI quota exceeded. Try again tomorrow.");
           return;
         }
-        throw new Error(data.error || 'Failed to generate insights');
+        throw new Error(data.error || "Failed to generate insights");
       }
-      
+
       if (data.insights) {
         setInsights(data.insights);
         setMeta(data.meta);
         setIsCached(data.cached);
         setGeneratedAt(data.generatedAt ? new Date(data.generatedAt) : new Date());
       }
-    } catch (err) {
-      console.error('Failed to generate insights:', err);
-      setError(err instanceof Error ? err.message : 'Failed to generate insights');
+    } catch (caught) {
+      console.error("Failed to generate insights:", caught);
+      setError(
+        caught instanceof Error ? caught.message : "Failed to generate insights"
+      );
     } finally {
       clearInterval(stepInterval);
       setAnalysisStep(4);
@@ -119,155 +125,141 @@ export function AIInsightsHero({ analytics }: AIInsightsHeroProps) {
   }, []);
 
   return (
-    <div className="bg-transparent overflow-visible">
-      {/* Header Section */}
-      <div className="py-4 border-b border-[rgba(240,240,250,0.05)]">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          {/* Title & Meta */}
-          <div className="flex items-center gap-4">
-            <div className="p-3 opacity-30">
-              <Wand2 className="w-6 h-6 text-[#f0f0fa]" />
-            </div>
-            <div>
-              <h2 className="text-caption-bold text-sm tracking-widest uppercase">
-                AI-POWERED ANALYSIS
-              </h2>
-              <p className="text-micro pt-1 opacity-50 uppercase tracking-widest">
-                DEEP INSIGHTS INTO YOUR DEVELOPMENT PATTERNS
-              </p>
+    <Card
+      padding="none"
+      role="region"
+      aria-labelledby="ai-analysis-title"
+      className="overflow-hidden"
+    >
+      <div className="flex flex-wrap items-start justify-between gap-4 border-b border-border-subtle p-5 sm:p-6">
+        <div className="flex min-w-0 items-start gap-3">
+          <IconTile tone="accent">
+            <Wand2 className="size-4" />
+          </IconTile>
+          <div className="min-w-0">
+            <h2 id="ai-analysis-title" className="text-card-title">
+              AI analysis
+            </h2>
+            <p className="mt-1 max-w-xl text-caption">
+              Generate patterns, strengths and actionable suggestions from your
+              indexed commit history.
+            </p>
+
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              {analytics ? (
+                <Chip>
+                  {analytics.totalCommits.toLocaleString("en-US")} commits
+                  indexed
+                </Chip>
+              ) : null}
+              {generatedAt ? (
+                <Chip icon={<Clock />}>
+                  {isCached ? "Cached" : "Generated"}{" "}
+                  <time dateTime={generatedAt.toISOString()}>
+                    {generatedAt.toLocaleString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </time>
+                </Chip>
+              ) : null}
+              {insights ? (
+                <Badge variant="success" size="sm" dot>
+                  Analysis ready
+                </Badge>
+              ) : null}
             </div>
           </div>
-          
-          {/* Generate Button */}
-          <button
-            onClick={generateInsights}
-            disabled={loading}
-            className={cn(
-              "group relative flex items-center gap-2.5 btn-ghost ml-auto",
-              loading ? "opacity-80 cursor-not-allowed" : ""
-            )}
-          >
-            {loading ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                <span>Analyzing...</span>
-              </>
-            ) : (
-              <>
-                <RotateCcw className="w-4 h-4" />
-                <span>Regenerate</span>
-              </>
-            )}
-          </button>
         </div>
-        
-        {/* Status row */}
-        <div className="flex flex-wrap items-center gap-4 mt-4">
-          {analytics && (
-            <div className="flex items-center gap-1.5 text-micro uppercase tracking-widest opacity-30">
-              <span>{analytics.totalCommits.toLocaleString()} commits indexed</span>
-            </div>
-          )}
-          {generatedAt && (
-            <div className="flex items-center gap-2 text-xs opacity-80">
-              <Clock className="w-3.5 h-3.5" />
-              <span>
-                {isCached ? 'Cached' : 'Generated'}: {generatedAt.toLocaleDateString('en-US', {
-                  month: 'short',
-                  day: 'numeric',
-                  hour: '2-digit',
-                  minute: '2-digit',
-                })}
-              </span>
-            </div>
-          )}
-          {insights && (
-            <div className="flex items-center gap-1.5 text-micro uppercase tracking-widest opacity-40">
-              <CheckCircle2 className="w-3.5 h-3.5" />
-              <span>LOGS READY</span>
-            </div>
-          )}
-        </div>
+
+        <Button
+          variant={insights ? "secondary" : "primary"}
+          onClick={generateInsights}
+          loading={loading}
+          loadingText="Analyzing…"
+          leadingIcon={<Sparkles className="size-4" />}
+        >
+          {insights ? "Regenerate" : "Generate analysis"}
+        </Button>
       </div>
 
-      {/* Loading Progress */}
-      {loading && (
-        <div className="p-6 border-b border-[rgba(240,240,250,0.15)]">
+      {loading ? (
+        <div className="border-b border-border-subtle p-5 sm:p-6">
           <AIAnalysisProgress isAnalyzing={loading} currentStep={analysisStep} />
         </div>
-      )}
+      ) : null}
 
-      {/* Error State */}
-      {error && (
-        <div className="m-6 bg-rose-500/10 border border-rose-500/30 p-4 flex items-start gap-3">
-          <AlertTriangle className="w-5 h-5 text-rose-400 mt-0.5 shrink-0" />
-          <div>
-            <p className="text-rose-400 font-medium">Unable to generate insights</p>
-            <p className="text-rose-400/70 text-sm">{error}</p>
-          </div>
+      {error ? (
+        <div className="p-5 sm:p-6">
+          <InlineNotice variant="error" title="Unable to generate insights">
+            {error}
+          </InlineNotice>
         </div>
-      )}
+      ) : null}
 
-      {/* Insights Display */}
-      {insights && !loading && (
-        <div className="py-6 space-y-6">
-          {/* Milestone Banner */}
-          {meta?.daysToMilestone && (
-            <div className="flex items-center gap-5 p-5 brutalist-glass border-l-2 border-l-white/20">
-              <div className="p-3 bg-white/5 opacity-40">
-                <Target className="w-6 h-6 text-[#f0f0fa]" />
-              </div>
-              <div className="flex-1">
-                <p className="text-micro uppercase tracking-widest text-[#f0f0fa] opacity-60">
-                   {meta.daysToMilestone.daysRemaining} DEPLOYMENT CYCLES TO {meta.daysToMilestone.milestone}-DAY MILESTONE
-                </p>
-              </div>
-            </div>
-          )}
+      {insights && !loading ? (
+        <div className="space-y-5 p-5 sm:p-6">
+          {meta?.daysToMilestone ? (
+            <InlineNotice
+              variant="info"
+              icon={<Target />}
+              title="Milestone approaching"
+            >
+              {meta.daysToMilestone.daysRemaining.toLocaleString("en-US")}{" "}
+              {meta.daysToMilestone.daysRemaining === 1 ? "day" : "days"} until
+              your {meta.daysToMilestone.milestone}-day commit milestone.
+            </InlineNotice>
+          ) : null}
 
-          {/* Insight Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             <InsightPanel
-              icon={<Brain className="w-6 h-6" />}
-              title="COGNITIVE PATTERNS"
+              icon={<Brain className="size-4" />}
+              title="Patterns"
               items={insights.patterns}
             />
             <InsightPanel
-              icon={<Zap className="w-6 h-6" />}
-              title="VELOCITY STRENGTHS"
+              icon={<Zap className="size-4" />}
+              title="Strengths"
               items={insights.strengths}
             />
             <InsightPanel
-              icon={<Lightbulb className="w-6 h-6" />}
-              title="SYSTEM OPTIMIZATIONS"
+              icon={<Lightbulb className="size-4" />}
+              title="Suggestions"
               items={insights.suggestions}
             />
           </div>
-        </div>
-      )}
 
-      {/* Empty State */}
-      {!insights && !loading && !error && (
-        <div className="py-6">
-          <div className="bg-transparent py-8 text-center">
-            <div className="w-16 h-16 border border-[rgba(240,240,250,0.35)] flex items-center justify-center mx-auto mb-4 p-4 text-[#f0f0fa]">
-               <Sparkles className="w-8 h-8 opacity-30" />
-            </div>
-             <h3 className="text-caption-bold text-sm tracking-widest uppercase mb-2">
-              UNLOCK AI INSIGHTS
-            </h3>
-            <p className="text-micro opacity-50 uppercase tracking-widest max-w-md mx-auto mb-6">
-              GET PERSONALIZED ANALYSIS OF YOUR CODING PATTERNS, STRENGTHS, AND ACTIONABLE SUGGESTIONS POWERED BY ADVANCED AI.
-            </p>
-             <div className="flex flex-wrap justify-center gap-3">
-              <FeatureTag text="PATTERN DETECTION" />
-              <FeatureTag text="STRENGTH ANALYSIS" />
-              <FeatureTag text="SMART SUGGESTIONS" />
-            </div>
+          <p className="flex items-center gap-2 text-caption">
+            <CheckCircle2 className="size-3.5 shrink-0" aria-hidden="true" />
+            Scope: your indexed commit history
+            {isCached && generatedAt
+              ? `, generated ${generatedAt.toLocaleDateString("en-US", {
+                  month: "short",
+                  day: "numeric",
+                })}`
+              : null}
+            . AI suggestions are directional, not definitive.
+          </p>
+        </div>
+      ) : null}
+
+      {!insights && !loading && !error ? (
+        <div className="p-5 sm:p-6">
+          <EmptyState
+            icon={<Sparkles className="size-5" />}
+            title="No analysis yet"
+            description="Generate a first analysis to surface your coding patterns, strengths and practical suggestions."
+          />
+          <div className="mt-2 flex flex-wrap justify-center gap-2">
+            <Chip>Pattern detection</Chip>
+            <Chip>Strength analysis</Chip>
+            <Chip>Practical suggestions</Chip>
           </div>
         </div>
-      )}
-    </div>
+      ) : null}
+    </Card>
   );
 }
 
@@ -275,39 +267,47 @@ export function AIInsightsHero({ analytics }: AIInsightsHeroProps) {
 // Sub-Components
 // ===========================================
 
-function InsightPanel({ 
-  icon, 
-  title, 
-  items, 
-}: { 
-  icon: React.ReactNode; 
-  title: string; 
-  items: string[]; 
+function InsightPanel({
+  icon,
+  title,
+  items,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  items: string[];
 }) {
   return (
-    <div className="brutalist-glass p-5 sm:p-8 hover:bg-white/[0.02] transition-all group flex flex-col h-full border-l-2 border-l-white/5">
-      <div className="flex items-center gap-4 mb-6">
-        <div className="p-3 bg-white/5 opacity-50">
-          <span className="text-[#f0f0fa]">{icon}</span>
-        </div>
-        <h3 className="text-caption-bold text-sm tracking-widest uppercase opacity-80">{title}</h3>
+    <article className="flex h-full min-w-0 flex-col rounded-card border border-border-subtle bg-white/[0.02] p-5">
+      <div className="flex items-center gap-3">
+        <IconTile size="sm" tone="neutral">
+          {icon}
+        </IconTile>
+        <h3 className="text-card-title">{title}</h3>
       </div>
-      <ul className="space-y-4">
-        {items.map((item, index) => (
-          <li key={index} className="flex items-start gap-3 text-micro uppercase tracking-widest leading-relaxed opacity-40 group-hover:opacity-100 transition-opacity">
-            <span className="w-1.5 h-px bg-white/40 mt-2 shrink-0" />
-            <span>{item}</span>
-          </li>
-        ))}
-      </ul>
-    </div>
+
+      {items.length > 0 ? (
+        <ul className="mt-4 flex-1 space-y-3">
+          {items.map((item, index) => (
+            <li
+              key={`${index}-${item}`}
+              className="flex items-start gap-2.5 text-caption text-text-2"
+            >
+              <span
+                className="mt-1.5 size-1 shrink-0 rounded-full bg-accent"
+                aria-hidden="true"
+              />
+              <span>{cleanInsight(item)}</span>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="mt-4 text-caption">No items returned in this category.</p>
+      )}
+    </article>
   );
 }
 
-function FeatureTag({ text }: { text: string }) {
-  return (
-    <div className="flex items-center gap-2 px-3 py-1.5 border border-[rgba(240,240,250,0.35)] text-micro opacity-50 uppercase tracking-widest text-shadow-glow">
-      <span>{text}</span>
-    </div>
-  );
+/** Strip leading emoji or punctuation from AI-generated strings. */
+function cleanInsight(text: string): string {
+  return text.replace(/^[^\p{L}\p{N}]+/u, "").trim();
 }

@@ -1,19 +1,26 @@
 import { requireAuth } from "@/lib/auth-helpers";
 import prisma from "@/lib/prisma";
-import Link from "next/link";
 import type { Prisma } from "@prisma/client";
-import { 
-  ArrowLeft, 
-  Code, 
-  Star, 
-  GitFork, 
+import {
   Clock,
+  Code,
   ExternalLink,
   GitCommit,
-  Lock,
+  GitFork,
   Globe,
+  Lock,
   RefreshCw,
+  Star,
 } from "lucide-react";
+import { Badge, Chip } from "@/components/ui/badge";
+import { ButtonLink } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
+import { PageHeader } from "@/components/ui/page-header";
+import { PageShell } from "@/components/ui/page-shell";
+import { SectionHeader } from "@/components/ui/section-header";
+import { SpaceBackground } from "@/components/ui/space-background";
+import { StatCard } from "@/components/ui/stat-card";
 
 type RepositoryWithCommitCount = Prisma.RepositoryGetPayload<{
   include: { _count: { select: { commits: true } } };
@@ -21,8 +28,8 @@ type RepositoryWithCommitCount = Prisma.RepositoryGetPayload<{
 
 /**
  * Repositories Page
- * 
- * Lists all synced repositories with stats
+ *
+ * Lists all synced repositories with stats.
  */
 export default async function RepositoriesPage() {
   const session = await requireAuth();
@@ -33,130 +40,140 @@ export default async function RepositoriesPage() {
     where: { userId: user.id },
     include: {
       _count: {
-        select: { commits: true }
-      }
+        select: { commits: true },
+      },
     },
-    orderBy: { lastSyncedAt: 'desc' }
+    orderBy: { lastSyncedAt: "desc" },
   });
 
   // Calculate totals
   const totalRepos = repositories.length;
-  const totalStars = repositories.reduce((sum, r) => sum + r.stars, 0);
-  const totalForks = repositories.reduce((sum, r) => sum + r.forks, 0);
-  const totalCommits = repositories.reduce((sum, r) => sum + r._count.commits, 0);
+  const totalStars = repositories.reduce((sum, repo) => sum + repo.stars, 0);
+  const totalForks = repositories.reduce((sum, repo) => sum + repo.forks, 0);
+  const totalCommits = repositories.reduce(
+    (sum, repo) => sum + repo._count.commits,
+    0
+  );
 
   // Group by language
   const languageCounts: Record<string, number> = {};
-  repositories.forEach(repo => {
+  repositories.forEach((repo) => {
     if (repo.language) {
       languageCounts[repo.language] = (languageCounts[repo.language] || 0) + 1;
     }
   });
 
-  return (
-    <div className="section-cinematic bg-black items-start">
-      <div 
-        className="section-photo" 
-        style={{ 
-          backgroundImage: "url('/space-hero.png')", 
-          backgroundSize: "cover", 
-          backgroundPosition: "center"
-        }} 
-      />
-      <div className="section-overlay" />
-      <div className="section-content relative z-20 w-full" style={{ padding: "clamp(88px, 14vh, 120px) clamp(24px, 6vw, 80px) 40px" }}>
-        {/* Header */}
-        <div style={{ marginBottom: "40px" }}>
-          <div style={{ display: "flex", alignItems: "flex-start", gap: "16px", flexWrap: "wrap" }}>
-            <Link
-              href="/dashboard"
-              className="p-3 brutalist-glass hover:bg-white/5 transition-all opacity-40 hover:opacity-100"
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </Link>
-            <div>
-              <p className="text-micro uppercase tracking-widest opacity-40 mb-2">ARCHIVE</p>
-              <h1 className="text-section-head flex items-center gap-4">
-                <Code className="w-8 h-8 opacity-50" />
-                REPOSITORIES
-              </h1>
-              <p className="text-micro uppercase tracking-widest opacity-30 mt-2">
-                {totalRepos} DEPLOYMENTS SYNCED TO THE ARCHIVE
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Summary Stats Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6 mb-10 sm:mb-12">
-          <SummaryCard
-            label="TOTAL REPOS"
-            value={totalRepos}
-          />
-          <SummaryCard
-            label="COMMIT LOGS"
-            value={totalCommits}
-          />
-          <SummaryCard
-            label="STAR COUNT"
-            value={totalStars}
-          />
-          <SummaryCard
-            label="FORK COUNT"
-            value={totalForks}
-          />
-        </div>
-
-        {/* Repository Grid */}
-        {repositories.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {repositories.map((repo) => (
-              <RepositoryCard key={repo.id} repo={repo} commitCount={repo._count.commits} />
-            ))}
-          </div>
-        ) : (
-          <EmptyState />
-        )}
-
-        {/* Language Archive */}
-        {Object.keys(languageCounts).length > 0 && (
-          <div className="mt-12 brutalist-glass p-8">
-            <p className="text-micro uppercase tracking-widest opacity-40 mb-6">TECHNOLOGY STACK</p>
-            <div className="flex flex-wrap gap-3">
-              {Object.entries(languageCounts)
-                .sort((a, b) => b[1] - a[1])
-                .map(([language, count]) => (
-                  <span
-                    key={language}
-                    className="px-4 py-2 border border-[rgba(240,240,250,0.1)] text-micro uppercase tracking-widest opacity-60"
-                  >
-                    {language} <span className="opacity-30">[{count}]</span>
-                  </span>
-                ))}
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
+  const languages = Object.entries(languageCounts).sort(
+    (a, b) => b[1] - a[1]
   );
-}
 
-// ===========================================
-// Components
-// ===========================================
-
-function SummaryCard({
-  label,
-  value,
-}: {
-  label: string;
-  value: number;
-}) {
   return (
-    <div className="brutalist-glass p-6 border-l-2 border-l-[rgba(240,240,250,0.1)]">
-      <p className="text-micro opacity-40 mb-3 tracking-[2px] uppercase">{label}</p>
-      <p className="text-display-hero text-3xl font-bold opacity-80 tabular-nums">{value.toLocaleString()}</p>
-    </div>
+    <>
+      <SpaceBackground variant="app" />
+
+      <PageShell>
+        <main
+          id="main-content"
+          role="main"
+          aria-label="Repositories overview"
+        >
+          <PageHeader
+            eyebrow="Archive"
+            title="Repositories"
+            subtitle="Every repository synced from your connected GitHub account, ordered by most recent sync."
+            back={{ href: "/dashboard", label: "Dashboard" }}
+          />
+
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <StatCard
+              label="Repositories"
+              value={totalRepos.toLocaleString("en-US")}
+              icon={<Code className="size-4" />}
+              context="Synced to DevInsight"
+              footer="From your connected GitHub account"
+            />
+            <StatCard
+              label="Commits"
+              value={totalCommits.toLocaleString("en-US")}
+              icon={<GitCommit className="size-4" />}
+              context="Stored commit history"
+              footer="Across synced repositories"
+            />
+            <StatCard
+              label="Stars earned"
+              value={totalStars.toLocaleString("en-US")}
+              icon={<Star className="size-4" />}
+              context="Across synced repositories"
+              footer="All-time total"
+            />
+            <StatCard
+              label="Forks"
+              value={totalForks.toLocaleString("en-US")}
+              icon={<GitFork className="size-4" />}
+              context="Across synced repositories"
+              footer="All-time total"
+            />
+          </div>
+
+          <section aria-label="Repository list" className="mt-10 sm:mt-12">
+            <SectionHeader
+              title="Repository list"
+              description="Commit counts reflect the history stored during sync."
+            />
+
+            {repositories.length > 0 ? (
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                {repositories.map((repo) => (
+                  <RepositoryCard
+                    key={repo.id}
+                    repo={repo}
+                    commitCount={repo._count.commits}
+                  />
+                ))}
+              </div>
+            ) : (
+              <Card>
+                <EmptyState
+                  icon={<Code className="size-5" />}
+                  title="No repositories synced"
+                  description="Sync your GitHub data from the dashboard to populate your repository archive."
+                  action={
+                    <ButtonLink
+                      href="/dashboard"
+                      variant="primary"
+                      leadingIcon={<RefreshCw className="size-4" />}
+                    >
+                      Go to dashboard
+                    </ButtonLink>
+                  }
+                />
+              </Card>
+            )}
+          </section>
+
+          {languages.length > 0 ? (
+            <Card className="mt-10 sm:mt-12">
+              <SectionHeader
+                title="Technology stack"
+                description="Repositories grouped by their primary language."
+              />
+
+              <div className="flex flex-wrap gap-2">
+                {languages.map(([language, count]) => (
+                  <Chip key={language} mono>
+                    {language}
+                    <span className="text-text-3">
+                      {count.toLocaleString("en-US")}{" "}
+                      {count === 1 ? "repo" : "repos"}
+                    </span>
+                  </Chip>
+                ))}
+              </div>
+            </Card>
+          ) : null}
+        </main>
+      </PageShell>
+    </>
   );
 }
 
@@ -167,97 +184,90 @@ function RepositoryCard({
   repo: RepositoryWithCommitCount;
   commitCount: number;
 }) {
+  const syncedDate = repo.lastSyncedAt
+    ? new Date(repo.lastSyncedAt)
+    : null;
+
   return (
-    <div className="brutalist-glass p-5 sm:p-8 hover:bg-white/[0.02] transition-all group flex flex-col justify-between min-h-[220px]">
-      {/* Header */}
-      <div className="flex items-start justify-between mb-3">
-        <div className="flex items-center gap-2 min-w-0">
-          {repo.isPrivate ? (
-            <Lock className="w-4 h-4 text-yellow-500 shrink-0" />
-          ) : (
-            <Globe className="w-4 h-4 text-green-500 shrink-0" />
-          )}
-          <h3 className="opacity-80 font-semibold truncate group-hover:text-[#f0f0fa] transition-colors">
+    <Card
+      role="article"
+      aria-label={`Repository ${repo.fullName}`}
+      className="flex h-full flex-col"
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <Badge
+            variant="neutral"
+            size="sm"
+            icon={repo.isPrivate ? <Lock /> : <Globe />}
+          >
+            {repo.isPrivate ? "Private" : "Public"}
+          </Badge>
+          <h2 className="mt-2.5 break-words font-display text-lg font-semibold leading-tight text-text">
             {repo.name}
-          </h3>
+          </h2>
         </div>
+
         <a
           href={`https://github.com/${repo.fullName}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="p-1.5 opacity-80 hover:text-[#f0f0fa] transition-all"
+          className="focus-ring -mr-1.5 -mt-1.5 inline-flex size-11 shrink-0 items-center justify-center rounded-pill text-text-3 transition-colors duration-150 hover:bg-surface-hover hover:text-text"
+          aria-label={`Open ${repo.fullName} on GitHub in a new tab`}
         >
-          <ExternalLink className="w-4 h-4" />
+          <ExternalLink className="size-4" aria-hidden="true" />
         </a>
       </div>
 
-      {/* Description */}
-      {repo.description && (
-        <p className="text-sm opacity-80 mb-4 line-clamp-2">
+      {repo.description ? (
+        <p className="mt-3 line-clamp-2 text-sm leading-snug text-text-2">
           {repo.description}
         </p>
+      ) : (
+        <p className="mt-3 text-caption">No description provided.</p>
       )}
 
-      {/* Stats */}
-      <div className="flex items-center gap-4 text-sm opacity-80 mb-4 flex-wrap">
-        <div className="flex items-center gap-1">
-          <GitCommit className="w-4 h-4" />
-          <span>{commitCount}</span>
-        </div>
-        <div className="flex items-center gap-1">
-          <Star className="w-4 h-4 text-yellow-500" />
-          <span>{repo.stars}</span>
-        </div>
-        <div className="flex items-center gap-1">
-          <GitFork className="w-4 h-4 text-purple-400" />
-          <span>{repo.forks}</span>
-        </div>
-      </div>
+      <dl className="mt-5 grid grid-cols-3 gap-2 rounded-card border border-border-subtle bg-white/[0.02] p-3">
+        <RepoMetric label="Commits" value={commitCount} />
+        <RepoMetric label="Stars" value={repo.stars} />
+        <RepoMetric label="Forks" value={repo.forks} />
+      </dl>
 
-      {/* Footer */}
-      <div className="flex items-center justify-between pt-3 border-t border-[rgba(240,240,250,0.15)] gap-3 flex-wrap">
-        {repo.language && (
-          <span className="px-2 py-1 text-xs opacity-80">
+      <div className="mt-auto flex flex-wrap items-center justify-between gap-3 border-t border-border-subtle pt-4">
+        {repo.language ? (
+          <Chip mono>
+            <Code className="size-3" aria-hidden="true" />
             {repo.language}
-          </span>
+          </Chip>
+        ) : (
+          <span aria-hidden="true" />
         )}
-        {repo.lastSyncedAt && (
-          <div className="flex items-center gap-1 text-xs opacity-80">
-            <Clock className="w-3 h-3" />
-            <span>
-              {new Date(repo.lastSyncedAt).toLocaleDateString('en-US', {
-                month: 'short',
-                day: 'numeric',
+
+        {syncedDate ? (
+          <p className="flex items-center gap-1.5 text-caption">
+            <Clock className="size-3.5 shrink-0" aria-hidden="true" />
+            Synced{" "}
+            <time dateTime={syncedDate.toISOString()}>
+              {syncedDate.toLocaleDateString("en-US", {
+                month: "short",
+                day: "numeric",
+                year: "numeric",
               })}
-            </span>
-          </div>
-        )}
+            </time>
+          </p>
+        ) : null}
       </div>
-    </div>
+    </Card>
   );
 }
 
-function EmptyState() {
+function RepoMetric({ label, value }: { label: string; value: number }) {
   return (
-    <div className="border border-[rgba(240,240,250,0.15)] p-8 sm:p-12 backdrop-blur-sm text-center">
-      <div className="max-w-md mx-auto">
-        <div className="w-16 h-16 bg-white/5 border border-[rgba(240,240,250,0.2)] rounded-full flex items-center justify-center mx-auto mb-6">
-          <Code className="w-8 h-8 text-[#f0f0fa]" />
-        </div>
-        <h2 className="text-xl font-semibold opacity-80 mb-3">
-          No Repositories Synced
-        </h2>
-        <p className="opacity-80 mb-6">
-          Sync your GitHub data to see your repositories here.
-        </p>
-        <Link
-          href="/dashboard"
-          className="inline-flex items-center gap-2 px-6 py-3 bg-white/10 border border-[rgba(240,240,250,0.35)] text-[#f0f0fa] hover:bg-white/20 transition-all font-medium"
-        >
-          <RefreshCw className="w-5 h-5" />
-          Go to Dashboard
-        </Link>
-      </div>
+    <div className="min-w-0">
+      <dt className="text-label">{label}</dt>
+      <dd className="mt-1 font-mono text-sm tabular-nums text-text">
+        {value.toLocaleString("en-US")}
+      </dd>
     </div>
   );
 }

@@ -1,274 +1,195 @@
 import { requireAuth } from "@/lib/auth-helpers";
+import {
+  AlertTriangle,
+  Bell,
+  ExternalLink,
+  Github,
+  KeyRound,
+  Mail,
+  ShieldCheck,
+  User,
+} from "lucide-react";
 import { LogoutButton } from "@/components/LogoutButton";
-import { Shield, Bell, Key, ArrowLeft } from "lucide-react";
-import Link from "next/link";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardFooter, CardHeader } from "@/components/ui/card";
+import { IconTile } from "@/components/ui/icon-tile";
+import { KeyValueList } from "@/components/ui/key-value-list";
+import { PageHeader } from "@/components/ui/page-header";
+import { PageShell } from "@/components/ui/page-shell";
+import { SpaceBackground } from "@/components/ui/space-background";
 
 /**
- * Settings Page — SpaceX-inspired, minimal achromatic design
+ * Settings Page
+ *
+ * Read-only account details, session security and unavailable preferences.
  */
 export default async function SettingsPage() {
   const session = await requireAuth();
   const { user } = session;
 
   return (
-    <div className="section-cinematic bg-black items-start">
-      <div 
-        className="section-photo" 
-        style={{ 
-          backgroundImage: "url('/space-hero.png')", 
-          backgroundSize: "cover", 
-          backgroundPosition: "center"
-        }} 
-      />
-      <div className="section-overlay" />
-      <div className="section-content relative z-20 w-full" style={{ padding: "clamp(88px, 14vh, 120px) clamp(24px, 6vw, 80px) 40px", maxWidth: "800px", margin: "0 auto" }}>
-        {/* Header */}
-        <div style={{ marginBottom: "40px" }}>
-          <Link
-            href="/dashboard"
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "8px",
-              textDecoration: "none",
-              marginBottom: "20px",
-              opacity: 0.4,
-              transition: "opacity 0.2s ease",
-              minHeight: "44px",
-            }}
-            className="text-micro"
-            
-            
-          >
-            <ArrowLeft size={11} />
-            Dashboard
-          </Link>
-          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", flexWrap: "wrap", gap: "16px" }}>
-            <div>
-              <p className="text-micro" style={{ marginBottom: "8px", opacity: 0.4 }}>Account</p>
-              <h1 className="text-section-head">Settings</h1>
-            </div>
-            <LogoutButton />
-          </div>
-        </div>
+    <>
+      <SpaceBackground variant="app" />
 
-        <div className="space-y-8">
-          {/* Account Settings */}
-          <div className="brutalist-glass p-5 sm:p-8">
-            <SettingsSection
-              icon={<Shield size={14} />}
-              title="ACCOUNT SETTINGS"
-              description="MANAGE YOUR ACCOUNT INFORMATION AND PREFERENCES"
-            >
-              <SettingItem
-                label="EMAIL ADDRESS"
-                value={user.email || "NOT PROVIDED"}
-                description="YOUR EMAIL FROM GITHUB"
-              />
-              <SettingItem
-                label="GITHUB USERNAME"
-                value={`@${user.username?.toUpperCase() || "N/A"}`}
-                description="YOUR GITHUB USERNAME"
-              />
-              <SettingItem
-                label="DISPLAY NAME"
-                value={(user.name || "NOT SET").toUpperCase()}
-                description="YOUR DISPLAY NAME"
-              />
-            </SettingsSection>
-          </div>
+      <PageShell width="narrow">
+        <main id="main-content" role="main" aria-label="Settings">
+          <PageHeader
+            eyebrow="Account"
+            title="Settings"
+            subtitle="Account details, security and workspace preferences."
+            back={{ href: "/dashboard", label: "Dashboard" }}
+          />
 
-          {/* Security Settings */}
-          <div className="brutalist-glass p-5 sm:p-8">
-            <SettingsSection
-              icon={<Key size={14} />}
-              title="SECURITY"
-              description="MANAGE YOUR SECURITY AND AUTHENTICATION SETTINGS"
-            >
-              <div style={{ display: "flex", flexDirection: "column", gap: "24px", background: "transparent", borderRadius: "0", overflow: "visible" }}>
-                <div
-                  style={{
-                    background: "transparent",
-                    padding: "0",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    gap: "12px",
-                    flexWrap: "wrap",
-                  }}
+          <div className="space-y-5">
+            <Card>
+              <CardHeader
+                headingLevel={2}
+                icon={<User className="size-4" />}
+                title="Account"
+                description="Read-only details from your GitHub identity."
+              />
+
+              <KeyValueList
+                items={[
+                  {
+                    label: "Email",
+                    value: user.email || "Not provided",
+                    icon: <Mail />,
+                  },
+                  {
+                    label: "GitHub username",
+                    value: user.username ? (
+                      <a
+                        href={`https://github.com/${user.username}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="focus-ring inline-flex min-h-11 items-center gap-1 text-accent transition-colors hover:text-text"
+                      >
+                        @{user.username}
+                        <ExternalLink className="size-3" aria-hidden="true" />
+                        <span className="sr-only">
+                          on GitHub (opens in a new tab)
+                        </span>
+                      </a>
+                    ) : (
+                      "Not linked"
+                    ),
+                    icon: <Github />,
+                  },
+                  {
+                    label: "Display name",
+                    value: user.name || "Not set",
+                    icon: <User />,
+                  },
+                  {
+                    label: "Authentication",
+                    value: "GitHub OAuth",
+                    icon: <KeyRound />,
+                  },
+                ]}
+              />
+
+              <CardFooter>
+                <a
+                  href="https://github.com/settings/profile"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="focus-ring inline-flex min-h-11 items-center gap-2 text-caption text-accent transition-colors hover:text-text"
                 >
-                  <div>
-                    <p className="text-caption-bold text-sm tracking-widest uppercase mb-1">
-                      AUTHENTICATION METHOD
-                    </p>
-                    <p className="text-micro opacity-40 uppercase tracking-widest">
-                      SIGNED IN WITH GITHUB OAUTH
+                  Edit profile on GitHub
+                  <ExternalLink className="size-3" aria-hidden="true" />
+                  <span className="sr-only">(opens in a new tab)</span>
+                </a>
+              </CardFooter>
+            </Card>
+
+            <Card>
+              <CardHeader
+                headingLevel={2}
+                icon={<ShieldCheck className="size-4" />}
+                title="Security"
+                description="How you sign in and the state of this session."
+                action={
+                  <Badge variant="success" size="sm" dot>
+                    Secure
+                  </Badge>
+                }
+              />
+
+              <KeyValueList
+                items={[
+                  {
+                    label: "Authentication",
+                    value: "GitHub OAuth",
+                    icon: <KeyRound />,
+                  },
+                  {
+                    label: "Session",
+                    value: "Active in this browser",
+                    icon: <ShieldCheck />,
+                  },
+                ]}
+              />
+
+              <CardFooter>
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <p className="text-caption">
+                    Signing out ends this browser session. Your synced data stays
+                    intact.
+                  </p>
+                  <LogoutButton className="shrink-0" />
+                </div>
+              </CardFooter>
+            </Card>
+
+            <Card>
+              <CardHeader
+                headingLevel={2}
+                icon={<Bell className="size-4" />}
+                title="Notifications"
+                description="Delivery preferences for sync and analysis updates."
+                action={
+                  <Badge variant="warning" size="sm">
+                    Coming soon
+                  </Badge>
+                }
+              />
+
+              <p className="text-caption">
+                Notification settings are not available yet. Sync results and AI
+                analysis updates currently appear inside the app.
+              </p>
+            </Card>
+
+            <Card className="border-danger/25">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex min-w-0 items-start gap-3">
+                  <IconTile tone="danger">
+                    <AlertTriangle className="size-4" />
+                  </IconTile>
+                  <div className="min-w-0">
+                    <h2 className="text-card-title">Danger zone</h2>
+                    <p className="mt-1 max-w-xl text-caption">
+                      Permanently remove your DevInsight account and synced
+                      data. This action cannot be undone.
                     </p>
                   </div>
-                  <span
-                    style={{
-                      padding: "4px 10px",
-                      background: "rgba(134,239,172,0.06)",
-                      border: "1px solid rgba(134,239,172,0.15)",
-                      borderRadius: "2px",
-                    }}
-                    className="text-micro"
-                  >
-                    ACTIVE
-                  </span>
                 </div>
 
-                <div
-                  style={{
-                    background: "transparent",
-                    padding: "0",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    gap: "12px",
-                    flexWrap: "wrap",
-                  }}
-                >
-                  <div>
-                    <p className="text-caption-bold text-sm tracking-widest uppercase mb-1">SESSION</p>
-                    <p className="text-micro opacity-40 uppercase tracking-widest">
-                      YOUR SESSION IS ACTIVE AND SECURE
-                    </p>
-                  </div>
-                  <LogoutButton variant="minimal" />
+                <div className="flex shrink-0 flex-wrap items-center gap-2">
+                  <Badge variant="danger" size="sm">
+                    Unavailable
+                  </Badge>
+                  <Button variant="danger" disabled>
+                    Delete account
+                  </Button>
                 </div>
               </div>
-            </SettingsSection>
+            </Card>
           </div>
-
-          {/* Notifications */}
-          <div className="brutalist-glass p-5 sm:p-8 opacity-50">
-            <SettingsSection
-              icon={<Bell size={14} />}
-              title="NOTIFICATIONS"
-              description="CONFIGURE HOW YOU RECEIVE NOTIFICATIONS"
-            >
-              <div
-                style={{
-                  padding: "24px",
-                  textAlign: "center",
-                }}
-              >
-                <p className="text-micro uppercase tracking-widest opacity-40">NOTIFICATION SETTINGS COMING SOON</p>
-              </div>
-            </SettingsSection>
-          </div>
-        </div>
-
-        {/* Danger Zone */}
-        <div
-          style={{
-            marginTop: "32px",
-            padding: "20px 0",
-            background: "transparent",
-            border: "none",
-            borderRadius: "0",
-          }}
-        >
-          <p
-            className="text-caption-bold uppercase tracking-widest text-sm"
-            style={{ color: "rgba(252,165,165,0.6)", marginBottom: "8px" }}
-          >
-            DANGER ZONE
-          </p>
-          <p className="text-micro uppercase tracking-widest" style={{ opacity: 0.3, marginBottom: "16px" }}>
-            THESE ACTIONS ARE IRREVERSIBLE. PLEASE BE CAREFUL.
-          </p>
-          <button
-            disabled
-            style={{
-              padding: "10px 20px",
-              background: "rgba(252,165,172,0.04)",
-              border: "1px solid rgba(252,165,172,0.12)",
-              borderRadius: "2px",
-              color: "rgba(252,165,172,0.4)",
-              cursor: "not-allowed",
-              opacity: 0.5,
-              width: "100%",
-            }}
-            className="text-micro uppercase tracking-widest"
-          >
-            DELETE ACCOUNT (COMING SOON)
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// Settings Section Component
-function SettingsSection({
-  icon,
-  title,
-  description,
-  children,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  description: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div style={{ background: "transparent" }}>
-      {/* Section header */}
-      <div
-        style={{
-          padding: "16px 0",
-          borderBottom: "1px solid rgba(240,240,250,0.05)",
-          display: "flex",
-          alignItems: "center",
-          gap: "10px",
-        }}
-      >
-        <span style={{ opacity: 0.3 }}>{icon}</span>
-        <div>
-          <p className="text-caption-bold" style={{ fontSize: "0.813rem" }}>{title}</p>
-          <p className="text-micro" style={{ opacity: 0.3, marginTop: "2px" }}>{description}</p>
-        </div>
-      </div>
-      {/* Section content */}
-      <div style={{ padding: "20px 0" }}>{children}</div>
-    </div>
-  );
-}
-
-// Setting Item Component
-function SettingItem({
-  label,
-  value,
-  description,
-}: {
-  label: string;
-  value: string;
-  description?: string;
-}) {
-  return (
-    <div
-      style={{
-        padding: "14px 0",
-        background: "transparent",
-        border: "none",
-        borderBottom: "1px solid rgba(240,240,250,0.05)",
-        borderRadius: "0",
-        marginBottom: "8px",
-      }}
-      className="last-mb-0"
-    >
-      <style>{`.last-mb-0:last-child { margin-bottom: 0; }`}</style>
-      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
-        <div style={{ flex: 1 }}>
-          <p className="text-micro" style={{ opacity: 0.35, marginBottom: "4px" }}>{label}</p>
-          {description && (
-            <p className="text-micro" style={{ opacity: 0.2, marginBottom: "4px" }}>{description}</p>
-          )}
-          <p className="text-caption" style={{ opacity: 0.7 }}>{value}</p>
-        </div>
-      </div>
-    </div>
+        </main>
+      </PageShell>
+    </>
   );
 }

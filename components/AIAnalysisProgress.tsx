@@ -1,11 +1,13 @@
-'use client';
+"use client";
 
-import React from 'react';
+import { CheckCircle2, Circle, Loader2, Sparkles } from "lucide-react";
+import { cn } from "@/components/ui/cn";
+import { IconTile } from "@/components/ui/icon-tile";
 
 interface AnalysisStep {
   id: string;
   label: string;
-  status: 'pending' | 'active' | 'complete';
+  status: "pending" | "active" | "complete";
 }
 
 interface AIAnalysisProgressProps {
@@ -14,68 +16,92 @@ interface AIAnalysisProgressProps {
 }
 
 const analysisSteps: AnalysisStep[] = [
-  { id: 'patterns', label: 'Analyzing coding patterns...', status: 'pending' },
-  { id: 'consistency', label: 'Checking consistency...', status: 'pending' },
-  { id: 'languages', label: 'Evaluating language diversity...', status: 'pending' },
-  { id: 'drafting', label: 'Drafting suggestions...', status: 'pending' },
+  { id: "patterns", label: "Analyzing coding patterns", status: "pending" },
+  { id: "consistency", label: "Checking consistency", status: "pending" },
+  { id: "languages", label: "Evaluating language diversity", status: "pending" },
+  { id: "drafting", label: "Drafting suggestions", status: "pending" },
 ];
 
-export function AIAnalysisProgress({ isAnalyzing, currentStep = 0 }: AIAnalysisProgressProps) {
+export function AIAnalysisProgress({
+  isAnalyzing,
+  currentStep = 0,
+}: AIAnalysisProgressProps) {
   if (!isAnalyzing) return null;
 
   const steps = analysisSteps.map((step, index) => ({
     ...step,
-    status: index < currentStep ? 'complete' : index === currentStep ? 'active' : 'pending',
+    status:
+      index < currentStep
+        ? ("complete" as const)
+        : index === currentStep
+          ? ("active" as const)
+          : ("pending" as const),
   }));
 
+  const percent = Math.round(((currentStep + 1) / steps.length) * 100);
+
   return (
-    <div className="brutalist-glass p-8">
-      <div className="flex items-center gap-4 mb-8">
-        <div className="relative">
-          <div className="h-12 w-12 flex items-center justify-center border border-[rgba(240,240,250,0.15)] bg-white/5">
-            <svg className="h-6 w-6 text-[#f0f0fa] animate-pulse opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-            </svg>
-          </div>
-          <span className="absolute -bottom-1 -right-1 flex h-3 w-3">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-20"></span>
-            <span className="relative inline-flex rounded-full h-3 w-3 bg-white/40"></span>
-          </span>
-        </div>
+    <div className="rounded-card border border-border-subtle bg-white/[0.02] p-5 sm:p-6">
+      <div className="flex items-center gap-3">
+        <IconTile tone="accent">
+          <Sparkles className="size-4" />
+        </IconTile>
         <div>
-          <h3 className="text-caption-bold text-sm tracking-widest uppercase">AI IS THINKING</h3>
-          <p className="text-micro pt-1 opacity-40 uppercase tracking-widest">GENERATING ARCHIVE INSIGHTS</p>
+          <p className="text-card-title">Analyzing your history</p>
+          <p className="mt-1 text-caption">
+            Generating patterns, strengths and suggestions.
+          </p>
         </div>
       </div>
 
-      <div className="space-y-4">
+      <ol className="mt-5 space-y-3" aria-label="Analysis progress">
         {steps.map((step) => (
-          <div key={step.id} className="flex items-center gap-4">
-            <div className={`shrink-0 h-2 w-2 transition-all duration-300 ${
-              step.status === 'complete' 
-                ? 'bg-[#f0f0fa] opacity-60' 
-                : step.status === 'active'
-                ? 'bg-[#f0f0fa] animate-pulse'
-                : 'bg-white/10'
-            }`} />
-            <span className={`text-micro uppercase tracking-widest transition-colors duration-300 ${
-              step.status === 'complete' 
-                ? 'text-[#f0f0fa] opacity-80' 
-                : step.status === 'active'
-                ? 'text-[#f0f0fa]'
-                : 'opacity-30'
-            }`}>
-              {step.label.toUpperCase()}
+          <li key={step.id} className="flex items-center gap-3">
+            <span
+              className={cn(
+                "inline-flex size-4 shrink-0 items-center justify-center [&>svg]:size-4",
+                step.status === "complete" && "text-success",
+                step.status === "active" && "text-accent",
+                step.status === "pending" && "text-text-3"
+              )}
+              aria-hidden="true"
+            >
+              {step.status === "complete" ? (
+                <CheckCircle2 />
+              ) : step.status === "active" ? (
+                <Loader2 className="animate-spin" />
+              ) : (
+                <Circle />
+              )}
             </span>
-          </div>
+            <span
+              className={cn(
+                "text-caption",
+                step.status === "active" && "font-medium text-text"
+              )}
+            >
+              {step.label}
+            </span>
+            <span className="ml-auto text-[11px] text-text-3">
+              {step.status === "complete"
+                ? "Done"
+                : step.status === "active"
+                  ? "In progress"
+                  : "Queued"}
+            </span>
+          </li>
         ))}
-      </div>
+      </ol>
 
-      <div className="mt-8 h-px w-full bg-white/5 overflow-hidden">
-        <div 
-          className="h-full bg-[#f0f0fa] opacity-30 transition-all duration-1000 ease-out"
-          style={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}
-        />
+      <div
+        className="progress-bar-track mt-5"
+        role="progressbar"
+        aria-label="Analysis progress"
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={percent}
+      >
+        <div className="progress-bar-fill" style={{ width: `${percent}%` }} />
       </div>
     </div>
   );

@@ -1,21 +1,23 @@
-'use client';
+"use client";
 
 /**
  * Repository Stats Chart
- * 
- * Horizontal bar chart showing top repositories by commits
+ *
+ * Horizontal bar chart showing the most active repositories by commits.
  */
 
 import {
-  BarChart,
   Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  Cell,
-} from 'recharts';
+} from "recharts";
+import { ChartTooltip } from "@/components/ui/chart-card";
+import { ChartStat, chartAxisLine, chartGridStroke, chartTick } from "./chart-primitives";
 
 interface RepoStat {
   id: string;
@@ -33,123 +35,142 @@ interface RepoStatsChartProps {
   limit?: number;
 }
 
-export function RepoStatsChart({ data, className = '', limit = 6 }: RepoStatsChartProps) {
-  // Get top repos by commits
-  const topRepos = data
-    .sort((a, b) => b.commits - a.commits)
-    .slice(0, limit);
+export function RepoStatsChart({
+  data,
+  className = "",
+  limit = 6,
+}: RepoStatsChartProps) {
+  const topRepos = [...data].sort((a, b) => b.commits - a.commits).slice(0, limit);
 
-  // Calculate totals
-  const totalCommits = data.reduce((sum, r) => sum + r.commits, 0);
-  const totalStars = data.reduce((sum, r) => sum + r.stars, 0);
-  const totalForks = data.reduce((sum, r) => sum + r.forks, 0);
+  const totalCommits = data.reduce((sum, repo) => sum + repo.commits, 0);
+  const totalStars = data.reduce((sum, repo) => sum + repo.stars, 0);
+  const totalForks = data.reduce((sum, repo) => sum + repo.forks, 0);
 
   return (
-    <div className={` bg-transparent border-none ${className}`}>
-      {/* Header */}
-      {/* Summary Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 mb-10">
-        <div className="border-l-2 border-[rgba(240,240,250,0.1)] pl-4">
-          <p className="text-micro opacity-40 mb-2 tracking-[2px]">TOTAL REPOSITORIES</p>
-          <p className="text-display-hero text-3xl opacity-90 tabular-nums">{data.length}</p>
-        </div>
-        <div className="border-l-2 border-[rgba(240,240,250,0.1)] pl-4">
-          <p className="text-micro opacity-40 mb-2 tracking-[2px]">TOTAL STARS</p>
-          <p className="text-display-hero text-3xl opacity-90 tabular-nums">{totalStars.toLocaleString()}</p>
-        </div>
-        <div className="border-l-2 border-[rgba(240,240,250,0.1)] pl-4">
-          <p className="text-micro opacity-40 mb-2 tracking-[2px]">TOTAL FORKS</p>
-          <p className="text-display-hero text-3xl opacity-90 tabular-nums">{totalForks.toLocaleString()}</p>
-        </div>
+    <div className={className}>
+      <div className="mb-5 grid grid-cols-2 gap-4 sm:grid-cols-3">
+        <ChartStat
+          label="Repositories"
+          value={data.length.toLocaleString("en-US")}
+          detail="In this view"
+        />
+        <ChartStat
+          label="Stars"
+          value={totalStars.toLocaleString("en-US")}
+          detail="Across these repositories"
+        />
+        <ChartStat
+          label="Forks"
+          value={totalForks.toLocaleString("en-US")}
+          detail="Across these repositories"
+        />
       </div>
 
-      {/* Chart */}
-      <div className="p-4 sm:p-6">
-        {topRepos.length > 0 ? (
-          <div className="h-72 min-h-72 min-w-0">
-            <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={288}>
+      {topRepos.length > 0 ? (
+        <div>
+          <div
+            className="h-64 min-h-64 min-w-0"
+            role="img"
+            aria-label={`Top ${topRepos.length} repositories by commits: ${topRepos
+              .map((repo) => `${repo.name}, ${repo.commits} commits`)
+              .join("; ")}.`}
+          >
+            <ResponsiveContainer
+              width="100%"
+              height="100%"
+              minWidth={0}
+              minHeight={256}
+            >
               <BarChart
                 data={topRepos}
                 layout="vertical"
-                margin={{ top: 5, right: 16, left: 0, bottom: 5 }}
+                margin={{ top: 5, right: 12, left: 0, bottom: 5 }}
               >
-                <CartesianGrid strokeDasharray="0" stroke="rgba(240,240,250,0.05)" horizontal={false} />
+                <CartesianGrid
+                  strokeDasharray="0"
+                  stroke={chartGridStroke}
+                  horizontal={false}
+                />
                 <XAxis
                   type="number"
-                  tick={{ fill: 'rgba(240,240,250,0.3)', fontSize: 10 }}
+                  tick={chartTick}
                   tickLine={false}
-                  axisLine={{ stroke: 'rgba(240,240,250,0.1)' }}
+                  axisLine={chartAxisLine}
+                  allowDecimals={false}
                 />
                 <YAxis
                   dataKey="name"
                   type="category"
-                  tick={{ fill: 'rgba(240,240,250,0.6)', fontSize: 9, letterSpacing: '1px' }}
+                  tick={chartTick}
                   tickLine={false}
                   axisLine={false}
-                  width={100}
-                  tickFormatter={(val) => val.slice(0, 12).toUpperCase()}
+                  width={112}
+                  tickFormatter={(value: string) =>
+                    value.length > 15 ? `${value.slice(0, 14)}…` : value
+                  }
                 />
-                <Tooltip content={<CustomTooltip totalCommits={totalCommits} />} cursor={{ fill: 'rgba(240, 240, 250, 0.05)' }} />
-                <Bar dataKey="commits" radius={[0, 0, 0, 0]} maxBarSize={30}>
-                  {topRepos.map((entry, index) => (
-                    <Cell 
-                      key={`cell-${index}`} 
-                      fill="#f0f0fa" 
-                      opacity={0.8 - (index / topRepos.length) * 0.6}
+                <Tooltip
+                  content={<RepoTooltipContent totalCommits={totalCommits} />}
+                  cursor={{ fill: "var(--surface-hover)" }}
+                />
+                <Bar dataKey="commits" name="Commits" radius={[0, 3, 3, 0]} maxBarSize={22}>
+                  {topRepos.map((repo, index) => (
+                    <Cell
+                      key={repo.id}
+                      fill={
+                        index === 0
+                          ? "var(--accent)"
+                          : "rgba(240, 240, 250, 0.22)"
+                      }
                     />
                   ))}
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
           </div>
-        ) : (
-          <div className="h-72 flex items-center justify-center opacity-80">
-            <p>No repository data available</p>
-          </div>
-        )}
-      </div>
+
+          <p className="mt-3 text-caption">
+            Scope: all repositories in this view; the chart shows the top{" "}
+            {topRepos.length} by stored commit count.
+          </p>
+        </div>
+      ) : (
+        <p className="flex h-64 items-center justify-center text-caption">
+          No repository data available.
+        </p>
+      )}
     </div>
   );
 }
 
-// ===========================================
-// Custom Tooltip Component
-// ===========================================
-
-type CustomTooltipProps = {
+interface RepoTooltipContentProps {
   active?: boolean;
-  payload?: Array<{ payload: RepoStat }>;
+  payload?: ReadonlyArray<{ payload?: RepoStat }>;
   totalCommits: number;
-};
+}
 
-function CustomTooltip({ active, payload, totalCommits }: CustomTooltipProps) {
-  if (!active || !payload || !payload.length) return null;
+function RepoTooltipContent({
+  active,
+  payload,
+  totalCommits,
+}: RepoTooltipContentProps) {
+  const repo = payload?.[0]?.payload;
+  if (!active || !repo) return null;
 
-  const data = payload[0].payload;
-  const percentage = totalCommits > 0 
-    ? ((data.commits / totalCommits) * 100).toFixed(1)
-    : '0';
+  const share =
+    totalCommits > 0 ? ((repo.commits / totalCommits) * 100).toFixed(1) : "0";
 
   return (
-    <div className="brutalist-glass p-3 border-none ring-1 ring-[#f0f0fa]/10">
-      <p className="text-micro font-medium opacity-40 mb-2 tracking-widest truncate">{data.fullName.toUpperCase()}</p>
-      
-      <div className="space-y-2">
-        <div className="flex items-center justify-between gap-6">
-          <span className="text-micro opacity-40 tracking-widest">COMMITS</span>
-          <span className="text-display-hero text-lg opacity-90 tabular-nums">{data.commits.toLocaleString()}</span>
-        </div>
-        <div className="flex items-center justify-between gap-6">
-          <span className="text-micro opacity-40 tracking-widest">SHARE</span>
-          <span className="text-display-hero text-lg opacity-90 tabular-nums">{percentage}%</span>
-        </div>
-        {data.language && (
-          <div className="flex items-center justify-between gap-6">
-            <span className="text-micro opacity-40 tracking-widest">LANGUAGE</span>
-            <span className="text-micro opacity-90 tracking-widest">{data.language.toUpperCase()}</span>
-          </div>
-        )}
-      </div>
-    </div>
+    <ChartTooltip
+      active={active}
+      label={repo.fullName}
+      payload={[
+        { name: "Commits", value: repo.commits.toLocaleString("en-US") },
+        { name: "Share", value: `${share}%` },
+        ...(repo.language
+          ? [{ name: "Language", value: repo.language }]
+          : []),
+      ]}
+    />
   );
 }

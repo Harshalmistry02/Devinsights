@@ -1,16 +1,20 @@
-'use client';
+"use client";
 
-import React, { useState, useMemo } from 'react';
-import { 
-  GitBranch,
-  ExternalLink,
-  ChevronUp,
-  ChevronDown,
+import { useMemo, useState } from "react";
+import {
   ArrowUpDown,
+  ChevronDown,
+  ChevronUp,
+  ExternalLink,
   Eye,
   EyeOff,
-} from 'lucide-react';
-import { cn } from '@/lib/utils';
+  GitBranch,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { cn } from "@/components/ui/cn";
+import { EmptyState } from "@/components/ui/empty-state";
+import { IconTile } from "@/components/ui/icon-tile";
 
 // ===========================================
 // Type Definitions
@@ -36,74 +40,85 @@ interface RepoDeepDiveProps {
   className?: string;
 }
 
-type SortField = 'commits' | 'stars' | 'name' | 'language';
-type SortDirection = 'asc' | 'desc';
-type ViewMode = 'treemap' | 'table';
+type SortField = "commits" | "stars" | "name" | "language";
+type SortDirection = "asc" | "desc";
+type ViewMode = "treemap" | "table";
+
+const PAGE_SIZE = 20;
 
 // ===========================================
 // Main Component
 // ===========================================
 
-export function RepoDeepDive({ 
-  repoStats, 
-  onRepoSelect, 
+export function RepoDeepDive({
+  repoStats,
+  onRepoSelect,
   selectedRepoId,
-  className 
+  className,
 }: RepoDeepDiveProps) {
-  const [viewMode, setViewMode] = useState<ViewMode>('treemap');
-  const [sortField, setSortField] = useState<SortField>('commits');
-  const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
+  const [viewMode, setViewMode] = useState<ViewMode>("treemap");
+  const [sortField, setSortField] = useState<SortField>("commits");
+  const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
   const [showAll, setShowAll] = useState(false);
-  
-  // Sort repos
+
   const sortedRepos = useMemo(() => {
     if (!repoStats || repoStats.length === 0) return [];
-    
+
     return [...repoStats].sort((a, b) => {
       let comparison = 0;
-      
+
       switch (sortField) {
-        case 'commits':
+        case "commits":
           comparison = a.commits - b.commits;
           break;
-        case 'stars':
+        case "stars":
           comparison = a.stars - b.stars;
           break;
-        case 'name':
+        case "name":
           comparison = a.name.localeCompare(b.name);
           break;
-        case 'language':
-          comparison = (a.language || '').localeCompare(b.language || '');
+        case "language":
+          comparison = (a.language || "").localeCompare(b.language || "");
           break;
       }
-      
-      return sortDirection === 'desc' ? -comparison : comparison;
+
+      return sortDirection === "desc" ? -comparison : comparison;
     });
   }, [repoStats, sortField, sortDirection]);
-  
-  // Limit display for performance
-  const displayedRepos = showAll ? sortedRepos : sortedRepos.slice(0, 20);
-  const hasMore = sortedRepos.length > 20;
-  
+
+  const displayedRepos = showAll ? sortedRepos : sortedRepos.slice(0, PAGE_SIZE);
+  const hasMore = sortedRepos.length > PAGE_SIZE;
+
   if (!repoStats || repoStats.length === 0) {
     return (
-      <div className={cn(
-        "brutalist-glass p-16 text-center border-white/5",
-        className
-      )}>
-        <GitBranch className="w-16 h-16 opacity-10 mx-auto mb-8" />
-        <h3 className="text-caption-bold text-lg opacity-40 mb-4 tracking-widest uppercase">ARCHIVE EMPTY</h3>
-        <p className="text-micro opacity-20 uppercase tracking-[2px]">INITIALIZE GITHUB SYNC TO POPULATE REPOSITORY DATABASE</p>
-      </div>
+      <Card className={cn("flex h-full flex-col", className)}>
+        <div className="mb-4 flex items-center gap-3">
+          <IconTile>
+            <GitBranch className="size-4" />
+          </IconTile>
+          <div>
+            <h2 className="text-card-title">Repository deep dive</h2>
+            <p className="mt-1 text-caption">
+              Compare activity across your synced repositories.
+            </p>
+          </div>
+        </div>
+        <EmptyState
+          variant="compact"
+          icon={<GitBranch className="size-4" />}
+          title="No repositories in this snapshot"
+          description="Sync your GitHub data to populate the repository breakdown."
+        />
+      </Card>
     );
   }
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
-      setSortDirection(d => d === 'asc' ? 'desc' : 'asc');
+      setSortDirection((direction) => (direction === "asc" ? "desc" : "asc"));
     } else {
       setSortField(field);
-      setSortDirection('desc');
+      setSortDirection("desc");
     }
   };
 
@@ -114,89 +129,95 @@ export function RepoDeepDive({
   };
 
   return (
-    <div className={className}>
-      {/* Header */}
-      <div className="py-6 border-b border-white/5">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
-          <div className="flex items-center gap-4">
-            <div className="border-l-2 border-white/20 pl-6">
-              <h3 className="text-caption-bold text-sm tracking-widest uppercase opacity-80">REPOSITORY DEEP DIVE</h3>
-              <p className="text-micro opacity-20 uppercase tracking-widest mt-2 font-mono">
-                {repoStats.length} ENTRIES ARCHIVED
-              </p>
-            </div>
-          </div>
-          
-          {/* View Toggle */}
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setViewMode('treemap')}
-              className={cn(
-                "px-5 py-2 text-micro tracking-widest transition-all uppercase border border-white/10",
-                viewMode === 'treemap' 
-                  ? "bg-[#f0f0fa] text-[#000000] font-bold"
-                  : "opacity-30 hover:opacity-100"
-              )}
-            >
-              TREEMAP
-            </button>
-            <button
-              onClick={() => setViewMode('table')}
-              className={cn(
-                "px-5 py-2 text-micro tracking-widest transition-all uppercase border border-white/10",
-                viewMode === 'table' 
-                  ? "bg-[#f0f0fa] text-[#000000] font-bold"
-                  : "opacity-30 hover:opacity-100"
-              )}
-            >
-              TABLE
-            </button>
+    <Card
+      padding="none"
+      className={cn("overflow-hidden", className)}
+      role="region"
+      aria-labelledby="repo-deep-dive-title"
+    >
+      <div className="flex flex-wrap items-start justify-between gap-4 border-b border-border-subtle p-5 sm:p-6">
+        <div className="flex min-w-0 items-start gap-3">
+          <IconTile>
+            <GitBranch className="size-4" />
+          </IconTile>
+          <div className="min-w-0">
+            <h2 id="repo-deep-dive-title" className="text-card-title">
+              Repository deep dive
+            </h2>
+            <p className="mt-1 text-caption">
+              {repoStats.length.toLocaleString("en-US")}{" "}
+              {repoStats.length === 1 ? "repository" : "repositories"} in the
+              latest analytics snapshot.
+            </p>
           </div>
         </div>
+
+        <div
+          className="flex items-center gap-1 rounded-pill border border-border-subtle p-1"
+          role="group"
+          aria-label="Repository view"
+        >
+          <Button
+            variant={viewMode === "treemap" ? "primary" : "ghost"}
+            size="sm"
+            className="border-transparent"
+            aria-pressed={viewMode === "treemap"}
+            onClick={() => setViewMode("treemap")}
+          >
+            Treemap
+          </Button>
+          <Button
+            variant={viewMode === "table" ? "primary" : "ghost"}
+            size="sm"
+            className="border-transparent"
+            aria-pressed={viewMode === "table"}
+            onClick={() => setViewMode("table")}
+          >
+            Table
+          </Button>
+        </div>
       </div>
-      
-      {/* Content */}
-      <div className="py-8">
-        {viewMode === 'treemap' ? (
-          <TreemapView 
-            repos={displayedRepos} 
-            onRepoClick={handleRepoClick}
+
+      <div className="p-5 sm:p-6">
+        {viewMode === "treemap" ? (
+          <TreemapView
+            repos={displayedRepos}
+            onRepoClick={onRepoSelect ? handleRepoClick : undefined}
             selectedRepoId={selectedRepoId}
           />
         ) : (
-          <TableView 
-            repos={displayedRepos} 
+          <TableView
+            repos={displayedRepos}
             sortField={sortField}
             sortDirection={sortDirection}
             onSort={handleSort}
-            onRepoClick={handleRepoClick}
+            onRepoClick={onRepoSelect ? handleRepoClick : undefined}
             selectedRepoId={selectedRepoId}
           />
         )}
-        
-        {/* Show More Button */}
-        {hasMore && (
-          <div className="mt-8 text-center">
-            <button
-              onClick={() => setShowAll(!showAll)}
-              className="btn-ghost flex items-center gap-3 px-8 py-3 text-micro uppercase tracking-widest mx-auto"
+
+        {hasMore ? (
+          <div className="mt-6 flex justify-center">
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => setShowAll((previous) => !previous)}
+              leadingIcon={
+                showAll ? (
+                  <EyeOff className="size-3.5" />
+                ) : (
+                  <Eye className="size-3.5" />
+                )
+              }
             >
-              {showAll ? (
-                <>
-                  <EyeOff className="w-3.5 h-3.5 opacity-40" />
-                  DISPLAY COMPACT
-                </>
-              ) : (
-                <>
-                  <Eye className="w-3.5 h-3.5 opacity-40" />
-                  ARCHIVE EXPANSION ({sortedRepos.length - 20} ADDITIONAL)
-                </>
-              )}
-            </button>
+              {showAll
+                ? "Show fewer repositories"
+                : `Show all ${sortedRepos.length} repositories`}
+            </Button>
           </div>
-        )}
+        ) : null}
       </div>
-    </div>
+    </Card>
   );
 }
 
@@ -204,70 +225,122 @@ export function RepoDeepDive({
 // Treemap View
 // ===========================================
 
-function TreemapView({ repos, onRepoClick, selectedRepoId }: {
+function TreemapView({
+  repos,
+  onRepoClick,
+  selectedRepoId,
+}: {
   repos: RepoStat[];
   onRepoClick?: (repoId: string) => void;
   selectedRepoId?: string | null;
 }) {
-  const totalCommits = repos.reduce((sum, r) => sum + r.commits, 0);
-  
+  const totalCommits = repos.reduce((sum, repo) => sum + repo.commits, 0);
+
   const treemapData = useMemo(() => {
-    return repos.map(repo => {
-      const percentage = totalCommits > 0 ? (repo.commits / totalCommits) * 100 : 0;
-      const size = Math.max(percentage, 4);
-      return { ...repo, percentage, size };
+    return repos.map((repo) => {
+      const percentage =
+        totalCommits > 0 ? (repo.commits / totalCommits) * 100 : 0;
+      return {
+        ...repo,
+        percentage,
+        span: percentage >= 20 ? 2 : 1,
+      };
     });
   }, [repos, totalCommits]);
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-8 xl:grid-cols-12 gap-3 auto-rows-fr" style={{ minHeight: '320px' }}>
+    <div
+      className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6"
+      style={{ gridAutoRows: "minmax(108px, auto)" }}
+    >
       {treemapData.map((repo) => {
-        const span = repo.size > 20 ? 3 : repo.size > 10 ? 2 : 1;
         const isSelected = selectedRepoId === repo.id;
-        
-        return (
-          <div
-            key={repo.id}
-            className={cn(
-              "brutalist-glass relative overflow-hidden cursor-pointer transition-all duration-500 group border border-white/5",
-              isSelected 
-                ? "border-white/40 bg-white/5 ring-4 ring-white/5" 
-                : "hover:border-white/20 hover:bg-white/[0.02]"
-            )}
-            style={{ 
-              gridColumn: `span ${span}`,
-              gridRow: `span ${span}`,
-            }}
-            onClick={() => onRepoClick?.(repo.id)}
-          >
-            {/* Intensity gradient hint (achromatic) */}
-            <div 
-              className="absolute inset-0 opacity-5 pointer-events-none"
-              style={{ background: `linear-gradient(to bottom right, white, transparent)` }}
-            />
-            
-            {/* Content */}
-            <div className="p-5 h-full flex flex-col justify-between relative z-10">
-              <div className="text-micro font-bold tracking-widest opacity-60 group-hover:opacity-100 transition-opacity truncate">
-                {repo.name.toUpperCase()}
-              </div>
-              <div className="mt-auto space-y-1">
-                 <div className="flex items-center justify-between">
-                    <span className="text-micro opacity-20 uppercase tracking-widest truncate">{repo.language?.toUpperCase() || 'VOID'}</span>
-                    <span className="text-micro opacity-40 font-mono">{repo.commits}</span>
-                 </div>
-              </div>
-            </div>
 
-            {/* Selection indicator */}
-            {isSelected && (
-              <div className="absolute top-0 right-0 p-1">
-                 <div className="w-1.5 h-1.5 bg-white shadow-glow" />
-              </div>
-            )}
-          </div>
+        return (
+          <RepoCell
+            key={repo.id}
+            repo={repo}
+            isSelected={isSelected}
+            onClick={onRepoClick ? () => onRepoClick(repo.id) : undefined}
+          />
         );
       })}
+    </div>
+  );
+}
+
+function RepoCell({
+  repo,
+  isSelected,
+  onClick,
+}: {
+  repo: RepoStat & { percentage: number; span: number };
+  isSelected: boolean;
+  onClick?: () => void;
+}) {
+  const content = (
+    <>
+      <div className="flex min-w-0 items-start justify-between gap-2">
+        <p className="truncate text-sm font-semibold leading-snug text-text">
+          {repo.name}
+        </p>
+        {isSelected ? (
+          <span
+            className="mt-1 size-1.5 shrink-0 rounded-full bg-accent"
+            aria-hidden="true"
+          />
+        ) : null}
+      </div>
+
+      <div className="mt-3">
+        <div className="flex items-center justify-between gap-2">
+          <span className="truncate text-[11px] text-text-3">
+            {repo.language ?? "No language"}
+          </span>
+          <span className="shrink-0 font-mono text-[11px] tabular-nums text-text-2">
+            {repo.commits.toLocaleString("en-US")}
+          </span>
+        </div>
+        <div className="mt-2 h-1 w-full overflow-hidden rounded-pill bg-white/10">
+          <div
+            className="h-full rounded-pill bg-accent"
+            style={{ width: `${Math.max(repo.percentage, 2)}%` }}
+          />
+        </div>
+      </div>
+    </>
+  );
+
+  const className = cn(
+    "flex min-w-0 flex-col justify-between rounded-card border p-4 text-left transition-colors duration-150",
+    isSelected
+      ? "border-accent/60 bg-accent-soft"
+      : "border-border-subtle bg-white/[0.02]",
+    onClick && "focus-ring hover:border-border-strong hover:bg-surface-hover"
+  );
+
+  if (onClick) {
+    return (
+      <button
+        type="button"
+        onClick={onClick}
+        aria-pressed={isSelected}
+        aria-label={`${repo.fullName}, ${repo.commits} commits`}
+        className={className}
+        style={{ gridColumn: `span ${repo.span}` }}
+      >
+        {content}
+      </button>
+    );
+  }
+
+  return (
+    <div
+      className={className}
+      style={{ gridColumn: `span ${repo.span}` }}
+      aria-label={`${repo.fullName}, ${repo.commits} commits`}
+    >
+      {content}
     </div>
   );
 }
@@ -276,23 +349,13 @@ function TreemapView({ repos, onRepoClick, selectedRepoId }: {
 // Table View
 // ===========================================
 
-function renderSortIcon(field: SortField, sortField: SortField, sortDirection: SortDirection) {
-  if (sortField !== field) {
-    return <ArrowUpDown className="w-3 h-3 opacity-20" />;
-  }
-
-  return sortDirection === 'desc'
-    ? <ChevronDown className="w-3.5 h-3.5 opacity-80" />
-    : <ChevronUp className="w-3.5 h-3.5 opacity-80" />;
-}
-
-function TableView({ 
-  repos, 
-  sortField, 
-  sortDirection, 
-  onSort, 
+function TableView({
+  repos,
+  sortField,
+  sortDirection,
+  onSort,
   onRepoClick,
-  selectedRepoId 
+  selectedRepoId,
 }: {
   repos: RepoStat[];
   sortField: SortField;
@@ -302,61 +365,93 @@ function TableView({
   selectedRepoId?: string | null;
 }) {
   return (
-    <div className="overflow-x-auto brutalist-glass">
-      <table className="w-full text-left">
+    <div className="overflow-x-auto">
+      <table className="w-full min-w-[640px] text-left">
         <thead>
-          <tr className="border-b border-white/10">
-            <th 
-              className="py-5 px-6 opacity-30 text-micro font-bold tracking-widest cursor-pointer hover:opacity-100 transition-all uppercase"
-              onClick={() => onSort('name')}
-            >
-              <div className="flex items-center gap-2">REPOSITORY {renderSortIcon('name', sortField, sortDirection)}</div>
+          <tr className="border-b border-border">
+            <SortableHeader
+              label="Repository"
+              field="name"
+              sortField={sortField}
+              sortDirection={sortDirection}
+              onSort={onSort}
+            />
+            <SortableHeader
+              label="Language"
+              field="language"
+              sortField={sortField}
+              sortDirection={sortDirection}
+              onSort={onSort}
+            />
+            <SortableHeader
+              label="Commits"
+              field="commits"
+              sortField={sortField}
+              sortDirection={sortDirection}
+              onSort={onSort}
+              align="right"
+            />
+            <SortableHeader
+              label="Stars"
+              field="stars"
+              sortField={sortField}
+              sortDirection={sortDirection}
+              onSort={onSort}
+              align="right"
+            />
+            <th className="px-3 py-2 text-right">
+              <span className="text-label">Link</span>
             </th>
-            <th 
-              className="py-5 px-6 opacity-30 text-micro font-bold tracking-widest cursor-pointer hover:opacity-100 transition-all uppercase"
-              onClick={() => onSort('language')}
-            >
-              <div className="flex items-center gap-2">LANGUAGE {renderSortIcon('language', sortField, sortDirection)}</div>
-            </th>
-            <th 
-              className="py-5 px-6 opacity-30 text-micro font-bold tracking-widest text-right cursor-pointer hover:opacity-100 transition-all uppercase"
-              onClick={() => onSort('commits')}
-            >
-              <div className="flex items-center justify-end gap-2">ACTIVITY {renderSortIcon('commits', sortField, sortDirection)}</div>
-            </th>
-            <th className="py-5 px-6 opacity-30 text-micro font-bold tracking-widest text-right uppercase">ACTION</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-white/5">
+        <tbody className="divide-y divide-border-subtle">
           {repos.map((repo) => {
             const isSelected = selectedRepoId === repo.id;
+
             return (
-              <tr 
+              <tr
                 key={repo.id}
                 className={cn(
-                  "hover:bg-white/[0.02] transition-colors cursor-pointer group",
-                  isSelected && "bg-white/5"
+                  "transition-colors",
+                  isSelected ? "bg-accent-soft" : "hover:bg-surface-hover"
                 )}
-                onClick={() => onRepoClick?.(repo.id)}
               >
-                <td className="py-4 px-6">
-                  <span className="text-micro font-bold opacity-70 group-hover:opacity-100 transition-opacity uppercase tracking-widest">{repo.name}</span>
+                <td className="px-3 py-2.5">
+                  {onRepoClick ? (
+                    <button
+                      type="button"
+                      onClick={() => onRepoClick(repo.id)}
+                      aria-pressed={isSelected}
+                      className="focus-ring inline-flex min-h-11 items-center rounded-[4px] text-left text-sm font-medium text-text hover:text-accent"
+                    >
+                      {repo.name}
+                    </button>
+                  ) : (
+                    <span className="inline-flex min-h-11 items-center text-sm font-medium text-text">
+                      {repo.name}
+                    </span>
+                  )}
                 </td>
-                <td className="py-4 px-6 text-micro opacity-40 uppercase tracking-widest">
-                  {repo.language || 'UNKNOWN'}
+                <td className="px-3 py-2.5">
+                  <span className="text-caption">
+                    {repo.language ?? "No language"}
+                  </span>
                 </td>
-                <td className="py-4 px-6 text-right font-mono text-micro opacity-40 group-hover:opacity-80 transition-opacity">
-                  {repo.commits.toLocaleString()}
+                <td className="px-3 py-2.5 text-right font-mono text-xs tabular-nums text-text">
+                  {repo.commits.toLocaleString("en-US")}
                 </td>
-                <td className="py-4 px-6 text-right">
+                <td className="px-3 py-2.5 text-right font-mono text-xs tabular-nums text-text-2">
+                  {repo.stars.toLocaleString("en-US")}
+                </td>
+                <td className="px-3 py-2.5 text-right">
                   <a
                     href={`https://github.com/${repo.fullName}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    onClick={(e) => e.stopPropagation()}
-                    className="inline-flex p-2 opacity-20 hover:opacity-100 transition-opacity border border-white/5"
+                    className="focus-ring inline-flex size-11 items-center justify-center rounded-pill text-text-3 transition-colors hover:bg-surface-hover hover:text-text"
+                    aria-label={`Open ${repo.fullName} on GitHub in a new tab`}
                   >
-                    <ExternalLink className="w-3.5 h-3.5" />
+                    <ExternalLink className="size-3.5" aria-hidden="true" />
                   </a>
                 </td>
               </tr>
@@ -365,5 +460,56 @@ function TableView({
         </tbody>
       </table>
     </div>
+  );
+}
+
+function SortableHeader({
+  label,
+  field,
+  sortField,
+  sortDirection,
+  onSort,
+  align = "left",
+}: {
+  label: string;
+  field: SortField;
+  sortField: SortField;
+  sortDirection: SortDirection;
+  onSort: (field: SortField) => void;
+  align?: "left" | "right";
+}) {
+  const isActive = sortField === field;
+
+  return (
+    <th
+      className={cn("px-3 py-2", align === "right" && "text-right")}
+      aria-sort={
+        isActive
+          ? sortDirection === "asc"
+            ? "ascending"
+            : "descending"
+          : "none"
+      }
+    >
+      <button
+        type="button"
+        onClick={() => onSort(field)}
+        className={cn(
+          "focus-ring inline-flex min-h-11 items-center gap-2 text-label transition-colors hover:text-text",
+          align === "right" && "justify-end"
+        )}
+      >
+        {label}
+        {isActive ? (
+          sortDirection === "desc" ? (
+            <ChevronDown className="size-3.5" aria-hidden="true" />
+          ) : (
+            <ChevronUp className="size-3.5" aria-hidden="true" />
+          )
+        ) : (
+          <ArrowUpDown className="size-3.5" aria-hidden="true" />
+        )}
+      </button>
+    </th>
   );
 }

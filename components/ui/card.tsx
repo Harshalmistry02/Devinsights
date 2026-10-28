@@ -46,6 +46,8 @@ interface CardHeaderProps {
   description?: ReactNode;
   icon?: ReactNode;
   action?: ReactNode;
+  /** Defaults to h3 under a page-level h2 section heading. */
+  headingLevel?: 2 | 3 | 4;
   className?: string;
 }
 
@@ -54,14 +56,17 @@ export function CardHeader({
   description,
   icon,
   action,
+  headingLevel = 3,
   className,
 }: CardHeaderProps) {
+  const Heading = `h${headingLevel}` as "h2" | "h3" | "h4";
+
   return (
     <div className={cn("mb-4 flex items-start justify-between gap-4", className)}>
       <div className="flex min-w-0 items-start gap-3">
         {icon ? <IconTile>{icon}</IconTile> : null}
         <div className="min-w-0">
-          <h3 className="text-card-title">{title}</h3>
+          <Heading className="text-card-title">{title}</Heading>
           {description ? (
             <p className="mt-1 text-caption">{description}</p>
           ) : null}

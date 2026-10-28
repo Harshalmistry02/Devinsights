@@ -1,135 +1,189 @@
-'use client';
+"use client";
 
 /**
  * Hourly Activity Chart
- * 
- * Bar chart showing commit distribution across hours of the day
+ *
+ * Commit distribution across hours of the day.
  */
 
 import {
-  BarChart,
   Bar,
-  XAxis,
-  YAxis,
+  BarChart,
   CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
   Cell,
   ReferenceLine,
-} from 'recharts';
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
+import {
+  ChartStat,
+  ChartTooltipContent,
+  chartAxisLine,
+  chartGridStroke,
+  chartTick,
+} from "./chart-primitives";
 
 interface HourlyActivityProps {
   data: Record<string, number>; // { "0": 5, "1": 3, ..., "23": 10 }
   className?: string;
 }
 
-export function HourlyActivity({ data, className = '' }: HourlyActivityProps) {
-  // Convert to chart format
+export function HourlyActivity({ data, className = "" }: HourlyActivityProps) {
   const chartData = Array.from({ length: 24 }, (_, hour) => ({
     hour,
     label: formatHourLabel(hour),
     commits: data[hour.toString()] || 0,
   }));
 
-  // Find peak hour
-  const maxCommits = Math.max(...chartData.map(d => d.commits));
-  const peakHour = chartData.find(d => d.commits === maxCommits)?.hour ?? 0;
-  
-  // Calculate time period stats
-  const morningCommits = chartData.slice(6, 12).reduce((sum, d) => sum + d.commits, 0);
-  const afternoonCommits = chartData.slice(12, 18).reduce((sum, d) => sum + d.commits, 0);
-  const eveningCommits = chartData.slice(18, 24).reduce((sum, d) => sum + d.commits, 0);
-  const nightCommits = [...chartData.slice(0, 6)].reduce((sum, d) => sum + d.commits, 0);
-  const total = morningCommits + afternoonCommits + eveningCommits + nightCommits;
+  const total = chartData.reduce((sum, item) => sum + item.commits, 0);
+  const maxCommits = Math.max(...chartData.map((item) => item.commits));
+  const peakHour = chartData.find((item) => item.commits === maxCommits)?.hour ?? 0;
 
-  // Determine coding style
-  const codingStyle = getCodingStyle(morningCommits, afternoonCommits, eveningCommits, nightCommits);
+  const morningCommits = chartData
+    .slice(6, 12)
+    .reduce((sum, item) => sum + item.commits, 0);
+  const afternoonCommits = chartData
+    .slice(12, 18)
+    .reduce((sum, item) => sum + item.commits, 0);
+  const eveningCommits = chartData
+    .slice(18, 24)
+    .reduce((sum, item) => sum + item.commits, 0);
+  const nightCommits = chartData
+    .slice(0, 6)
+    .reduce((sum, item) => sum + item.commits, 0);
+
+  const codingStyle = getCodingStyle(
+    morningCommits,
+    afternoonCommits,
+    eveningCommits,
+    nightCommits
+  );
 
   return (
-    <div className={` bg-transparent border-none ${className}`}>
-      {/* Summary Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 mb-10">
-        <div className="border-l-2 border-[rgba(240,240,250,0.1)] pl-4">
-          <p className="text-micro opacity-40 mb-2 tracking-[2px]">PEAK ACTIVITY</p>
-          <p className="text-display-hero text-3xl opacity-90">{formatPeakTime(peakHour).toUpperCase()}</p>
-        </div>
-        <div className="border-l-2 border-[rgba(240,240,250,0.1)] pl-4">
-          <p className="text-micro opacity-40 mb-2 tracking-[2px]">CODING STYLE</p>
-          <p className="text-display-hero text-3xl opacity-90">{codingStyle.replace(/[^a-zA-Z\s]/g, '').trim().toUpperCase()}</p>
-        </div>
+    <div className={className}>
+      <div className="mb-5 grid grid-cols-2 gap-4">
+        <ChartStat
+          label="Peak hour"
+          value={total > 0 ? formatPeakTime(peakHour) : "No activity"}
+          detail="Across all recorded commits"
+        />
+        <ChartStat
+          label="Coding style"
+          value={total > 0 ? codingStyle : "Not enough data"}
+          detail="Based on time-of-day share"
+        />
       </div>
 
-      {/* Chart */}
-      <div className="p-4 sm:p-6">
-        {total > 0 ? (
-          <>
-            <div className="h-48 min-h-48 min-w-0">
-              <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={192}>
-                <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="0" stroke="rgba(240,240,250,0.05)" vertical={false} />
-                  <XAxis
-                    dataKey="hour"
-                    tick={{ fill: 'rgba(240,240,250,0.3)', fontSize: 10, letterSpacing: '1px' }}
-                    tickLine={false}
-                    axisLine={{ stroke: 'rgba(240,240,250,0.1)' }}
-                    interval={2}
-                    tickFormatter={(h) => formatHourLabel(h).toUpperCase()}
-                  />
-                  <YAxis
-                    tick={{ fill: 'rgba(240,240,250,0.3)', fontSize: 10 }}
-                    tickLine={false}
-                    axisLine={false}
-                    allowDecimals={false}
-                  />
-                  <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(240, 240, 250, 0.05)' }} />
-                  
-                  {/* Time period reference lines */}
-                  <ReferenceLine x={6} stroke="rgba(240,240,250,0.1)" strokeDasharray="3 3" />
-                  <ReferenceLine x={12} stroke="rgba(240,240,250,0.1)" strokeDasharray="3 3" />
-                  <ReferenceLine x={18} stroke="rgba(240,240,250,0.1)" strokeDasharray="3 3" />
-                  
-                  <Bar dataKey="commits" radius={[0, 0, 0, 0]} maxBarSize={30}>
-                    {chartData.map((entry, index) => (
-                      <Cell
-                        key={`cell-${index}`}
-                        fill="#f0f0fa"
-                        opacity={entry.commits === maxCommits ? 0.9 : 0.2}
-                      />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
+      {total > 0 ? (
+        <div>
+          <div
+            className="h-48 min-h-48 min-w-0"
+            role="img"
+            aria-label={`Commits by hour of day. Peak hour is ${formatPeakTime(peakHour)}. The busiest period is ${codingStyle}.`}
+          >
+            <ResponsiveContainer
+              width="100%"
+              height="100%"
+              minWidth={0}
+              minHeight={192}
+            >
+              <BarChart
+                data={chartData}
+                margin={{ top: 10, right: 8, left: -20, bottom: 0 }}
+              >
+                <CartesianGrid
+                  strokeDasharray="0"
+                  stroke={chartGridStroke}
+                  vertical={false}
+                />
+                <XAxis
+                  dataKey="hour"
+                  tick={chartTick}
+                  tickLine={false}
+                  axisLine={chartAxisLine}
+                  interval={2}
+                  tickFormatter={(hour) => formatHourLabel(hour)}
+                />
+                <YAxis
+                  tick={chartTick}
+                  tickLine={false}
+                  axisLine={false}
+                  allowDecimals={false}
+                  width={36}
+                />
+                <Tooltip
+                  content={
+                    <ChartTooltipContent
+                      valueSuffix=" commits"
+                      labelFormatter={(value) => formatHourRange(Number(value))}
+                    />
+                  }
+                  cursor={{ fill: "var(--surface-hover)" }}
+                />
 
-            <div className="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-4">
-              <TimePeriodStat
-                label="NIGHT"
-                value={nightCommits}
-                total={total}
-              />
-              <TimePeriodStat
-                label="MORNING"
-                value={morningCommits}
-                total={total}
-              />
-              <TimePeriodStat
-                label="AFTERNOON"
-                value={afternoonCommits}
-                total={total}
-              />
-              <TimePeriodStat
-                label="EVENING"
-                value={eveningCommits}
-                total={total}
-              />
-            </div>
-          </>
-        ) : (
-          <div className="h-48 flex items-center justify-center opacity-80">
-            <p>No hourly data available</p>
+                <ReferenceLine
+                  x={6}
+                  stroke="var(--border-subtle)"
+                  strokeDasharray="3 3"
+                />
+                <ReferenceLine
+                  x={12}
+                  stroke="var(--border-subtle)"
+                  strokeDasharray="3 3"
+                />
+                <ReferenceLine
+                  x={18}
+                  stroke="var(--border-subtle)"
+                  strokeDasharray="3 3"
+                />
+
+                <Bar dataKey="commits" name="Commits" radius={[2, 2, 0, 0]} maxBarSize={22}>
+                  {chartData.map((entry) => (
+                    <Cell
+                      key={entry.hour}
+                      fill={
+                        entry.commits === maxCommits
+                          ? "var(--accent)"
+                          : "rgba(240, 240, 250, 0.18)"
+                      }
+                    />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
           </div>
-        )}
-      </div>
+
+          <div className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-4">
+            <TimePeriodStat label="Night" value={nightCommits} total={total} />
+            <TimePeriodStat
+              label="Morning"
+              value={morningCommits}
+              total={total}
+            />
+            <TimePeriodStat
+              label="Afternoon"
+              value={afternoonCommits}
+              total={total}
+            />
+            <TimePeriodStat
+              label="Evening"
+              value={eveningCommits}
+              total={total}
+            />
+          </div>
+
+          <p className="mt-4 text-caption">
+            Scope: all recorded commits. Periods are 12am–6am, 6am–12pm,
+            12pm–6pm and 6pm–12am.
+          </p>
+        </div>
+      ) : (
+        <p className="flex h-48 items-center justify-center text-caption">
+          No hourly activity data available.
+        </p>
+      )}
     </div>
   );
 }
@@ -148,11 +202,13 @@ function TimePeriodStat({
   total: number;
 }) {
   const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
-  
+
   return (
-    <div className="border-l-2 border-[rgba(240,240,250,0.05)] pl-3">
-      <p className="text-display-hero text-xl opacity-90 tabular-nums">{percentage}%</p>
-      <p className="text-micro opacity-40 tracking-widest mt-1">{label}</p>
+    <div className="min-w-0 border-l border-border-subtle pl-3">
+      <p className="font-display text-xl font-bold leading-none text-text tabular-nums">
+        {percentage}%
+      </p>
+      <p className="mt-1 text-label">{label}</p>
     </div>
   );
 }
@@ -162,51 +218,39 @@ function TimePeriodStat({
 // ===========================================
 
 function formatHourLabel(hour: number): string {
-  if (hour === 0) return '12a';
-  if (hour === 12) return '12p';
+  if (hour === 0) return "12a";
+  if (hour === 12) return "12p";
   if (hour < 12) return `${hour}a`;
   return `${hour - 12}p`;
 }
 
 function formatPeakTime(hour: number): string {
-  const period = hour >= 12 ? 'PM' : 'AM';
+  const period = hour >= 12 ? "PM" : "AM";
   const displayHour = hour % 12 || 12;
   return `${displayHour}:00 ${period}`;
 }
 
-function getCodingStyle(morning: number, afternoon: number, evening: number, night: number): string {
-  const total = morning + afternoon + evening + night;
-  if (total === 0) return 'No data';
-  
-  const max = Math.max(morning, afternoon, evening, night);
-  
-  if (max === night && night / total > 0.3) return 'NIGHT OWL';
-  if (max === morning && morning / total > 0.3) return 'EARLY BIRD';
-  if (max === afternoon && afternoon / total > 0.3) return 'AFTERNOON CODER';
-  if (max === evening && evening / total > 0.3) return 'EVENING DEVELOPER';
-  
-  return 'BALANCED';
+function formatHourRange(hour: number): string {
+  const period = hour >= 12 ? "PM" : "AM";
+  const displayHour = hour % 12 || 12;
+  return `${displayHour}:00–${displayHour}:59 ${period}`;
 }
 
-// ===========================================
-// Custom Tooltip Component
-// ===========================================
+function getCodingStyle(
+  morning: number,
+  afternoon: number,
+  evening: number,
+  night: number
+): string {
+  const total = morning + afternoon + evening + night;
+  if (total === 0) return "Not enough data";
 
-function CustomTooltip({ active, payload }: any) {
-  if (!active || !payload || !payload.length) return null;
+  const max = Math.max(morning, afternoon, evening, night);
 
-  const data = payload[0].payload;
-  const period = data.hour >= 12 ? 'PM' : 'AM';
-  const displayHour = data.hour % 12 || 12;
+  if (max === night && night / total > 0.3) return "Night owl";
+  if (max === morning && morning / total > 0.3) return "Early bird";
+  if (max === afternoon && afternoon / total > 0.3) return "Afternoon coder";
+  if (max === evening && evening / total > 0.3) return "Evening developer";
 
-  return (
-    <div className="brutalist-glass p-3 border-none ring-1 ring-[#f0f0fa]/10">
-      <p className="text-micro opacity-40 mb-1 tracking-widest">
-        {displayHour}:00 - {displayHour}:59 {period}
-      </p>
-      <p className="text-display-hero text-xl opacity-90">
-        {data.commits} COMMITS
-      </p>
-    </div>
-  );
+  return "Balanced";
 }

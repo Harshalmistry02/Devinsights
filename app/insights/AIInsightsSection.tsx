@@ -75,9 +75,8 @@ export function AIInsightsSection({ analytics }: AIInsightsSectionProps) {
             setGeneratedAt(data.generatedAt ? new Date(data.generatedAt) : null);
           }
         }
-      } catch (err) {
+      } catch {
         // Silently ignore - user can generate new insights
-        console.log('No existing insights found');
       }
     };
     fetchExistingInsights();

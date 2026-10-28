@@ -78,9 +78,6 @@ export const metadata: Metadata = {
   formatDetection: {
     telephone: false
   },
-  alternates: {
-    canonical: "/"
-  },
   robots: {
     index: true,
     follow: true,
